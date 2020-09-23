@@ -5,3 +5,36 @@
 1. 索引 B+TREE 索引  BTREE索引
 2. 回表查询
 3. 覆盖索引
+
+1. E-R图、  数据库模型图
+2. 数据库设计      
+
+3. 	三大范式
+    1. 第一范式的目标是确保每列的原子性
+	2. 第二范式要求一张表只描述一件事
+	3. 
+    
+4.  mysql -u root -p 
+    mysql -u root -proot 
+	
+5.  show create database  数据库名  //查看创建库信息
+
+6.  show create table 表名   //查看创建表信息 
+
+7.  char   
+    定长字符串 char(n)     即使没存数据，也要占用n个字符  查询效率较高
+    char列的长度在你建表的时候，就是你定义的固定长度。值的范围是0~255。char值存储的时候，
+	右部以空格来填充到指定的长度。当检索char的时候，会自动去掉尾部的空格
+    
+	varchar
+	变长字符串 varchar(n)   n决定最多存储的字符
+    在MySQL5.0.3之前，值被保存到varchar列的时候，尾部空格会被剔除.
+
+8.  timestamp  只要一行中的数据有变动，timestamp的值都会更新。
+     
+9.  一个表中只有一个主键
+
+10.  复合主键   主键不能有空值
+    create table test(id int, userid char(20), name char(10), 
+		primary key (id, userid));  
+    id userid 各种可以有相同值，但是不能有相同的组合值。

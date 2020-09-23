@@ -164,6 +164,54 @@ thread 线程
   
 20 lua_settop(L, 0); 重新设置栈底
 
+21 local  局部变量   
+
+22 lua 变量默认为局部变量     不存在的变量值是nil
+
+23  循环 repeat     until
+
+24 求幂  ^
+
+25 数学运算符  ==    ~=   >   <   >=   <=
+
+26 逻辑运算符  and  or  not  
+
+27 多行字符串  [[ ]]
+
+28 转义字符
+
+29  pairs可以遍历表中所有的key，并且除了迭代器本身以及遍历表本身还可以返回nil;
+      但是ipairs则不能返回nil,只能返回数字0，如果遇到nil则退出。
+      它只能遍历到表中出现的第一个不是整数的key
+
+30 元表扩充了普通表的行为
+
+31 __newindex  给表添加新的数据的时候
+
+32 rawset( )
+
+33 coroutine.create
+
+34 携程函数只能执行一次？
+
+35    package.path = '/usr/local/share/lua/5.1/?.lua;/home/resty/?.lua;'    --搜索lua模块
+        package.cpath = '/usr/local/lib/lua/5.1/?.so;'        --搜索so模块
+
+36  Lua设置搜索路径package.path和package.cpath
+     
+--方法1 只加载想要的目录
+package.path = "../myLuaTest/myLuaCode/?.lua;"
+--方法2 增加目录
+package.path = "../myLuaTest/myLuaCode/?.lua;"..package.path
+
+
+37  协议中有2个关键字可以控制方法是否要实现(默认是@required，在大多数情况下，用途在于程序员之间的交流) 
+    @required：这个方法必须要实现（若不实现，编译器会发出警告）
+    @optional：这个方法不一定要实现
+    @repeated 代表可重复，我们可以理解为数组
+
+38 compat  n. 兼容
+
   
   
   
