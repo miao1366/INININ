@@ -1,0 +1,633 @@
+signal(SIGPIPE, SIG_IGN)    https://blog.csdn.net/zhouwulin145/article/details/28862119
+当服务器close一个连接时，若client端接着发数据。根据TCP 协议的规定，会收到一个RST响应，client再往这个服务器发送数据时，系统会发出一个SIGPIPE信号给进程，告诉进程这个连接已经断开了，不要再写了。
+根据信号的默认处理规则SIGPIPE信号的默认执行动作是terminate(终止、退出),所以client会退出。若不想客户端退出可以把SIGPIPE设为SIG_IGN
+ 如:    signal(SIGPIPE,SIG_IGN);  　
+这时SIGPIPE交给了系统处理。  　　
+服务器采用了fork的话，要收集垃圾进程，防止僵尸进程的产生，可以这样处理：  　　signal(SIGCHLD,SIG_IGN); 交给系统init去回收。  　　这里子进程就不会产生僵尸进程了。   
+ 关于SIGPIPE信号  
+我写了一个服务器程序,在Linux下测试，然后用C++写了客户端用千万级别数量的短链接进行压力测试.  但是服务器总是莫名退出，没有core文件.  最后问题确定为, 对一个对端已经关闭的socket调用两次write, 第二次将会生成SIGPIPE信号, 该信号默认结束进程. 
+
+
+
+
+SIGPIPE
+　 在网络编程中，SIGPIPE这个信号是很常见的。当往一个写端关闭的管道或socket连接中连续写入数据时会引发SIGPIPE信号,引发SIGPIPE信号的写操作将设置errno为EPIPE。
+   在TCP通信中，当通信的双方中的一方close一个连接时，若另一方接着发数据，根据TCP协议的规定，会收到一个RST响应报文，若再往这个服务器发送数据时，系统会发出一个SIGPIPE信号给进程，
+   告诉进程这个连接已经断开了，不能再写入数据。
+   
+   
+   
+   
+   
+#define	SIG_ERR	 ((__sighandler_t) -1)	/* Error return.    */  
+#define	SIG_DFL	 ((__sighandler_t)  0)	/* Default action.  */ 采用默认处理方式
+#define	SIG_IGN	 ((__sighandler_t)  1)	/* Ignore signal.   */ 忽略信号	
+
+
+
+
+
+
+1. PF_INET和AF_INET的区别
+  在写网络程序的时候，建立TCP socket：
+     sock = socket(PF_INET, SOCK_STREAM, 0);
+  相关头文件中的定义： AF        =  Address Family
+                    PF       =  Protocol Family
+                    AF_INET  =  PF_INET
+  然后在绑定本地地址或连接远程地址时需要初始化sockaddr_in结构，其中指定address family时一般设置为AF_INET，即使用IP
+  理论上建立socket时是指定协议，应该用PF_xxxx，设置地址时应该用AF_xxxx
+
+
+2. SOL_SOCKET、IPPROTO_TCP、IPPROTO_IP
+
+  IPPROTO_TCP 、 IPPROTO_IP 、IPPROTO_UDP代表三种不同的协议，分别代表IP协议族里面的TCP协议、IP协议和UDP协议。用于socket(,,,)函数
+  SOL_SOCKET，用于setsockopt/getsockopt 函数，表示设置（获取）socket参数SOL应该是socket level的缩写
+  
+3  sockaddr、sockaddr_in、sockaddr_in6的区别及转换
+
+/* Structure describing a generic socket address.  */
+struct sockaddr
+{
+ uint16 sa_family;           /* Common data: address family and length.  */
+ char sa_data[14];           /* Address data.  */
+};
+
+/* Structure describing an Internet socket address.  */
+struct sockaddr_in
+{
+ uint16 sin_family;          /* Address family AF_INET */ 
+ uint16 sin_port;            /* Port number.  */
+ uint32 sin_addr;     /* Internet address.  */
+ unsigned char sin_zero[8];  /* Pad to size of `struct sockaddr'.  */
+};
+
+/* Ditto, for IPv6.  */
+struct sockaddr_in6
+{
+ uint16 sin6_family;         /* Address family AF_INET6 */
+ uint16 sin6_port;           /* Transport layer port # */
+ uint32 sin6_flowinfo;       /* IPv6 flow information */
+ uint8  sin6_addr[16];       /* IPv6 address */
+ uint32 sin6_scope_id;       /* IPv6 scope-id */
+};
+
+ 我们发现结构 sockaddr 和 sockaddr_in 字节数完全相同，都是16个字节，所以可以直接强转，但是结构 sockaddr_in6 有28个字节，
+ 为什么在使用的时候也是直接将地址强制转化成(sockaddr*)类型呢,其实sockaddr 和 sockaddr_in 之间的转化很容易理解，因为他们开头一样，内存大小也一样，
+ 但是sockaddr和sockaddr_in6之间的转换就有点让人搞不懂了，其实你有可能被结构所占的内存迷惑了，这几个结构在作为参数时基本上都是以指针的形式传入的，
+ 我们拿函数bind()为例，这个函数一共接收三个参数，第一个为监听的文件描述符，第二个参数是sockaddr*类型，第三个参数是传入指针原结构的内存大小，所以有了后两个信息，
+ 无所谓原结构怎么变化，因为他们的头都是一样的，也就是uint16 sa_family，那么我们也能根据这个头做处理，原本我没有看过bind()函数的源代码
+ int bind(int socket_fd, sockaddr* p_addr, int add_size)
+{
+    if (p_addr->sa_family == AF_INET)
+    {
+        sockaddr_in* p_addr_in = (sockaddr_in*)p_addr;
+        //...
+    }
+    else if (p_addr->sa_family == AF_INET6)
+    {
+        sockaddr_in6* p_addr_in = (sockaddr_in6*)p_addr;
+        //...
+    }
+    else
+    {
+        //...
+    }
+}
+
+4 somaxconn参数
+  解析：
+　　对于一个TCP连接，Server与Client需要通过三次握手来建立网络连接.当三次握手成功后,
+　　我们可以看到端口的状态由LISTEN转变为ESTABLISHED,接着这条链路上就可以开始传送数据了.
+　　每一个处于监听(Listen)状态的端口,都有自己的监听队列.监听队列的长度,与如下两方面有关:
+　　- somaxconn参数.
+　　- 使用该端口的程序中listen()函数.
+  
+  关于somaxconn参数:
+　　定义了系统中每一个端口最大的监听队列的长度,这是个全局的参数,默认值为128.限制了每个端口接收新tcp连接侦听队列的大小。
+   对于一个经常处理新连接的高负载 web服务环境来说，默认的 128 太小了。大多数环境这个值建议增加到 1024 或者更多
+   
+5 int listen(int sockfd, int backlog);              #define SOMAXCONN	128
+  第二个参数backlog代表的是相应的socket可以排队的最大连接数。 
+由于客户端client 发起connect(）连接时。需要建立TCP三次握手连接需要时间，所有会有一个队列来存储客户端对服务器发起的connect连接。
+1  当客户端完成连接后。连接被放到端口的socket的队列里面，等待服务器去响应。
+2  当服务器调用accept()来获取队列中的连接，这时候就会从队列中移除。
+3  listen()函数的第二个参数就是去设置这个队列的大小的。
+backlog的上限值受到系统全局设定的限制。
+这个上限存储在：/proc/sys/net/core/somaxconn文件中。（我的Ubuntu中设置的最大值是128）。如果大于这个值，就会被截短。
+
+6 int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);   
+  阻塞模式下调用accept()函数，而且没有新连接时，进程会进入睡眠状态，直到有可用的连接，才返回。
+  非阻塞模式下调用accept()函数立即返回，有连接返回客户端套接字描述符，没有新连接时，将返回EWOULDBLOCK错误码，表示本来应该阻塞。
+ 
+ int accept4(int sockfd, struct sockaddr *addr, socklen_t *addrlen, int flags);
+ 如果flags为0  等同于 accept. flag 可设置  SOCK_NONBLOCK   SOCK_CLOEXEC
+ 
+ 
+7 
+	POLLIN: 		有数据可读。
+	POLLRDNORM: 	有普通数据可读。
+	POLLRDBAND:     有优先数据可读。
+	POLLPRI:		有紧迫数据可读。
+	POLLOUT:		写数据不会导致阻塞。
+	POLLWRNORM:		写普通数据不会导致阻塞。
+	POLLWRBAND:		写优先数据不会导致阻塞。
+	//POLLMSG:	SIGPOLL 消息可用。
+
+	此外，revents域中还可能返回下列事件：
+	POLLER:		指定的文件描述符发生错误。
+	POLLHUP:	指定的文件描述符挂起事件。
+	POLLNVAL:	指定的文件描述符非法。
+
+8  tcp 11种状态 
+   
+   CLOSED       ：初始状态，表示TCP连接是“关闭着的”或“未打开的”。
+   LISTEN       ：表示服务器端的某个SOCKET处于监听状态，可以接受客户端的连接。
+   SYN_RCVD     ：表示服务器接收到了来自客户端请求连接的SYN报文。在正常情况下，这个状态是服务器端的SOCKET在建立TCP连接时的三次握手会话过程中的一个中间状态，很短暂，基本上用netstat很难看到这种状态，除非故意写一个监测程序，
+                  将三次TCP握手过程中最后一个ACK报文不予发送。当TCP连接处于此状态时，再收到客户端的ACK报文，它就会进入到ESTABLISHED 状态。
+   SYN_SENT     ：这个状态与SYN_RCVD 状态相呼应，当客户端SOCKET执行connect()进行连接时，它首先发送SYN报文，然后随即进入到SYN_SENT 状态，并等待服务端的发送三次握手中的第2个报文。SYN_SENT 状态表示客户端已发送SYN报文。
+   ESTABLISHED  ：表示TCP连接已经成功建立。
+   FIN_WAIT_1   ：这个状态得好好解释一下，其实FIN_WAIT_1 和FIN_WAIT_2 两种状态的真正含义都是表示等待对方的FIN报文。而这两种状态的区别是：FIN_WAIT_1状态实际上是当SOCKET在ESTABLISHED状态时，它想主动关闭连接，向对方发送了FIN报文，
+                 此时该SOCKET进入到FIN_WAIT_1 状态。而当对方回应ACK报文后，则进入到FIN_WAIT_2 状态。当然在实际的正常情况下，无论对方处于任何种情况下，都应该马上回应ACK报文，所以FIN_WAIT_1 状态一般是比较难见到的，而FIN_WAIT_2 状态有时仍可以用netstat看到。
+   FIN_WAIT_2   ：上面已经解释了这种状态的由来，实际上FIN_WAIT_2状态下的SOCKET表示半连接，即有一方调用close()主动要求关闭连接。注意：FIN_WAIT_2 是没有超时的（不像TIME_WAIT 状态），
+                 这种状态下如果对方不关闭（不配合完成4次挥手过程），那这个 FIN_WAIT_2 状态将一直保持到系统重启，越来越多的FIN_WAIT_2 状态会导致内核crash。
+   TIME_WAIT   ：表示收到了对方的FIN报文，并发送出了ACK报文。 TIME_WAIT状态下的TCP连接会等待2*MSL（Max Segment Lifetime，最大分段生存期，指一个TCP报文在Internet上的最长生存时间。每个具体的TCP协议实现都必须选择一个确定的MSL值，RFC 1122建议是2分钟，
+                 但BSD传统实现采用了30秒，Linux可以cat /proc/sys/net/ipv4/tcp_fin_timeout看到本机的这个值），然后即可回到CLOSED 可用状态了。如果FIN_WAIT_1状态下，收到了对方同时带FIN标志和ACK标志的报文时，可以直接进入到TIME_WAIT状态，
+				 而无须经过FIN_WAIT_2状态。（这种情况应该就是四次挥手变成三次挥手的那种情况）
+   CLOSING     ：这种状态在实际情况中应该很少见，属于一种比较罕见的例外状态。正常情况下，当一方发送FIN报文后，按理来说是应该先收到（或同时收到）对方的ACK报文，再收到对方的FIN报文。但是CLOSING 状态表示一方发送FIN报文后，
+               并没有收到对方的ACK报文，反而却也收到了对方的FIN报文。什么情况下会出现此种情况呢？那就是当双方几乎在同时close()一个SOCKET的话，就出现了双方同时发送FIN报文的情况，这是就会出现CLOSING 状态，表示双方都正在关闭SOCKET连接。
+   CLOSE_WAIT  ：表示正在等待关闭。怎么理解呢？当对方close()一个SOCKET后发送FIN报文给自己，你的系统毫无疑问地将会回应一个ACK报文给对方，此时TCP连接则进入到CLOSE_WAIT状态。接下来呢，你需要检查自己是否还有数据要发送给对方，如果没有的话，
+               那你也就可以close()这个SOCKET并发送FIN报文给对方，即关闭自己到对方这个方向的连接。有数据的话则看程序的策略，继续发送或丢弃。简单地说，当你处于CLOSE_WAIT 状态下，需要完成的事情是等待你去关闭连接。
+   LAST_ACK ：当被动关闭的一方在发送FIN报文后，等待对方的ACK报文的时候，就处于LAST_ACK 状态。当收到对方的ACK报文后，也就可以进入到CLOSED 可用状态了
+
+9 tcp 单词缩写
+  ack  acknowledge Character  中文译名: 确认字符
+  
+10 socket常见选项之SO_REUSEADDR,   SO_REUSEPORT
+  SO_REUSEADDR
+   一般来说，一个端口释放后会等待两分钟之后才能再被使用，SO_REUSEADDR是让端口释放后立即就可以被再次使用
+   SO_REUSEADDR用于对TCP套接字处于TIME_WAIT状态下的socket，才可以重复绑定使用
+   server程序总是应该在调用bind()之前设置SO_REUSEADDR套接字选项
+   TCP，先调用close()的一方会进入TIME_WAIT状态
+  SO_REUSEADDR提供如下四个功能：
+允许启动一个监听服务器并捆绑其众所周知端口，即使以前建立的将此端口用做他们的本地端口的连接仍存在。这通常是重启监听服务器时出现，若不设置此选项，则bind时将出错
+允许在同一端口上启动同一服务器的多个实例，只要每个实例捆绑一个不同的本地IP地址即可。对于TCP，我们根本不可能启动捆绑相同IP地址和相同端口号的多个服务器。
+允许单个进程捆绑同一端口到多个套接口上，只要每个捆绑指定不同的本地IP地址即可。这一般不用于TCP服务器。
+SO_REUSEADDR允许完全重复的捆绑：
+当一个IP地址和端口绑定到某个套接口上时，还允许此IP地址和端口捆绑到另一个套接口上。一般来说，这个特性仅在支持多播的系统上才有，而且只对UDP套接口而言（TCP不支持多播）。
+SO_REUSEPORT选项有如下语义：
+此选项允许完全重复捆绑，但仅在想捆绑相同IP地址和端口的套接口都指定了此套接口选项才行。
+
+如果被捆绑的IP地址是一个多播地址，则SO_REUSEADDR和SO_REUSEPORT等效。
+
+使用这两个套接口选项的建议：
+
+在所有TCP服务器中，在调用bind之前设置SO_REUSEADDR套接口选项；
+当编写一个同一时刻在同一主机上可运行多次的多播应用程序时，设置SO_REUSEADDR选项，并将本组的多播地址作为本地IP地址捆绑
+time-wait
+TIME_WAIT状态有两个存在的理由：
+(1)可靠地实现TCP全双工连接的终止
+(2)允许老的重复分节在网络中消逝
+
+
+11  假如accept返回EMFILE该如何应对？这意味着本进程打开的文件描述符已经打到上限，无法为新连接创建socket文件描述符。但是，既然没有sockt文件描述符来表示这个连接，我们无法close它。
+   程序会继续运行，回到再次调用的epoll_wait。这个时候epoll_wait会立刻返回，因为有新连接还等待处理，listenning fd 还是可读的（POLLIN事件）。
+   这样程序会陷入busy loop状态，CPU占有率接近100%，会影响本系统的其他服务，也会影响同一机器上的其他服务。
+  如何处理那？
+1、调高进程的文件描述符数目。治标不治本，因为只要有足够多的客户端，就一定能把一个服务进程的文件描述符用户
+2、死等。鸵鸟算法（传说中鸵鸟看到危险就把头埋在地底下。当你对某一件事情没有一个很好的解决方法时，那就忽略它，就像鸵鸟面对危险时会把它深埋在沙砾中，装作看不到。
+   这样的算法称为“鸵鸟算法“。鸵鸟算法，是平衡性能和复杂性而选择的一种方法。）
+3、退出程序。似乎小题大做，为这种暂时的错误而中断现有的服务似乎不值得
+4、关闭监听listenning fd。那么什么时候重新打开那
+5、改用edge trigger。如果漏掉了一次accept（2），程序再也不会收到连接
+6、准备一个空闲的文件描述符。如遇到这种情况，先关闭这个空闲的文件，获得了一个文件描述符的名额；再accept拿到新socket连接的描述符；随后立刻关闭close它，这样就优雅的断开了客户端连接；最后重新打开一个空闲的文件，把“坑”占住，
+  已被再次出现这种情况时使用。
+7、file descriptor是hard limit，我们可以自己设一个稍微第一点的soft limit，如果超过soft limit 就主动关闭新连接，
+   这样就避免触及“file descriptor耗尽”这种边界条件。比方说当前进程的max file descriptor是1024，那么我们可以在连接数打到1000的时候进入“拒绝新连接”的状态
+
+  1 2 3 4 5 7 都是废话
+  
+12  端口号 0 是一个预留的端口号，代表的意思就是它在TCP或者UDP网络传输中应该不会被用到。但是在网络编程中，尤其是在unix socket编程当中，它有一些特殊的含义。
+    在unix socket编程当中，端口号 0 是一种由系统指定动态生成的端口
+	
+13   172.0.0.1是回送地址，localhost是本地DNS解析的127.0.0.1的域名，在hosts文件里可以看到。
+     一般我们通过ping 127.0.0.1来测试本地网络是否正常。其实从127.0.0.1~127.255.255.255，这整个都是回环地址。这边还要
+     注意的一点就是localhost在了IPV4的是指127.0.0.1而IPV6是指::1。当我们在服务器搭建了一个web服务器的时候如果我们
+     监听的端口时127.0.0.1：端口号 的 时候，那么这个web服务器只可以在服务器本地访问了，在别的地方进行访问是不行的。
+    （127.0.0.1只可以在本地ping自己的，那么你监听这个就只可以在本地访问了）
+	
+14  如果我们直接ping 0.0.0.0是不行的，他在IPV4中表示的是无效的目标地址，但是在服务器端它表示
+    本机上的所有IPV4地址，如果一个服务有多个IP地址（192.168.1.2和10.1.1.12），那么我们如果设置的监听地址是0.0.0.0那
+    么我们无论是通过IP192.168.1.2还是10.1.1.12都是可以访问该服务的。在路由中，0.0.0.0表示的是默认路由，即当路由表中
+    没有找到完全匹配的路由的时候所对应的路由
+
+15  INADDR_ANY选项
+    网络编程中常用到bind函数，需要绑定IP地址，这时可以设置INADDR_ANY
+    INADDR_ANY就是指定地址为0.0.0.0的地址，这个地址事实上表示不确定地址，或“所有地址”、“任意地址”。
+也就是表示本机的所有IP，因为有些机子不止一块网卡，多网卡的情况下，这个就表示所有网卡ip地址的意思。
+    比如一台电脑有3块网卡，分别连接三个网络，那么这台电脑就有3个ip地址了，如果某个应用程序需要监听某
+个端口，那他要监听哪个网卡地址的端口呢？如果绑定某个具体的ip地址，你只能监听你所设置的ip地址所在的网
+卡的端口，其它两块网卡无法监听端口，如果我需要三个网卡都监听，那就需要绑定3个ip，也就等于需要管理3个
+套接字进行数据交换，这样岂不是很繁琐？
+    所以你只需绑定INADDR_ANY，管理一个套接字就行，不管数据是从哪个网卡过来的，
+只要是绑定的端口号过来的数据，都可以接收到。
+    当然， 客户端connect时，不能使用INADDR_ANY选项。必须指明要连接哪个服务器IP
+
+
+16 一、socket阻塞和非阻塞有哪些不同
+1. 建立连接
+阻塞方式下，connect首先发送SYN请求到服务器，当客户端收到服务器返回的SYN的确认时，则connect返回，否则的话一直阻塞。
+
+非阻塞方式，connect将启用TCP协议的三次握手，但是connect函数并不等待连接建立好才返回，而是立即返回，返回的错误码为EINPROGRESS,表示正在进行某种过程。
+
+2. 接收连接
+阻塞模式下调用accept()函数，而且没有新连接时，进程会进入睡眠状态，直到有可用的连接，才返回。
+
+非阻塞模式下调用accept()函数立即返回，有连接返回客户端套接字描述符，没有新连接时，将返回EWOULDBLOCK错误码，表示本来应该阻塞。
+
+3. 读操作
+阻塞模式下调用read(),recv()等读套接字函数会一直阻塞住，直到有数据到来才返回。当socket缓冲区中的数据量小于期望读取的数据量时，返回实际读取的字节数。当sockt的接收缓冲区中的数据大于期望读取的字节数时，读取期望读取的字节数，返回实际读取的长度。
+
+对于非阻塞socket而言，socket的接收缓冲区中有没有数据，read调用都会立刻返回。接收缓冲区中有数据时，与阻塞socket有数据的情况是一样的，如果接收缓冲区中没有数据，则返回错误号为EWOULDBLOCK，表示该操作本来应该阻塞的，但是由于本socket为非阻塞的socket，因此立刻返回。遇到这样的情况，可以在下次接着去尝试读取。如果返回值是其它负值，则表明读取错误。
+
+因此，非阻塞的re
+
+4.写操作
+对于阻塞Socket而言，如果发送缓冲区没有空间或者空间不足的话，write操作会直接阻塞住，如果有足够空间，则拷贝所有数据到发送缓冲区，然后返回.
+
+对于写操作write,原理和read是类似的，非阻塞socket在发送缓冲区没有空间时会直接返回错误号EWOULDBLOCK,表示没有空间可写数据，如果错误号是别的值，则表明发送失败。如果发送缓冲区中有足够空间或者是不足以拷贝所有待发送数据的空间的话，则拷贝前面N个能够容纳的数据，返回实际拷贝的字节数。
+尤其注意非阻塞的socket，在建立连接时要兼容处理返回EINPROGRESS情况，在接收连接、读操作、写操作时要兼容处理返回EWOULDBLOCK错误码的情况，以上情况并非连接异常，而是网络延时或者套接字缓冲区满造成的，一般不宜做异常处理（如返回异常关闭套接字）。
+
+简单点理解就是：
+
+同步，就是我调用一个功能，该功能没有结束前，我死等结果。
+异步，就是我调用一个功能，不需要知道该功能结果，该功能有结果后通知我（回调通知）。
+阻塞，就是调用我（函数），我（函数）没有接收完数据或者没有得到结果之前，我不会返回。
+非阻塞，就是调用我（函数），我（函数）立即返回，通过select通知调用者
+同步IO和异步IO的区别就在于：数据拷贝的时候进程是否阻塞
+阻塞IO和非阻塞IO的区别就在于：应用程序的调用是否立即返回
+
+
+4 带外数据
+　带外数据用于迅速告知对方本端发生的重要的事件。它比普通的数据（带内数据）拥有更高的优先级，不论发送缓冲区中是否有排队等待发送的数据，它总是被立即发送。
+  带外数据的传输可以使用一条独立的传输层连接，也可以映射到传输普通数据的连接中。实际应用中，带外数据是使用很少见，有，telnet和ftp等远程非活跃程序。
+　UDP没有没有实现带外数据传输，TCP也没有真正的带外数据。不过TCP利用头部的紧急指针标志和紧急指针，为应用程序提供了一种紧急方式，含义和带外数据类似。
+  TCP的紧急方式利用传输普通数据的连接来传输紧急数据
+
+5 网络编程的三个重要信号（SIGHUP ，SIGPIPE，SIGURG）
+
+
+SIGURG：
+内核通知应用程序带外数据到达的方式有两种：一种就是利用ＩＯ复用技术的系统调用（如select）在接受到带外数据时将返回，
+并向应用程序报告socket上的异常事件。另一种方法就是使用SIGURG信号。
+
+SIGHUP 信号在用户终端连接(正常或非正常)结束时发出, 通常是在终端的控制进程结束时, 通知同一session内的各个作业, 
+这时它们与控制终端不再关联. 系统对SIGHUP信号的默认处理是终止收到该信号的进程。
+
+6 进程组
+　　进程组就是一系列相互关联的进程集合，系统中的每一个进程也必须从属于某一个进程组；每个进程组中都会有一个唯一的 ID(process group id)，简称 PGID；
+   PGID 一般等同于进程组的创建进程的 Process ID，而这个进进程一般也会被称为进程组先导(process group leader)，同一进程组中除了进程组先导外的其他进程都是其子进程；
+　　进程组的存在，方便了系统对多个相关进程执行某些统一的操作，例如，我们可以一次性发送一个信号量给同一进程组中的所有进程。
+
+7 会话
+　　会话（session）是一个若干进程组的集合，同样的，系统中每一个进程组也都必须从属于某一个会话；一个会话只拥有最多一个控制终端（也可以没有），
+   该终端为会话中所有进程组中的进程所共用。一个会话中前台进程组只会有一个，只有其中的进程才可以和控制终端进行交互；除了前台进程组外的进程组，都是后台进程组；
+   和进程组先导类似，会话中也有会话先导(session leader)的概念，用来表示建立起到控制终端连接的进程。
+   在拥有控制终端的会话中，session leader 也被称为控制进程(controlling process)，一般来说控制进程也就是登入系统的 shell 进程(login shell)；
+
+PPID 指父进程 id；PID 指进程 id；PGID 指进程组 id
+SID 指会话 id；TTY 指会话的控制终端设备；COMMAND 指进程所执行的命令
+TPGID 指前台进程组的 PGID 
+
+8 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

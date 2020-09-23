@@ -1,0 +1,12 @@
+常用的软件架构模式
+
+1、分层模式——————-(Layered pattern)
+2、客户端/服务器模式 —–(Client-Server pattern)
+3、主/从模式 —————–(Master-Slave pattern)
+4、管道/过滤器模式 ——–(Pipe-Filter pattern)
+5、代理模式 ——————(Broker pattern)
+6、对等模式 ——————(Peer-to-Peer pattern)
+7、事件总线模式 ————(Event-Bus pattern)
+8、模型/视图/控制器模式 -(Moder-View-Controller pattern)
+9、黑板模式 ——————(Blackboard pattern)
+10、解析器模式 ————-(Interperter pattern)

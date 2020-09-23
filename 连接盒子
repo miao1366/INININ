@@ -1,0 +1,37 @@
+https://www.cnblogs.com/lqynkdcwy/p/9538478.html
+
+命令: sudo ip addr add 192.168.5.245/24 dev enp4s0 label enp4s0:2
+抓拍系统: http://192.168.0.211/detect.html
+
+vlc播放流视频: rtsp://admin:admin@192.168.5.105/ch1/stream1
+
+
+
+
+2. 远程连接盒子
+   ssh firefly@192.168.0.211   firefly
+
+http://192.168.0.215:7001/zh/pathHistory           应用管理 可查看轨迹库
+http://192.168.0.174:8209/#/faces/faceLibrary      识别服务器后台查看数据
+ftp://192.168.0.7/Pub/                             公司ftp
+
+
+公司 http://192.168.0.211/detect.html
+
+抓拍盒子pub的数字
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

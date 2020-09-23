@@ -1,0 +1,3 @@
+
+-Wconversion 		当隐式类型转换可能改变值时给出警告
+-Wold-style-cast 	程序使用C风格的类型转换时给出警告 

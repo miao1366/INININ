@@ -1,0 +1,9 @@
+1. 文件比较:meld
+2. git图形管理:gitk
+3. uml: lnkscape
+
+https://blog.csdn.net/tydyz/article/details/76166224
+
+sudo add-apt-repository ppa:inkscape.dev/stable
+sudo apt update
+sudo apt-get install inkscape

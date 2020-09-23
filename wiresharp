@@ -1,0 +1,28 @@
+https://blog.csdn.net/jipengwang/article/details/78799310
+
+https://blog.csdn.net/andrewgithub/article/details/81973888?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase
+
+
+
+在ubuntu上安装wireshark之后提示Couldn't run /usr/bin/dumpcap in child process:权限不够
+
+
+
+sudo apt-get install libcap2-bin wireshark
+sudo chgrp xxxxxxx /usr/bin/dumpcap
+sudo chmod 750 /usr/bin/dumpcap
+sudo setcap cap_net_raw,cap_net_admin+eip /usr/bin/dumpcap
+
+将其中的   xxxxxxx    替换成自己的用户名字就行了
+命令的作用就是更改你对dumpcap的使用权限
+
+
+
+本地通信设置监听设置any
+过滤设置
+1. tcp.port == 8080
+2. http
+3. ip.src==192.168.0.243 and ip.dst==192.168.0.243
+ 
+
+

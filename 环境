@@ -1,0 +1,44 @@
+1.公司服务 192.168.0.174
+
+code地址: 
+
+人脸抓拍系统:
+http://192.168.0.211/detect.html
+用户: admin
+密码: Senscape
+
+
+我的盒子:
+ssh firefly@192.168.0.244
+用户: firefly
+密码: firefly
+
+/home/firefly/project_run/conf.yaml     修改下ip tk1_ip: "192.168.0.244" 网关
+
+
+
+办公室两个摄像头ip:192.168.5.101   192.168.5.105    
+
+6. http://192.168.0.7/  公司代码托管地址
+7. http://192.168.0.6:8080/  应该是公司盒子操作系统版本管理地址.
+8. http://192.168.0.211   应该是一个盒子地址     
+   http://192.168.0.211/detect.html 
+   
+9. 我的盒子 http://192.168.0.244
+   http://192.168.0.244/detect.html
+ 
+10. http://192.168.0.243:8081/index.html#/
+
+11. http://192.168.0.6:8080  公司盒子系统更新       zip文件要放在/home/firefly/upgrade_suite/upgrade_processed
+
+12 /home/firefly/recognition_run/bin  盒子运行程序目录
+   /home/firefly/Public               盒子nginx挂载目录
+   
+13 
+
+14  nvidia 显卡   安装dkms  
+    sudo apt-get install dkms
+
+
+
+

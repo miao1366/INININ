@@ -1,0 +1,120 @@
+关闭docker: docker stop 容器id
+docker删除容器: docker rm   容器id
+显示运行的docker:  sudo docker ps -a
+进入某个docker: sudo docker exec -it 容器id bash
+显示docker镜像: docker images -a
+删除镜像: sudo docker image rm 镜像id
+查看最后一百条日志: sudo docker -f -t --tail 100 logs a4b812bc0c86(容器id)
+		   docker logs 28e9282aec19
+查看容器详细信息: sudo \docker inspect d8ed21d7967
+
+docker exec 启动不了时，先start 容器， 然后在exec
+sudo docker start 8022826ebd56 
+
+查看容器对应的镜像信息  sudo docker inspect 28e9282aec19(容器id)
+
+实时查看docker容器日志  $ sudo docker logs -f -t --tail 行数 容器名
+
+##查看redis容器日志，默认参数
+docker logs rabbitmq
+##查看redis容器日志，参数：-f  跟踪日志输出；-t   显示时间戳；--tail  仅列出最新N条容器日志；
+docker logs -f -t --tail=20 redis
+##查看容器redis从2019年05月21日后的最新10条日志。
+docker logs --since="2019-05-21" --tail=10 redis
+
+15. YAML中添加注释的方式是通过 # ; 只能单行注释  .yaml .yml 都是yaml文件
+
+16. 大约在0.6版, privileged被引入docker 使用该参数，container内的root拥有真正的root权限。
+    否则，container内的root只是外部的一个普通用户权限。 privileged启动的容器，可以看到很多host上的设备，并且可以执行moun
+
+17.  更新了容器，想保存/更新镜像该如何做
+    当对现有容器进行修改后，例如安装了某些软件、修改了配置等，要保存当前修改并生成新的镜像，使用docker commit命令 ，这个命令和git的commit命令很像
+
+# -a:修改者信息 -m:注释、说明 紧跟着当前操作的容器id 最后是要生成的新的镜像名称
+docker commit -a "my_name" -m "install xxx" contain_id image_name   docker save -o ./face_recogn0821.tar 
+
+a-> docker commit 
+b-> sudo docker save -o ./face_recogn0821.tar  face_recogn0821:latest
+c-> sudo docker load -i face_recogn0821.tar
+
+
+
+
+docker-compose.yml 
+
+
+dockerfile里的一般内容
+
+#基础镜像信息
+FROM ubuntu
+#维护者信息
+MAINTAINER slim_liu slim_liu@163.com
+#镜像操作指令
+RUN apt-get update && apt-get install -u nginx
+#启动容器时执行的指令
+CMD /usr/sbin/nginx
+
+11 创建新的docker image 
+  docker build -t 新的大版本号: 新的小版本号 .  //此时docker会从当前目录”.”中读取Dockerfile，并按其设置建立新的image
+  
+  
+12 Docker-Compose        //https://www.cnblogs.com/minseo/p/11548177.html
+   Docker-Compose项目是Docker官方的开源项目，负责实现对Docker容器集群的快速编排
+   Docker-Compose将所管理的容器分为三层，分别是工程（project），服务（service）以及容器（container）。
+   Docker-Compose运行目录下的所有文件（docker-compose.yml，extends文件或环境变量文件等）组成一个工程，
+   若无特殊指定工程名即为当前目录名。一个工程当中可包含多个服务，每个服务中定义了容器运行的镜像，参数，依赖。
+   一个服务当中可包括多个容器实例，Docker-Compose并没有解决负载均衡的问题，因此需要借助其它工具实现服务发现及负载均衡。
+   
+   Docker-Compose 参数 
+   1.ports：定义宿主机端口和容器端口的映射，可使用宿主机IP+宿主机端口进行访问
+     - "5000"
+     - "8081:8080"
+   2 restart_policy  配置如何重启退出的容器
+
+	condition：值为 none、on-failure 或者 any 之一，默认为 any。
+	delay：在下次尝试重启之前需要等待的时间，默认为 0。
+	max_attempts：最多尝试重启的次数，默认从不放弃。
+	window：判定一次重启失败前要等待的时间，默认立即判定
+   3 command 容器启动后默认执行的命令
+   4 network_mode：设置网络模式
+     bridge：默认，需要单独配置ports映射主机port和服务的port，并且开启了容器间通信
+     host：和宿主机共享网络，比如service是8081端口，无需配置ports，直接可以用主机IP:8081访问
+	 
+  运行容器	
+  docker-compose up [options] [--scale SERVICE=NUM...] [SERVICE...]  // 有关该命令的其他参数，可以使用docker-compose up --help查看
+  --build 在启动容器前构建服务镜像 
+  -d 在后台运行服务容器
+   
+   
+   
+   
+
+作者：ArtisCoder
+链接：https://www.jianshu.com/p/ee2383b6eedf
+来源：简书
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+   
+   
+
+
+13 docker 参数
+privileged          指定容器是否为特权容器，特权容器拥有所有的capabilities
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

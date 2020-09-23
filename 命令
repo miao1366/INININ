@@ -1,0 +1,279 @@
+1.查看端口信息: netstat -tnlp
+netstat -anp | grep 8210
+
+-a, --all, --listening     display all sockets (default: connected)
+-n, --numeric              don't resolve names
+-p, --programs             display PID/Program name for sockets
+-l, --listening            display listening server sockets
+-t                         选项列出 TCP 协议的连接：
+
+
+2. locate sqlite3.so
+是在后台数据库中按文件名搜索（也只能按文件名搜索），搜索速度较快
+这个数据库的目录，不同的linux发行版不同，在centos6.10中，这个数据库的目录为：/var/lib/mlocate/mlocate.db
+这个数据库默认一天一更新，所以一般新建的文件，如果不手动更新该数据库，在该天内是无法使用locate命令来查看文件位置的，更新该数据库的命令为：updatedb
+模糊查找文
+locate sqlite3.so
+
+
+3.md5sum
+md5sum libface_matcher.so ../x86/libface_matcher.so 
+
+4. ldd
+ldd fms_master | grep OpenCL
+
+5文件拷贝
+scp -r dev_restserver_20200609.tgz yanyan@192.168.0.36:
+5.1 cp 
+	 - r 若给出的源文件是一目录文件，此时cp将递归复制该目录下所有的子目录和文件。此时目标文件必须为一个目录名    ...cp -r ./project_run/ ./20200709bak
+
+6 rar文件解压
+
+rar x 文件名
+unrar e file.rar //解压rar
+
+7 tar文件解压
+
+tar -xvf file.tar //解压 tar包
+tar -xzvf file.tar.gz //解压tar.gz
+tar -xjvf file.tar.bz2   //解压 tar.bz2
+tar -xZvf file.tar.Z   //解压tar.Z
+unzip file.zip //解压zip
+
+压缩文件：
+tar -cf all.tar *.jpg   -c是表示产生新的包，-f指定包的文件名。
+tar -zcvf /home/xahot.tar.gz /xahot
+tar -zcvf 打包后生成的文件名全路径 要打包的目录
+
+8杀掉进程
+sudo kill -9 20113
+kill -s 9 1827
+
+
+9查看进程
+
+ps aux | grep python
+-a 显示同一终端下的所有程序
+-u 指定用户的所有进程
+-aux 显示所有包含其他使用者的行程
+
+
+USER ：进程的所属用户，
+PID ：进程的进程ID号， 
+%CPU ：进程占用的 CPU资源 百分比，
+%MEM ：进程占用的 物理内存 百分比， 
+VSZ ：进程使用掉的虚拟内存量 (Kbytes) ，
+RSS ：进程占用的固定的内存量 (Kbytes) ，
+TTY ：与进程相关联的终端（tty),?代表无关,tty1-tty6是本机上面的登入者程序,pts/0表示为由网络连接进主机的程序。
+STAT ：进程的状态，具体见2.1列出来的部分 ，
+START ：进程开始创建的时间 ，
+TIME ：进程使用的总cpu时间，
+COMMAND : 进程对应的实际程序。
+
+在Linux中，状态如下：
+
+D 不可中断 Uninterruptible sleep (usually IO)
+R 正在运行，或在队列中的进程
+S 处于休眠状态
+T 停止或被追踪
+Z 僵尸进程
+W 进入内存交换（从内核2.6开始无效）
+X 死掉的进程
+
+< 高优先级
+N 低优先级
+L 有些页被锁进内存
+s 包含子进程
++ 位于后台的进程组
+l 多线程，克隆线程
+
+根据以上信息，sl+ 其处于休眠状态，多线程，且是后台进程。
+
+
+
+
+
+
+
+10 重定向文件
+
+2>1 | tee a.log  标准错误输出重定向到标准输出，然后标准输出定向到a.log
+2>&1 | tee a.log  标准错误输出重定向到标准输出，然后标准输出定向到a.log 控制台也有输出打印
+
+
+11 网络抓包
+sudo tcpdump -i enp4s0 -w test.pcap
+
+监视指定网络接口的数据包:  tcpdump -i eth1    -w ./target.cap : 保存成cap文件，方便用ethereal(即wireshark)分析
+
+12 查看显卡信息 nvidia-smi
+
+13 mkdir -p 递归创建目录，即使上级目录不存在，会按目录层级自动创建目录 
+
+14. 远程连接 
+  ssh senscape@192.168.0.174        ssh 用户名@主机名（IP地址）
+
+15. 关闭 mosquitto 服务     sudo service mosquitto stop
+
+16. ip---给网卡配置多个IP地址（别名）以及删除  
+    ip addr add CIDR dev 网卡名 label 网卡名:num    sudo ip addr add 192.168.5.242/24 dev eth0 label eth0:2
+
+17. mosquitto_sub -v -t /recog/senscape -u admin -P Senscape -h 192.168.0.244
+    u:user 
+	p:password 
+	h:host
+	v, –verbose：冗长地打印收到的消息。若指定该选项，打印消息时前面会打印主题名——“主题 消息内容”，否则，只打印消息内容
+	t, –topic：指定订阅的消息主题，允许同时订阅到多个主题
+	
+	
+	mosquitto_sub -t mqttjs_f8be9d3a -u admin -P Senscape
+	mosquitto_sub -t senscape_sub -u admin -P Senscape
+	
+18. 间歇执行命令---watch
+    -d | --differences           高亮显示差异部分
+	-n                           指定时间间隔
+    watch -d -n 0.1 'ps aux | head -1;ps aux |grep -v PID |sort -rn -k +4 | head -2'
+
+19  ps aux | head -1;ps aux |grep -v PID |sort -rn -k +4 | head -2
+   打印前两个占用内存最大的进程
+   
+20 htop  查看内存信息
+
+21 scp  
+    本地上传到远端:		scp -r /root/lk root@43.224.34.73:/home/lk/cpfile。
+    远端上传到本地：       scp -r root@43.224.34.73:/home/lk /root。
+	scp 01log.log senscape@192.168.0.174:/home/senscape /home/miao  //把远端senscape@192.168.0.174:/home/senscape下的 01log.log 拷贝到本地  /home/miao 下       
+   
+22 dns 配置
+ vi /etc/resolv.con
+ nameserver 114.114.114.14  
+ nameserver 8.8.8.8
+
+23  ssh-keygen -f "/home/senscape/.ssh/known_hosts" -R 192.168.0.243
+
+24 设置句柄，永久有效
+ vim /etc/security/limits.conf 
+ 添加
+ * soft  nofile 65535   //* 代表所有用户
+ * hard nofile 65535
+ ??? 奇怪 本地查看不生效，远程登录看时有效
+
+25 ubuntu18.04配置ip  /etc/netplan/01-network-manager-all.yaml 
+
+network:
+  version: 2
+  renderer: NetworkManager
+  ethernets:
+          eno1: (网卡名)
+             dhcp4: no
+             addresses: [192.168.0.174/24]                                 [192.168.0.174/25]
+             gateway4: 192.168.0.1                                         192.168.0.129
+             nameservers:
+                     addresses: [8.8.8.8,114.114.114.114]
+
+26 查看可打开文件句柄数  ulimit -n
+
+27 find /usr/ -name "rsa.h"
+   find /usr/ -name "libssl*"
+   
+28  nmon  性能分析工具
+
+29 which 查看可执行文件的位置
+   which cat
+
+ 
+30 c++filt  c++过滤函数编译修饰名
+   c++filt _ZN15IFaceRecognizer11GetInstanceEi  -->  IFaceRecognizer::GetInstance(int)
+   
+31 lpr  打印文件
+   
+32 VPATH
+
+33 whoami  打印用户名
+
+34 arch  主要用于显示当前主机的硬件结构类型
+
+35 size   test.o 
+
+36 objdump -h test.o
+	
+37 echo -e   //后面语句中的特殊字符要转义
+
+38 run-parts  就是执行目录下的所有的脚本
+   
+   -v --verbose：详尽输出模式，包括错误信息
+   --report：只打印输出
+
+39 test
+
+40 anacron 
+   anacron 是用来做什么的呢？设想这样一个场景，Linux 服务器会在周末关机两天，但是设定的定时任务大多在周日早上进行，但在这个时间点，服务器又处于关机状态，导致系统很多定时任务无法运行。
+   又比如，我们需要在凌晨 5 点 05 分执行系统的日志备份，但 Linux 服务器不是 24 小时开机的，在晚上需要关机，白天上班之后才会再次开机，在这个定时任务的执行时间我们的服务器刚好没有开机，
+   那么这个定时任务就不会执行了。anacron 就是用来解决这个问题的
+   
+41 文件内容查找
+   grep -rl "keyword" ./ 
+   
+42 文件内容查找
+1、
+find / -name '*' | xargs grep 'route'
+在根文件夹下查找含有关键字route的文件，列出文件名和route所在行。
+2、
+find / -name '*.txt' | xargs grep 'route'
+在根文件夹下查找后缀名为txt且含有关键字route的文件，列出文件名和route所在行。
+ 
+43  Linux下用ifconfig命令设置IP、掩码、网关
+
+设置IP和掩码
+ifconfig eth0 192.168.5.40 netmask 255.255.255.0
+设置网关
+route add default gw 192.168.5.1
+
+44 free -m 查看内存
+
+    Mem:内存的使用情况总览表。
+    totel:机器总的物理内存 单位为：M
+    used：用掉的内存。
+    free:空闲的物理内存
+
+
+45 增加交换内存
+sudo fallocate -l 4G /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+
+46  sshfs  链接远程目录
+sshfs miao@192.168.0.243:/home/miao/project_run/workspace/FaceRecognitionRK3399 ./FaceRecog/
+sshfs firefly@192.168.0.244:/home/firefly/workspace/FaceRecognitionRK3399 ./ -o nonempty
+
+47 journalctl  查询系统日志的工具
+   journalctl -xe  // -e 从结尾开始看  -x 相关目录(如:问题相关的网址)
+   
+48 systemd即为system daemon,是linux下的一种init软件,  作为init系统，systemd进程作为系统中的1号进程.
+   Systemctl是一个systemd工具，主要负责控制systemd系统和服务管理器
+
+49 mount是Linux下的一个命令，它可以将分区挂接到Linux的一个文件夹下，从而将分区和该目录联系起来
+
+50  find ./ -type f|grep so  //递归查找目录下文件名包含so的文件
+
+51 dpkg -l 命令会列出系统中所有已安装的软件包信息。结合grep
+
+52 ctrl + r  查找历史命令
+
+53 sudo dpkg -i <package.deb>
+
+54 find . -type f -name "*.c" | xargs cat | wc -l       //统计当前目录下.c文件共有多少行
+
+
+
+
+
+
+ 
+	
+	
+
+
+
+

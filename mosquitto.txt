@@ -1,0 +1,495 @@
+0  启动mosquitto服务
+  mosquitto -c /etc/mosquitto/mosquitto.conf   //-c 配置文件 如果没有指定默认路径为/etc/mosquitto/mosquitto.conf
+  配置文件参数
+  bind_address    		服务绑定的IP地址
+  port            		服务绑定的端口号
+  password_file   		用户/密码文件
+  allow_anonymous       允许匿名用户
+  max_queued_messages   客户端心跳消息缓存队列
+  log_dest              日志的输出目的地 可以是：stdout stderr syslog topic 
+                        如果输出到某个文件的话可以这样设置log_dest file /var/log/mosquitto.log  要赋予对mosquitto.log文件的读写权限
+  
+  
+  
+  
+  
+1  工作上订阅的一些主题    
+
+    mosquitto_sub -t mqttjs_f8be9d3a -u admin -P Senscape
+	mosquitto_sub -t senscape_sub -u admin -P Senscape    
+
+1. mosquitto_sub -v -t /recog/senscape -u admin -P Senscape -h 192.168.0.244
+    u:user 
+	p:password 
+	h:host
+	v, –verbose：冗长地打印收到的消息。若指定该选项，打印消息时前面会打印主题名——“主题 消息内容”，否则，只打印消息内容
+	t, –topic：指定订阅的消息主题，允许同时订阅到多个主题
+	
+	-c  配置文件
+2. mosquitto_pub -h localhost -t mqtt -m "hello world" -u test -P t123456
+   -m  ----消息内容
+
+
+3. MQTT服务器(Broker) - mosquitto配置文件详解
+   bind_address             --服务绑定的IP地址
+   port                     --服务绑定的端口号
+   password_file            --用户/密码文件
+   max_queued_message       --客户端心跳消息缓存队列
+   allow_anonymous          --允许匿名用户
+   persistence              --持久化功能的开关
+   listener                 --监听端口，可写多个
+   log_dest file            --日志输出目录; log_dest file /home/logs/mosquitto/mosquitto.log ;log_dest stderr;
+   protocol                 --协议            mqtt协议; websocket协议 默认mqtt协议， 在监听端口下指定协议方式
+  
+  
+  
+4.  int mosquitto_lib_init(void) ;   //必须在任何其他mosquitto函数之前调用
+    返回值 总是MOSQ_ERR_SUCCESS
+	
+5 	 struct mosquitto *mosquitto_new(const char *id,bool clean_session,void *obj) 创建新的mosquitto实例
+      第一个参数id，用作mosquitto实例id的字符串。如果为空，将生成随机id。如果id为空，则clean_session必须为ture。
+      第二个参数clean_session,设置为true可指示代理清除断开连接时的所有消息和订阅，设置为false可指示代理保留这些消息和订阅。
+      第三个参数obj指针，作为参数传递给指定回调。
+     返回值：失败返回空指针，错误信息在errno，成功返回mosquitto实例
+
+6  void mosquitto_destroy(struct mosquitto *mosq);
+   用来释放mosquitto实例关联的内存，参数*mosq是mosquitto_new返回的实例
+	
+7 int mosquitto_lib_cleanup(void)；
+  用来释放库相关的资源
+  
+8 int mosquitto_connect(struct mosquitto *mosq,const char *host,int port,int keepalive)；
+
+连接mqtt服务器
+     第一个参数*mosq是mosquitto_new返回的实例
+     第二个参数是mqtt服务器的ip地址。
+     第三个参数是mqtt服务器的端口
+     第四个参数是超时时间
+	 
+  返回：MOSQ_ERR_SUCCESS 成功。
+       MOSQ_ERR_INVAL 如果输入参数无效。
+       MOSQ_ERR_ERRNO 如果系统调用返回错误。变量errno包含错误代码
+	  
+9 int mosquitto_publish(struct mosquitto *mosq,int *mid,const char *topic,int payloadlen,const void *payload,int qos,bool retain)；
+
+消息发布
+   第一个参数*mosq是mosquitto_new返回的实例.
+   第二个参数*mid是int类型的指针。如果不为NULL，函数会将其设置为此特定消息的消息ID。然后，可以将其与发布回调一起使用，以确定何时发送消息。
+   第三个参数是*topic发布的主题。第四个参数payloadlen是载荷长度，第五个参数*payload是载荷,第六个参数qos是服务质量。
+   第七个参数retain设置为true可保留消息
+Return：
+  成功返回MOSQ_ERR_SUCCESS
+  
+10 int mosquitto_loop_forever( struct mosquitto * mosq, int timeout, int max_packets )
+
+11 int mosquitto_lib_cleanup（void）
+   功能：使用完mosquitto函数之后，要做清除工作。
+   返回值： MOSQ_ERR_SUCCESS 总是
+
+12 void mosquitto_connect_callback_set(struct mosquitto * mosq, void (*on_connect)(struct mosquitto *mosq, void *obj, int rc) )
+  功能：连接确认回调函数，当代理发送CONNACK消息以响应连接时，将调用此方法
+  mosq   //客户端
+  on_connect  //回调函数
+        mosq 客户端数据
+        obj  创建客户端的回调参数
+  rc  
+        0-成功
+		1-连接被拒绝（协议版本不可接受）
+		2-连接被拒绝（标识符被拒绝）
+		3-连接被拒绝（经纪人不可用）
+		4-255-保留供将来使用0表示连接成功  其他表示失败
+  
+13 int mosquitto_disconnect( struct mosquitto * mosq )
+	功能：断开与代理/服务器的连接。
+	返回：
+	MOSQ_ERR_SUCCESS 成功。
+	MOSQ_ERR_INVAL 如果输入参数无效。
+	MOSQ_ERR_NO_CONN 如果客户端未连接到代理
+	
+9、int mosquitto_publish( struct mosquitto * mosq, int * mid, const char * topic, int payloadlen, const void * payload, int qos, bool retain )
+
+功能：主题发布的函数
+参数：
+①mosq：有效的mosquitto实例，客户端
+②mid：指向int的指针。如果不为NULL，则函数会将其设置为该特定消息的消息ID。然后可以将其与发布回调一起使用，以确定何时发送消息。
+      请注意，尽管MQTT协议不对QoS = 0的消息使用消息ID，但libmosquitto为其分配了消息ID，以便可以使用此参数对其进行跟踪。
+③topic：要发布的主题，以null结尾的字符串
+④payloadlen：有效负载的大小（字节），有效值在0到268，435，455之间；主题消息的内容长度
+⑤payload： 主题消息的内容，指向要发送的数据的指针，如果payloadlen >0，则它必须时有效的存储位置。
+⑥qos：整数值0、1、2指示要用于消息的服务质量。
+⑦retain：设置为true以保留消息。
+
+返回:
+MOSQ_ERR_SUCCESS 成功。
+MOSQ_ERR_INVAL 如果输入参数无效。
+MOSQ_ERR_NOMEM 如果发生内存不足的情况。
+MOSQ_ERR_NO_CONN 如果客户端未连接到代理。
+MOSQ_ERR_PROTOCOL 与代理进行通信时是否存在协议错误。
+MOSQ_ERR_PAYLOAD_SIZE 如果payloadlen太大。
+MOSQ_ERR_MALFORMED_UTF8 如果主题无效，则为UTF-8
+MOSQ_ERR_QOS_NOT_SUPPORTED 如果QoS大于代理支持的QoS。
+MOSQ_ERR_OVERSIZE_PACKET 如果结果包大于代理支持的包。
+
+10、int mosquitto_subscribe( struct mosquitto * mosq, int * mid, const char * sub, int qos )
+功能：订阅主题函数
+
+参数：
+①mosq：有效的mosquitto实例，客户端
+②mid： 指向int的指针。如果不为NULL，则函数会将其设置为该特定消息的消息ID。然后可以将其与订阅回调一起使用，以确定何时发送消息。；主题的消息ID
+③sub： 主题名称，订阅模式。
+④qos : 此订阅请求的服务质量。
+
+返回值：
+MOSQ_ERR_SUCCESS 成功。
+MOSQ_ERR_INVAL 如果输入参数无效。
+MOSQ_ERR_NOMEM 如果发生内存不足的情况。
+MOSQ_ERR_NO_CONN 如果客户端未连接到代理。
+MOSQ_ERR_MALFORMED_UTF8 如果主题无效，则为UTF-8
+MOSQ_ERR_OVERSIZE_PACKET 如果结果包大于代理支持的包。
+
+11、void mosquitto_message_callback_set( struct mosquitto * mosq, void (*on_message)(struct mosquitto *, void *, const struct mosquitto_message *) )
+功能：消息回调函数，收到订阅的消息后调用。
+
+参数：
+①mosq： 有效的mosquitto实例，客户端。
+②on_message 回调函数，格式如下：void callback（struct mosquitto * mosq，void * obj，const struct mosquitto_message * message）
+回调的参数：
+①mosq：进行回调的mosquitto实例
+②obj： mosquitto_new中提供的用户数据
+③message: 消息数据，回调完成后，库将释放此变量和关联的内存，客户应复制其所需要的任何数据。
+
+struct mosquitto_message{
+int mid;//消息序号ID
+char *topic; //主题
+void *payload; //主题内容 ，MQTT 中有效载荷
+int payloadlen; //消息的长度，单位是字节
+int qos; //服务质量
+bool retain; //是否保留消息
+};
+
+12、int mosquitto_loop_forever( struct mosquitto * mosq, int timeout, int max_packets )
+功能：此函数在无限阻塞循环中为你调用loop（），对于只想在程序中运行MQTT客户端循环的情况，这很有用，
+如果服务器连接丢失，它将处理重新连接，如果在回调中调用mosqitto_disconnect（）它将返回。
+
+参数：
+①mosq: 有效的mosquitto实例，客户端
+②timeout： 超时之前，在select（）调用中等待网络活动的最大毫秒数，设置为0以立即返回，设置为负可使用默认值为1000ms。
+③max_packets： 该参数当前未使用，应设为为1，以备来兼容
+
+返回值：
+MOSQ_ERR_SUCCESS 成功。
+MOSQ_ERR_INVAL 如果输入参数无效。
+MOSQ_ERR_NOMEM 如果发生内存不足的情况。
+MOSQ_ERR_NO_CONN 如果客户端未连接到代理。
+MOSQ_ERR_CONN_LOST 如果与代理的连接丢失。
+MOSQ_ERR_PROTOCOL 与代理进行通信时是否存在协议错误。
+MOSQ_ERR_ERRNO 如果系统调用返回错误。变量errno包含错误代码
+
+13、int mosquitto_loop_stop( struct mosquitto * mosq, bool force )
+
+功能:网络事件阻塞回收结束处理函数，这是线程客户端接口的一部分。调用一次可停止先前使用mosquitto_loop_start创建的网络线程。该调用将一直阻塞，直到网络线程结束。
+     为了使网络线程结束，您必须事先调用mosquitto_disconnect或将force参数设置为true。
+参数： ①mosq :有效的mosquitto实例
+      ②force：设置为true强制取消线程。如果为false，则必须已经调用mosquitto_disconnect。
+返回：
+MOSQ_ERR_SUCCESS 成功。
+MOSQ_ERR_INVAL 如果输入参数无效。
+MOSQ_ERR_NOT_SUPPORTED 如果没有线程支持。
+
+14、nt mosquitto_loop_start( struct mosquitto * mosq )
+功能：网络事件循环处理函数，通过创建新的线程不断调用mosquitto_loop() 函数处理网络事件，不阻塞
+返回：
+MOSQ_ERR_SUCCESS 成功。
+MOSQ_ERR_INVAL 如果输入参数无效。
+MOSQ_ERR_NOT_SUPPORTED 如果没有线程支持。
+
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

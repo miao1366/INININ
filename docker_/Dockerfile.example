@@ -1,0 +1,21 @@
+FROM nvidia/cuda:10.0-cudnn7-runtime-ubuntu18.04
+
+# Install necessary packages for the installer
+RUN apt-get update && apt-get install -y \
+    lsb-release \
+    build-essential \
+    sed \
+    sudo \
+    tar \
+    udev \
+    wget \
+    && apt-get clean
+
+# Copy files to docker
+COPY ./example example/
+
+# Set the current working directory to the cloned example directory
+WORKDIR "/example"
+
+# Run the installer
+RUN make install

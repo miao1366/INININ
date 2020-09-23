@@ -1,0 +1,22 @@
+crtl + shift + 方向键上  选中局部文字内容
+撤销刚才的操作：Ctrl+Z
+恢复刚才的操作：Ctrl+Shift+Z
+
+单行注释 / 取消单行注释： ctrl+/ 
+
+多行注释/ 取消注释：  ctrl+shit+A
+
+光标前进 ： crtl + alt + -          可通过文件->首选项->快捷键设置 
+光标后退：  crtl + shift + -
+
+
+modified:   src/face_manager/for_senscape/face_manager_for_senscape.cc
+	modified:   src/face_manager/for_sensetime/face_manager_for_sensetime.cc
+	modified:   src/face_recog/face_matcher_hdq.cc
+	modified:   src/face_recog/face_matcher_sensetime.cc
+	modified:   src/message_server_base.cc
+	modified:   src/message_server_for_recognise.cc
+	deleted:    src/re_match_result_processor_for_senscape.cc
+	deleted:    src/re_match_result_processor_for_senscape.h
+	deleted:    src/re_match_result_processor_for_sensetime.cc
+	deleted:    src/re_match_result_processor_for_sensetime.h

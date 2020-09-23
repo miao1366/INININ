@@ -1,0 +1,7 @@
+安装: https://zazalu.space/2019/06/14/ubuntu18-04%E5%AE%89%E8%A3%85mysql8-0-16-Community/
+
+用户: root 密码: miao
+
+1. 索引 B+TREE 索引  BTREE索引
+2. 回表查询
+3. 覆盖索引

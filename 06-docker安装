@@ -1,0 +1,34 @@
+1. gunzip -c docker 镜像名.tgz |sudo docker load
+ 是把restful镜像拷贝到install.sh同级目录这里， 这里执行命令后会等一段时间.
+
+2. RestServerDevelop20190530.tgz , 没有安装202002版本的.
+
+ sudo docker run --runtime=nvidia --net=host --privileged --restart=always --workdir="/home/senscape/project_run/" --name RestServerDevelop20200609 -v /dev:/dev -v /home/miao/project_run/:/home/senscape/project_run/ -i -t --log-opt max-size=10m --log-opt max-file=3 ff76d2b61f94 
+
+相比于文档少了/run_fms_master.sh.   max-file=3 后面跟镜像id 镜像tag都可以.
+
+
+sudo docker run --runtime=nvidia --net=host --privileged --restart=always --workdir="/home/senscape/project_run/" --name RestServer20200609 -v /dev:/dev -v /home/liguo/workspace/project_run_rest/:/home/senscape/project_run/ -i -t --log-opt max-size=10m --log-opt max-file=3 ubuntu18.0.4_dev_rest_server20200609_tmp
+
+
+
+
+
+3. /check_rate_py 两个python脚本注意数据库名字相同.
+
+4 删除nvidia-smi驱动 sudo bash ./NVIDIA-Linux-x86_64-418.56.run  --uninstall
+
+5 安装NVIDIA驱动出现: An NVIDIA kernel module 'nvidia-drm' 
+   sudo systemctl isolate multi-user.target
+   sudo modprobe -r nvidia-drm
+
+
+
+
+
+
+
+
+
+
+

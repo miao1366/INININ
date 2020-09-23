@@ -1,0 +1,113 @@
+1. EAGAIN  
+ 如以 O_NONBLOCK的标志打开文件/socket/FIFO，如果你连续做read操作而没有数据可读，此时程序不会阻塞起来等待数据准备就绪返回，read函数会返回一个错误EAGAIN，提示你的应用程序现在没有数据可读请稍后再试。又例如，当一个系统调用(比如fork)因为没有足够的资源(比如虚拟内存)而执行失败，返回EAGAIN提示其再调用一次(也许下次就能成功)。
+
+2. EWOULDBLOCK
+  用于非阻塞模式，不需要重新读或者写
+
+3. EINTR  error interrupt
+
+该术语适用于那些可能永远阻塞的系统调用。永远阻塞的系统调用是指调用永远无法返回，多数网络支持函数都属于这一类。如：若没有客户连接到服务器上，那么服务器的accept调用就会一直阻塞。
+
+慢系统调用可以被永久阻塞，包括以下几个类别：
+
+（1）读写‘慢’设备（包括pipe，终端设备，网络连接等）。读时，数据不存在，需要等待；写时，缓冲区满或其他原因，需要等待。读写磁盘文件一般不会阻塞。
+（2）当打开某些特殊文件时，需要等待某些条件，才能打开。例如：打开中断设备时，需要等到连接设备的modem响应才能完成。
+（3）pause和wait函数。pause函数使调用进程睡眠，直到捕获到一个信号。wait等待子进程终止。
+（4）某些ioctl操作。
+（5）某些IPC操作。
+错误产生的原因
+如果进程在一个慢系统调用(slow system call)中阻塞时，当捕获到某个信号且相应信号处理函数返回时，这个系统调用被中断，调用返回错误，设置errno为EINTR（相应的错误描述为“Interrupted system call”）
+
+EINTR错误的产生：当阻塞于某个慢系统调用的一个进程捕获某个信号且相应信号处理函数返回时，该系统调用可能返回一个EINTR错误
+
+4. EMFILE
+   EMFILE Too many open files 24
+
+5 ECONNRESET
+ 该错误被描述为“connection reset by peer”，即“对方复位连接”，这种情况一般发生在服务进程较客户进程提前终止。
+ 当服务进程终止时会向客户 TCP 发送 FIN 分节，客户 TCP 回应 ACK，服务 TCP 将转入 FIN_WAIT2 状态。此时如果客户进程没有处理该 FIN 
+ （如阻塞在其它调用上而没有关闭 Socket 时），则客户 TCP 将处于 CLOSE_WAIT 状态。当客户进程再次向 FIN_WAIT2 状态的服务 TCP 发送数据时，
+ 则服务 TCP 将立刻响应 RST。一般来说，这种情况还可以会引发另外的应用程序异常，客户进程在发送完数据后，往往会等待从网络IO接收数据，
+ 很典型的如 read 或 readline 调用，此时由于执行时序的原因，如果该调用发生在 RST 分节收到前执行的话，那么结果是客户进程会得到一个非预期的 EOF 错误。
+ 此时一般会输出“server terminated prematurely”－“服务器过早终止”错误
+ 
+6  ECONNABORTED
+   该错误被描述为“software caused connection abort”，即“软件引起的连接中止”。
+   原因在于当服务和客户进程在完成用于 TCP 连接的“三次握手”后，客户 TCP 却发送了一个 RST （复位）分节，在服务进程看来，
+   就在该连接已由 TCP 排队，等着服务进程调用 accept 的时候 RST 却到达了。POSIX 规定此时的 errno 值必须 ECONNABORTED。
+   源自 Berkeley 的实现完全在内核中处理中止的连接，服务进程将永远不知道该中止的发生。服务器进程一般可以忽略该错误，直接再次调用accept
+
+7  EPROTO   	Protocol error
+8  EPERM    	Operation not permitted
+9  EBADF    	Bad file number
+10 EFAULT   	Bad address
+11 EINVAL   	Invalid argument
+12 ENFILE   	File table overflow          //打开的文件太多
+13 ENOBUFS  	No buffer space available
+14 ENOMEM   	Out of memory
+15 ENOTSOCK 	Socket operation on non-socket
+16 EOPNOTSUPP   Operation not supported on transport
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,36 @@
+struct mosq_config {
+  string client_id;      // 客户端ID，不指定时系统随机给出
+  int protocol_version;  // 协议版本
+  int keepalive;         // 保持时间，单位秒
+  string host;           // MQTT Broker的IP
+  int port;              // Broker 端口
+  string bind_address;   //多网卡时客户端用来绑定的自身地址
+  string username;       //用户名
+  string password;       //密码
+  int qos;
+  bool retain;
+  // string message; /* pub */
+  // int64_t msglen; /* pub */
+  set<string> pub_topics;
+
+  // sub
+  bool clean_session;     /* sub */
+  set<string> sub_topics; /* sub */
+  // int topic_count;           /* sub */
+  int mid_sent;
+  bool is_connected;
+  callback_fun default_topic_fun;
+  map<string, callback_fun> special_topics;
+  mosq_config() {
+    protocol_version = MQTT_PROTOCOL_V31;
+    keepalive = 60;
+    qos = 0;
+    retain = false;
+    clean_session = true;
+    mid_sent = 0;
+    is_connected = false;
+  }
+};
+
+FaceRecognition()     //  (item.crop_face, item.enlarge_factor, 0, 1, face_infos)
+

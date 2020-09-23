@@ -1,0 +1,154 @@
+1. 
+Sqlite3的synchronous的模式选择
+
+PRAGMA synchronous = FULL; (2) 
+PRAGMA synchronous = NORMAL; (1) 
+PRAGMA synchronous = OFF; (0)
+
+当synchronous设置为FULL (2), SQLite数据库引擎在紧急时刻会暂停以确定数据已经写入磁盘。这使系统崩溃或电源出问题时能确保数据库在重起后不会损坏。FULL synchronous很安全但很慢。
+
+当synchronous设置为NORMAL, SQLite数据库引擎在大部分紧急时刻会暂停，但不像FULL模式下那么频繁。 NORMAL模式下有很小的几率(但不是不存在)发生电源故障导致数据库损坏的情况。但实际上，在这种情况 下很可能你的硬盘已经不能使用，或者发生了其他的不可恢复的硬件错误。
+ 
+设置为synchronous OFF (0)时，SQLite在传递数据给系统以后直接继续而不暂停。若运行SQLite的应用程序崩溃， 数据不会损伤，但在系统崩溃或写入数据时意外断电的情况下数据库可能会损坏。另一方面，在synchronous OFF时 一些操作可能会快50倍甚至更多。在SQLite 2中，缺省值为NORMAL.而在3中修改为FULL。
+
+
+2.
+开启事务：
+在对 sqlite3 insert into 等操作时速度比较慢。
+原因：它以文件的形式存在磁盘中，每次访问时都要打开一次文件，如果对数据库进行大量的操作，就很慢。
+解决办法：用事物的形式提交，因为开始事务后，进行的大量操作语句都保存在内存中，当提交时才全部写入数据库，此时，数据库文件也只用打开一次。如果操作错误，还可以回滚事务
+
+int ret ; 
+ret = sqlite3_exec ( db , "begin transaction" , 0 , 0 , & zErrorMsg ); // 开始一个事务 
+ret = sqlite3_exec ( db , "commit transaction" , 0 , 0 , & zErrorMsg ); // 提交事务 
+ret = sqlite3_exec ( db , "rollback transaction" , 0 , 0 , & zErrorMsg );
+
+
+例子:
+ret = sqlite3_exec ( db , "begin transaction" , 0 , 0 ,& zErrorMsg ); 
+for (...) 
+{ 
+  //insert into operate 
+
+  // 如果操作错误 
+
+ ret = sqlite3_exec ( db , "rollback transaction" , 0 , 0 , & zErrorMsg ) 
+} 
+ret = sqlite3_exec ( db , "commit transaction" , 0 , 0 , & zErrorMsg );
+
+
+3.
+SQLite中每个表都默认包含一个隐藏行rowid，使用WITHOUT ROWID定义的表除外
+
+4.
+sqlite_sequence表也是SQLite的系统表。该表用来保存其他表的RowID的最大值。数据库被创建时，sqlite_sequence表会被自动创建。该表包括两列。第一列为name，用来存储表的名称。第二列为seq，用来保存表对应的RowID的最大值
+
+
+insert or replace：如果不存在就插入，存在就更新  根据主键
+insert or ignore：如果不存在就插入，存在就忽略
+
+insert into表示插入数据，数据库会检查主键（PrimaryKey），如果出现重复会报错；
+
+5.
+
+sqlite3_step()
+这个过程用于执行有前面sqlite3_prepare创建的准备语句。这个语句执行到结果的第一行可用的位置。继续前进到结果的第二行的话，只需再次调用sqlite3_setp()。继续调用sqlite3_setp()知道这个语句完成，那些不返回结果的语句（如：INSERT，UPDATE，或DELETE），sqlite3_step()只执行一次就返回
+
+6. 统计表有多少行
+  select count(*) from 表名;
+
+7.删除表
+ drop table 表名
+
+8. 有次插入410710行数据花了47秒
+
+9 . 表的名字不能用? 占位
+
+10. 删除表 
+  DELETE FROM 表名
+
+11  VACUUM 命令通过复制主数据库中的内容到一个临时数据库文件，然后清空主数据库，
+    并从副本中重新载入原始的数据库文件。这消除了空闲页，把表中的数据排列为连续的，另外会清理数据库文件结构
+
+
+12  int sqlite3_step(sqlite3_stmt *pStmt)
+   有数据可读返回 SQLITE_ROW , 没有数据可读返回SQLITE_DONE
+
+
+
+
+
+
+
+随机插入一行记录(遥测数据)
+insert into BreakerTelemetry(
+DeviceId, A_phsA, A_phsB, A_phsC, PhV_phsA, PhV_phsB, PhV_phsC, TotW, TotVar, published, TimeStamp
+) values
+('8a:8d:e2:ae:49:31', abs(random() % 110), abs(random() % 110), abs(random() % 110), abs(random() % 380), abs(random() % 380), abs(random() % 380), abs(random() % 2200), abs(random() % 150), 0, 1599201667)
+
+
+
+
+
+
+随机插入一行记录(遥信数据)
+insert into BreakerTeleSignal(
+DeviceId, BrkSite, HandcartSite, GroundknifeClosed, SpringNoPower, NeedRepair, ResetSignal, Accident, CommunOutage, AccidentTimes, OneOverCurrent, TwoOverCurrent, Overload, ZeroOverLoad, TvPowerOutage, published, TimeStamp
+) values
+('8a:8d:e2:ae:49:31', abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2),
+abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2),
+0, 1599201667)
+
+
+随机插入一行记录(遥测数据)
+insert into BreakerTelemetry(
+DeviceId, A_phsA, A_phsB, A_phsC, PhV_phsA, PhV_phsB, PhV_phsC, TotW, TotVar, published, TimeStamp
+) values
+('8a:8d:e2:ae:49:31', abs(random() % 110), abs(random() % 110), abs(random() % 110), abs(random() % 380), abs(random() % 380), abs(random() % 380), abs(random() % 2200), abs(random() % 150), 0, 1599201667)
+
+
+
+
+随机插入一行记录(遥信数据)
+insert into BreakerTeleSignal(
+DeviceId, BrkSite, HandcartSite, GroundknifeClosed, SpringNoPower, NeedRepair, ResetSignal, Accident, CommunOutage, AccidentTimes, OneOverCurrent, TwoOverCurrent, Overload, ZeroOverLoad, TvPowerOutage, published, TimeStamp
+) values
+('8a:8d:e2:ae:49:31', abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2),
+abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2), abs(random() % 2),
+0, 1599201667)
+
+
+SQLite中创建自增字段:
+简单的回答：一个声明为 INTEGER PRIMARY KEY 的字段将自动增加。
+从 SQLite 的 2.3.4 版本开始，如果你将一个表中的一个字段声明为 INTEGER PRIMARY KEY，那么无论你何时向该表的该字段插入一个 NULL 值，
+这个 NULL 值将自动被更换为比表中该字段所有行的最大值大 1 的整数；如果表为空，那么将被更换为 1。
+一个新的API函数 sqlite3_last_insert_rowid() 返回最近的插入操作的整形键.
+注意这个整型键始终比之前插入表中的最后一个键大1。新键相对于表中的已有键来说是唯一的，但它可能与之前从表中删除的键值重叠。
+要始终得到在整个表中唯一的键，在INTEGER PRIMARY KEY的声明之前加关键词AUTOINCREMENT.这样被选的键将总是比表中已存在的最大键大1。
+若可能的最大键已存在于表中，INSERT操作将失败并返回一个SQLITE_FULL错误码.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

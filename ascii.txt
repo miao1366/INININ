@@ -1,0 +1,2 @@
+'\n' 10 换行（newline）
+'\r' 13 回车（return）

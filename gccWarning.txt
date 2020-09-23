@@ -1,0 +1,16 @@
+1 -Wformat-truncation
+  警告关于调用可能导致输出截断的格式化输入/输出函数（如snprintf和vsnprintf警告。 当由格式指令写入的确切字节数在编译时无法确定时，
+  它将根据启发式进行估计，这取决于级别参数和优化
+
+2 -Wdeprecated-declarations
+  用了过时的接口
+
+3 -Wunused-result 
+   没有判断函数返回值
+
+4  -Wall会将编译过程中遇到的警告全部列出
+
+5  -Wreturn-type  非 void 函数没有返回值。也有可能lambda语句中判断语句中有返回值，
+   函数最后没有返回值
+
+

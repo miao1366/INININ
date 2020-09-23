@@ -1,0 +1,17 @@
+cpprest
+https://github.com/microsoft/cpprestsdk/releases
+
+
+
+build 目录下编译
+
+threadpool& threadpool::shared_instance() { return initialize_shared_threadpool(400).second->get_shared(); }
+
+cmake -G Ninja ..
+ninja
+sudo apt-get install ninja-build
+
+build 目录要为空
+
+//不检查json格式
+ignore_content_type = true;

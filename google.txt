@@ -1,0 +1,5 @@
+1. protobuf 
+  GOOGLE_PROTOBUF_VERIFY_VERSION     每一个.pb.cc文件在启动时都将自动调用该宏
+  注意在程序结尾处调用ShutdownProtobufLibrary()
+  
+2. 

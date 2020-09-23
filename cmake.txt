@@ -1,0 +1,263 @@
+
+$^  所有的依赖目标的集合。以空格分隔。如果在依赖目标中有多个重复的，那个这个变量会去除重复的依赖目标，只保留一份
+$@  表示规则中的目标文件集。在模式规则中，如果有多个目标，那么，"$@"就是匹配于目标中模式定义的集合
+$?  所有比目标新的依赖目标的集合。以空格分隔。
+$<   依赖目标中的第一个目标名字。如果依赖目标是以模式（即"%"）定义的，那么"$<"将是符合模式的一系列的文件集。注意，其是一个一个取出来的。
+$(@D)  表示"$@"的目录部分（不以斜杠作为结尾） ，如果"$@"值是"dir/foo.o"，那么"$(@D)"就是"dir"，而如果"$@"中没有包含斜杠的话，其值是"."（当前目录）
+
+
+cmake的内置命令是不区分大小写的
+cmake内置变量是区分大小写的，或者干脆就说，cmake的所有变量都是区分大小写的
+
+
+
+1.set 
+
+语法： SET(VAR [VALUE] [CACHE TYPE DOCSTRING [FORCE]]) 
+指令功能: 用来显式的定义变量 
+例子: SET (SRC_LST main.c other.c) 
+说明: 用变量代替值，例子中定义SRC_LST代替后面的字符串。
+
+2. project
+
+   project( OneFLOW
+         VERSION 1.2.3.4
+         DESCRIPTION "OneFLOW opensource CFD"
+         HOMEPAGE_URL "https://github.com/eric2003/OneFLOW"
+         LANGUAGES CXX
+        )
+	PROJECT-NAME：必选
+	项目名称，配置好值后，会存在　CMAKE_PROJECT_NAME 变量中
+	VERSION：可选	
+	版本号，主要分为 major（主版本号）、minor（次版本号）、patch（补丁版本号）、tweak， 格式为： 10.2.1.3
+	设置对应的值后，会依次解析，存在各自对应的变量里面
+	以 10.2.1.3 为例
+
+	名称	变量名	值
+	major（主版本号）	PROJECT_VERSION_MAJOR	10
+	minor（次版本号）	PROJECT_VERSION_MINOR	2
+	patch（补丁版本号)	PROJECT_VERSION_PATCH	1
+	tweak	PROJECT_VERSION_TWEAK	3
+	VERSION	CMAKE_PROJECT_NAME	10.2.1.3
+	LANGUAGES: 可选，如果未配置，默认使用 C 以及 CXX
+    注意: 如果使用ASM（汇编），需要放在最后面
+	
+	
+3. CMAKE_BUILD_TYPE 设置编译模式 
+  set( CMAKE_BUILD_TYPE "Debug" )
+  
+4 -fvisibility=hidden 
+
+ GUN规定动态库中的所有函数的全局变量默认是对外可见的，如果编译动态库时不添加-fvisibility=hidden，默认是可见的，添加之后，如果调用动态库的函数，由于无法定义到引用的实际实现，会报错：
+ undefined symbol: XXX
+ 
+ -fvisibility=default   动态库部分需要对外显示的函数接口显示出来
+ 
+5  编译器优化程度调到最高需要设置 -O3 ，最低的是 -O0 即不做优化，添加调试信息的参数是 -g  -ggdb
+
+6  -w的意思是关闭编译时的警告，也就是编译后不显示任何warning，因为有时在编译之后编译器会显示一些例如数据转换之类的警告，这些警告是我们平时可以忽略的。
+   -Wall选项意思是编译后显示所有警告。
+   -W选项类似-Wall，会显示警告，但是只显示编译器认为会出现错误的警告。
+    在编译一些项目的时候可以-W和-Wall选项一起使用。
+	
+7 -fpic和-fPIC
+  -fPIC 作用于编译阶段，告诉编译器产生与位置无关代码(Position-Independent Code)，则产生的代码中，没有绝对地址，全部使用相对地址，
+  故而代码可以被加载器加载到内存的任意位置，都可以正确的执行
+  使用GCC产生地址无关代码很简单，我们只需要使用“-fPIC”参数即可。实际上GCC还提供了另外一个类似的参数叫做“-fpic”，即“PIC”3个字母小写，
+  这两个参数从功能上来讲完全一样，都是指示GCC产生地址无关代码。唯一的区别是，“-fPIC”产生的代码要大，而“-fpic”产生的代码相对较小，而且较快。
+  那么我们为什么不使用“-fpic”而要使用“-fPIC”呢？原因是，由于地址无关代码都是跟硬件平台相关的，不同的平台有着不同的实现，“-fpic”在某些平台上
+  会有一些限制，比如全局符号的数量或者代码的长度等，
+  而“-fPIC”则没有这样的限制。所以为了方便起见，绝大部分情况下我们都使用“-fPIC”参数来产生地址无关代
+   	
+8  -DSOAP_DEBUG    通过该选项可以打印通信交互过程接收发送的报文
+
+9  CMAKE_SYSTEM_PROCESSOR:
+   这个是可选项，但是在移动开发中很重要，代表目标系统的硬件或者CPU型号，例如ARM，X86 etc。
+  
+10  CMAKE_C_COMPILER:
+    即C语言编译器，这里可以将变量设置成完整路径或者文件名
+
+11 CMAKE_CXX_COMPILER:
+   C++编译器
+   
+12 编译静态库  -DBUILD_SHARED_LIBS=OFF
+
+13 CUDA_HOST_COMPILER  编译cuda程序
+	
+	
+14 set(CUDA_SEPARABLE_COMPILATION OFF/ON)
+   这个选项的意思是让nvcc自己把每个文件单独编译,链接的事情另外指定编译器
+   nvcc：NVIDIA  Cuda compiler driver
+   简单的说，就是CUDA开发环境下的C语言编译器
+   
+15 使用find_package引入外部依赖包
+   find_package()有Module模式(基本用法，basic signature)和Config模式(full signature，完全用法），
+   其中Module模式是基础，Config模式则更复杂高级些
+   只有这3种情况下才是Config模式：
+
+   find_package()中指定CONFIG关键字
+   find_package()中指定NO_MODULE关键字
+   find_package()中使用了不在"basic signature"(也就是Module模式下所有支持的配置）关键字
+   
+   find_package(<PackageName> [version] [EXACT] [QUIET] [MODULE])
+   
+   关键字解释
+	version和EXACT: 	都是可选的，version指定的是版本，如果指定就必须检查找到的包的版本是否和version兼容。如果指定EXACT则表示必须完全匹配的版本而不是兼容版本就可以。
+	QUIET:	 可选字段，表示如果查找失败，不会在屏幕进行输出（但是如果指定了REQUIRED字段，则QUIET无效，仍然会输出查找失败提示语）。
+	MODULE: 可选字段。前面提到说“如果Module模式查找失败则回退到Config模式进行查找”，但是假如设定了MODULE选项，那么就只在Module模式查找，如果Module模式下查找失败并不回落到Config模式查找。
+	REQUIRED:可选字段。表示一定要找到包，找不到的话就立即停掉整个cmake。而如果不指定REQUIRED则cmake会继续执行。
+	COMPONENTS，components:可选字段，表示查找的包中必须要找到的组件(components），如果有任何一个找不到就算失败，类似于REQUIRED，导致cmake停止执行。
+	OPTIONAL_COMPONENTS和components：可选的模块，找不到也不会让cmake停止执行
+	
+	Module模式查找顺序
+	Module模式下是要查找到名为Find<PackageName>.cmake的文件。
+	先在CMAKE_MODULE_PATH变量对应的路径中查找。如果路径为空，或者路径中查找失败，则在cmake module directory（cmake安装时的Modules目录，比如/usr/local/share/cmake/Modules）查找
+
+16  include_directories
+    include_directories    增加头文件路径
+	
+17  link_directories    添加需要链接的库文件目录
+
+18  TARGET_LINK_LIBRARIES  设置要链接的库文件的名称
+
+19  CMAKE_RUNTIME_OUTPUT_DIRECTORY     控制编译出的可执行文件的输出路径
+
+20  CMAKE_SOURCE_DIR    定义了顶级CMakeLists.txt的文件夹.
+
+21  PROJECT_SOURCE_DIR  是指包含最近的project()命令的CMakeLists.txt的文件夹
+
+22  message()函数     message :为用户显示一条消息。
+
+23 -Wall 打开gcc的所有警告
+
+24 -Werror，它要求gcc将所有的警告当成错误进行处理
+
+25 -DWITH_NONAMESPACES  只在链接gSoap库时看到使用, 意思应该是不使用命名空间
+
+26 如果你的程序中使用dlopen、dlsym、dlclose、dlerror 显示加载动态库，需要设置链接选项 -ldl
+
+27 
+数学库 -lm ; posix线程 -lpthread 
+lc 是link libc
+lm 是link libm
+lz 是link libz
+
+28 -fno-use-cxa-atexit   // 
+   c++ dlclose()不调用全局对象的析构函数 这个问题在GCC的后期版本中得到解决，包括C/C++标准库和链接器。
+   基本上，C析构函数应该使用__cxa_atexit函数而不是atexit(3)进行注册.
+   
+29 -fexceptions  标记可以开启异常控制 //这应该是移动端用的
+
+30 -DWITH_DOM  -DWITH_OPENSSL -DSOAP_DEBUG      应该和链接 gSoap有关.
+
+31 add_subdirectory  添加外部项目文件夹
+
+32 -c     编译和汇编，但不要链接。
+
+33 –f ： 指定 makefile 文件, 而不是默认的makefile文件
+	
+34 CMAKE_EXPORT_COMPILE_COMMANDS
+   cmake 是支持多种编译方式的工具，产生多种编译工具可以使用的编译文件，例如常用的gdb。　
+   但是对于clang编译工具，还需要一个compile_commands.json 是否产生这个文件可以由CMAKE_EXPORT_COMPILE_COMMANDS 来控制
+   
+35 project(Caffe C CXX) 写明了是C/C++工程  CMake默认是开启了这两个
+   project(Caffe C CXX)
+   project()指令，给工程起名字，很正常不过了。这列还写明了是C/C++工程，其实没必要写出来，因为CMake默认是开启了这两个的。
+   这句命令执行后，自动产生了5个变量：
+   PROJECT_NAME，值等于Caffe
+   PROJECT_SOURCE_DIR，是CMakeLists.txt所在目录，通常是项目根目录（奇葩的项目比如protobuf，把CMakeLists.txt放在cmake子目录的也有）
+   PROJECT_BINARY_DIR，是执行cmake命令时所在的目录，通常是build一类的用户自行创建的目录。
+   Caffe_SOURCE_DIR，此时同PROJECT_SOURCE_DIR
+   Caffe_BINARY_DIR，此时同PROJECT_BINARY_DIR
+   
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

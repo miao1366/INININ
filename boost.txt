@@ -1,0 +1,28 @@
+1. BOOST_PP_CAT
+#define BOOST_PP_CAT(a, b)          BOOST_PP_CAT_I(a, b)
+#define BOOST_PP_CAT_I(a, b)       BOOST_PP_CAT_II(~, a##b)
+#define BOOST_PP_CAT_II(p, res)   res
+
+那么为什么不直接定义为M的形式呢？
+因为当宏展开时遇到#或##时则停止展开。
+如下宏定义
+
+https://blog.csdn.net/ll5161551615/article/details/83510793?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param
+
+2. BOOST_PP_STRINGIZE    可以将任意字面量转换为字符串
+
+3  shared_mutex即读写锁   
+    shared_lock是read lock。被锁后仍允许其他线程执行同样被shared_lock的代码。这是一般做读操作时的需要。
+    unique_lock是write lock。被锁后不允许其他线程执行被shared_lock或unique_lock的代码。在写操作时，一般用这个，可以同时限制unique_lock的写和share_lock的读
+
+4 boost::property_tree读取解析ini文件
+
+5 boost::spirit 解析器，可以写出个计算器 
+
+6 Boost::random 随机数
+
+7 boost::system_time
+
+8 boost statechart（boost状态图）
+
+9 https://www.boost.org/doc/libs/1_65_1/libs/spirit/example/   //查看example方法

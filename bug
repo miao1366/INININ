@@ -1,0 +1,55 @@
+1 .关于Linux中的SIGABRT信号
+  1. 对同一个指针free() 2次可能会产生SIGABRT
+  2. 执行abort() 函数
+  3. assert()失败
+
+2. 程序启动失败，可能是端口占用了。
+
+3 第三方库版本不一致。
+
+4  string name_;  char buf[name_.size() + 32];    //????
+5  size_t dd= strlen(argv[0]); char tmp[dd+9];
+
+6 程序异常，可以尝试下重启机器.  //哭 哭 哭
+
+7 异常触发，函数中的锁可能就没有释放
+
+8 遇到bug, 考虑是不是脏数据。
+
+9 INTERNAL COMPILER ERROR  编译时内存不够
+
+10 宏中++  -- 重复调用
+
+11  was not declared in this scope  可能是头文件卫士重复了
+
+12 basic_string::_M_construct null not valid  // string 构造函数传入空指针，或者 结构体中有string成员 结构体初始化时赋了空值
+
+13 多继承时，子类跳到不合理、莫名其妙的函数时，可能是父类指针赋值时错误。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

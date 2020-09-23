@@ -1,0 +1,99 @@
+version: '3'
+services:
+  mosquitto_publish:
+    image: docker_mosquitto:latest
+    container_name: senscape-mosquitto-publish
+    privileged: true
+    command: ["/usr/sbin/mosquitto", "-c", "/senscape/mosquitto/config/senscape_mosquitto.conf"]
+    ports:
+      - "1883:1883"
+      - "11883:11883"
+    #network_mode: "host"
+    volumes:
+      - ./common_data/mosquitto_publish:/senscape/mosquitto/
+    deploy:
+      restart_policy:
+        condition: always
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    restart: always
+    
+  mosquitto_receive:
+    image: docker_mosquitto:latest
+    container_name: senscape-mosquitto-receive
+    privileged: true
+    command: ["/usr/sbin/mosquitto", "-c", "/senscape/mosquitto/config/senscape_mosquitto.conf"]
+    ports:
+      - "1882:1883"
+      - "11882:11883"
+    #network_mode: "host"
+    volumes:
+      - ./common_data/mosquitto_recieve:/senscape/mosquitto/
+    deploy:
+      restart_policy:
+        condition: always
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    restart: always
+
+  pretreat_server:
+    image: pretreat_server:latest
+    network_mode: "host"
+    privileged: true
+    container_name: pretreat-server
+    volumes:
+      - ./common_data/pretreat_server:/senscape
+    deploy:
+      restart_policy:
+        condition: always
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    restart: always
+    working_dir: /senscape
+    command: ["./pretreat_service"]
+    depends_on: 
+      - mosquitto_publish
+      - mosquitto_receive
+
+  pretreat_server_web:
+    image: nginx:latest
+    privileged: true
+    container_name: pretreat-server-web
+    ports:
+      - "8081:80"
+    volumes:
+      - ./common_data/webapp/pretreat_server_web:/usr/share/nginx/html
+      - ./common_data/webapp/nginx.conf:/etc/nginx/nginx.conf 
+      - ./common_data/webapp/logs:/var/log/nginx
+    deploy:
+      restart_policy:
+        condition: always
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    restart: always
+    depends_on: 
+      - mosquitto_publish

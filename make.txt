@@ -1,0 +1,372 @@
+https://blog.csdn.net/haoel/article/details/2886
+
+1. include 
+   Makefile 使用 include 关键字可以把别的 Makefile 包含进来，这很像 C 语言的#include，
+   被包含的文件会原模原样的放在当前文件的包含位置  //在 include前面可以有一些空字符，但是绝不能是[Tab]键开始
+
+2. 
+
+= 是最基本的赋值
+:= 是覆盖之前的值
+?= 是如果没有被赋值过就赋予等号后面的值
++= 是添加等号后面的值
+
+3 之前一直纠结makefile中“=”和“:=”的区别到底有什么区别，因为给变量赋值时，两个符号都在使用。网上搜了一下，有人给出了解答，但是本人愚钝，看不懂什么意思。几寻无果之下，也就放下了。今天看一篇博客，无意中发现作者对于这个问题做了很好的解答。解决问题之余不免感叹，有时候给个例子不就清楚了吗？为什么非要说得那么学术呢。^_^
+      1、“=”
+      make会将整个makefile展开后，再决定变量的值。也就是说，变量的值将会是整个makefile中最后被指定的值。看例子：
+            x = foo
+            y = $(x) bar
+            x = xyz
+      在上例中，y的值将会是 xyz bar ，而不是 foo bar 。
+      2、“:=”
+      “:=”表示变量的值决定于它在makefile中的位置，而不是整个makefile展开后的最终值。
+            x := foo
+            y := $(x) bar
+            x := xyz
+      在上例中，y的值将会是 foo bar ，而不是 xyz bar 了.
+4  注释
+# 字符是注释符，makefile 把 # 字符后面的内容作为注释内容处理（shell、perl 脚本也是使用 # 字符作为注释符）。 
+如果某行的第一个非空字符为 #，则此行会被 make 解释为注释行（命令行除外，如果 Tab 字符之后使用 # 字符，则会被 make 解释为命令行）
+注释行的结尾如果存在反斜线（\），那么下一行也被作为注释行
+
+4 \ 
+  反斜线（\），换行符.
+
+5 依赖文件（prerequisites）就是冒号后面的那些
+
+
+6 target ... : prerequisites ...
+            command
+            ...
+            ...
+	target也就是一个目标文件，可以是Object File，也可以是执行文件。还可以是一个标签（Label），对于标签这种特性，在后续的“伪目标”章节中会有叙述。
+	prerequisites就是，要生成那个target所需要的文件或是目标。
+        command也就是make需要执行的命令。（任意的Shell命令）
+
+7  make只管文件的依赖性
+
+
+8  clean这种，没有被第一个目标文件直接或间接关联，那么它后面所定义的命令将不会被自动执行，不过，
+   我们可以显示要make执行。即命令——“make clean”，以此来清除所有的目标文件， 以便重编译
+
+9  只要make看到一个[.o]文件，它就会自动的把[.c]文件加在依赖关系中，如果make找到一个whatever.o，那么whatever.c，
+   就会是whatever.o的依赖文件。并且 cc -c whatever.c 也会被  推导出来
+
+10 .PHONY : clean
+    clean :
+            rm edit $(objects)
+    “.PHONY”表示，clean是个伪目标文件。 
+
+11 
+$@  表示目标文件
+$^  表示所有的依赖文件
+$<  表示第一个依赖文件
+$?  表示比目标还要新的依赖文件列表
+
+12 .cpp.o是老式的“后缀规则”，编译器将会自动将.cpp识别为源文件后缀，而.o识别为输出文件后缀。
+    特别需要注意的是，后缀规则不允许任何依赖文件，但也不能没有命令。
+
+
+13 
+
+all: test1 test2 test3  
+test1: test1.cpp  
+test2: test2.cpp  
+test3: test3.cpp  
+clean:  
+    rm -f test1 test2 test3 
+
+为什么没有生成all文件呢？ 因为all下面并没有待执行的命令，也无法自动推导.
+
+14 .cpp.o:         #cpp 编译成 o
+   $(CXX) -c $(CXXFLAGS) $(INCLUDE_PATH) $< -o $@
+
+15 .c.o:           # c 编译成 o
+   $(CXX) -c $(CXXFLAGS) $(INCLUDE_PATH) $< -o $@
+
+16 .PHONY : clean
+        clean :
+                -rm edit $(objects)
+   PHONY意思表示clean是一个“伪目标”，。而在rm命令前面加了一个小减号的意思就是，也许某些文件出现问题，但不要管，继续做后面的事
+
+
+17 Makefile里主要包含了五个东西：显式规则、隐晦规则、变量定义、文件指示和注释。
+
+18 注释。Makefile中只有行注释，和UNIX的Shell脚本一样，其注释是用“#”字符
+
+19 Makefile中的命令，必须要以[Tab]键开始。
+
+20 如果要指定特定的Makefile，你可以使用make的“-f”和“--file”参数，如：make -f Make.Linux或make --file Make.AIX
+
+21 make命令开始时，会把找寻include所指出的其它Makefile，并把其内容安置在当前的位置。就好像C/C++的#include指令一样。如果文件都没有指定绝对路径或是相对路径的话，make会在当前目录下首先寻找，如果当前目录下没有找到，那么，make还会在下面的几个目录下找：
+ 1、如果make执行时，有“-I”或“--include-dir”参数，那么make就会在这个参数所指定的目录下去寻找。
+ 2、如果目录<prefix>/include（一般是：/usr/local/bin或/usr/include）存在的话，make也会去找
+
+
+22 - 
+  - make不理那些无法读取的文件
+
+23 环境变量 MAKEFILES
+
+24  make的工作方式
+    1、读入所有的Makefile。
+    2、读入被include的其它Makefile。
+    3、初始化文件中的变量。
+    4、推导隐晦规则，并分析所有规则。
+    5、为所有的目标文件创建依赖关系链。
+    6、根据依赖关系，决定哪些目标要重新生成。
+    7、执行生成命令。
+25 make会以UNIX的标准Shell，也就是/bin/sh来执行命令
+
+26 “伪目标”并不是一个文件，只是一个标签，由于“伪目标”不是文件，所以make无法生成它的依赖关系和决定它是否要执行。
+    我们只有通过显示地指明这个“目标”才能让其生效。当然，“伪目标”的取名不能和文件名重名，不然其就失去了“伪目标”的意义了
+
+27  https://blog.csdn.net/haoel/article/details/2889 // 由于伪目标的特性是，总是被执行的 (有点疑惑)
+
+28   bigoutput littleoutput : text.g
+            generate text.g -$(subst output,,$@) > $@
+    上述规则等价于：
+    bigoutput : text.g
+            generate text.g -big > bigoutput
+    littleoutput : text.g
+            generate text.g -little > littleoutput
+
+    其中，-$(subst output,,$@)中的“$”表示执行一个Makefile的函数，函数名为subst，后面的为参数。关于函数，将在后面讲述。
+    这里的这个函数是截取字符串的意思，“$@”表示目标的集  合，就像一个数组，“$@”依次取出目标，并执于命令
+
+29 -Wall会将编译过程中遇到的警告全部列出
+30 makefile 自带函数  filter  subst
+
+31 大多数的C/C++编译器都支持一个“-M”的选项，即自动找寻源文件中包含的头文件，并生成一个依赖关系。
+   例如，如果我们执行下面的命令： cc -M main.c
+   需要提醒一句的是，如果你使用GNU的C/C++编译器，你得用“-MM”参数，
+   不然，“-M”参数会把一些标准库的头文件也包含进来
+
+32 include $(sources:.c=.d)
+   “$(sources:.c=.d)”中的“.c=.d”的意思是做一个替换，把变量$(sources)所有[.c]的字串都替换成[.d] 
+
+33 通常，make会把其要执行的命令行在命令执行前输出到屏幕上。当我们用“@”字符在命令行前，那么，这个命令将不被make显示出来
+
+34 忽略命令的出错，我们可以在Makefile的命令行前加一个减号“-”（在Tab键之后），标记为不管命令出不出错都认为是成功的
+
+35 -C 选项的作用是指将当前工作目录转移到你所指定的位置
+
+36 “M=”选项的作用是，当用户需要以某个内核为基础编译一个外部模块的话，需要在make modules 命令中加入“M=dir”，
+   程序会自动到你所指定的dir目录中查找模块源码，将其编译，生成KO文件
+   
+37 35 ?=
+   FOO ?= bar  含义是，如果FOO没有被定义过，那么变量FOO的值就是“bar”，如果FOO先前被定义过，那么这条语将什么也不做
+   其等价于：
+    ifeq ($(origin FOO), undefined)
+      FOO = bar
+    endif
+	
+38 变量值的替换
+
+   $(var:a=b)”或是“${var:a=b}
+   还是看一个示例吧：
+   foo := a.o b.o c.o
+   bar := $(foo:.o=.c)
+   这个示例中，我们先定义了一个“$(foo)”变量，而第二行的意思是把“$(foo)”中所有以“.o”字串“结尾”全部替换成“.c”，
+   所以我们的“$(bar)”的值就是“a.c b.c c.c”
+   
+   
+39  变量值的替换(静态模式)
+
+    foo := a.o b.o c.o
+    bar := $(foo:%.o=%.c)
+	这依赖于被替换字串中的有相同的模式，模式中必须包含一个“%”字符，这个例子同样让$(bar)变量的值为“a.c b.c c.c”
+	
+40 -e
+  make运行时的系统环境变量可以在make开始运行时被载入到Makefile文件中，但是如果Makefile中已定义了这个变量，或是这个变量由make命令行带入，
+  那么系统的环境变量的值将被覆盖。（如果make指定了“-e”参数，那么，系统环境变量将覆盖Makefile中定义的变量）
+
+41 当make嵌套调用时（参见前面的“嵌套调用”章节），上层Makefile中定义的变量会以系统环境变量的方式传递到下层的Makefile中。
+   当然，默认情况下，只有通过命令行设置的变量会被传递。而定义在文件中的变量，如果要向下层Makefile传递，则需要使用exprot关键字来声明。
+
+42 make函数  strip
+
+43  comma:= ,
+    empty:=
+    space:= $(empty) $(empty)
+    foo:= a b c
+    bar:= $(subst $(space),$(comma),$(foo))
+    在这个示例中，$(comma)的值是一个逗号。$(space)使用了$(empty)定义了一个空格，$(foo)的值是“a b c”，$(bar)的定义用，
+	调用了函数“subst”，这是一个替换函数，这个函数有三个参数，第一个参数是被替换字串，第二个参数是替换字串，
+	第三个参数是替换操作作用的字串。这个函数也就是把$(foo)中的空格替换成逗号，所以$(bar)的值是“a,b,c”。
+
+44 make函数  
+  subst        字符串替换函数
+  patsubst     模式字符串替换函数
+  strip        去空格函数
+  findstring   查找字符串函数
+  filter       过滤函数
+  filter-out   反过滤函数
+  sort         排序函数
+  word         取单词函数
+  wordlist     取单词串函数
+  words        单词个数统计函数
+  firstword    首单词函数
+  
+45 通配符“%”，表示任意长度的字串
+
+46 文件名操作函数 
+
+  dir           取目录函数
+  notdir        取文件函数
+  suffix        取后缀函数
+  basename      取前缀函数
+  addsuffix     加后缀函数
+  addprefix     加前缀函数
+  join          连接函数
+
+47  foreach 函数
+
+48  if 函数
+
+49  call函数
+
+50  origin函数
+
+51  shell函数
+
+52  $(error <text ...>)   产生一个致命的错误，<text ...>是错误信息
+
+53  $(warning <text ...>) 这个函数很像error函数，只是它并不会让make退出，只是输出一段警告信息，而make继续执行
+
+54 有时候，我们不想让我们的makefile中的规则执行起来，我们只想检查一下我们的命令，或是执行的序列。于是我们可以使用make命令的下述参数：
+    “-n”
+    “--just-print”
+    “--dry-run”
+    “--recon”
+	
+55 默认情况下，GCC/G++链接时优先链接动态库，如果没有动态库，则链接相应的静态库。同时，GCC/G++也提供了链接选项 -Wl,-Bstatic 和 -Wl,-Bdynamic 供用户指定链接动态库或者静态库。
+    -Wl,-Bstatic指示跟在后面的-lxxx选项链接的都是静态库，-Wl,-Bdynamic指示跟在后面的-lxxx选项链接的都是动态库。
+例如：
+-Wl,-Bstatic -llog4cplus -lpcap -lpgm -lxerces-c -Wl,-Bdynamic -lnl-3 -ldbus-1 -libverbs -lcurl -lhiredis -Wl,--as-needed
+-Wl,-Bstatic 后面的库是静态链接的；  -Wl,-Bdynamic 后面的都是动态链接的。
+原理上讲，Wl后面的东西是作为参数传递给链接器ld
+The -Wl,xxx option for gcc passes a comma-separated list of tokens as a space-separated list of arguments to the linker. So
+"gcc -Wl,aaa,bbb,ccc"  eventually becomes a linker call "ld aaa bbb ccc"
+
+
+56 ar 命令   linux环境下编译静态库
+
+57 ranlib   更新静态库的符号索引表
+
+58 foreach 函数
+    names := a b c d   files := $(foreach n,$(names),$(n).o)
+	
+	$(name)中的单词会被挨个取出，并存到变量“n”中，“$(n).o”每次根据“$(n)”计算出一个值，这些值以空格分隔，最后作为foreach函数的返回，所以，$(files)的值是“a.o b.o c.o d.o”
+	
+59 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,6 @@
+1.运行程序时动态库 not found
+https://www.cnblogs.com/homejim/p/8004883.html
+-Wl,-rpath=《your_lib_dir》是为程序添加一个运行时库文件搜索路径的命令，在使用gcc编译链接时添加即可
+g++ -o test test.cpp -I./include/ -L./lib/ -levhtp -levent -lpthread -levent_openssl -lssl -lcrypto -Wl,-rpath=./lib/
+
+

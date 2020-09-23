@@ -1,0 +1,1311 @@
+#include <stdio.h>
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main(int argc, char *argv[]) {
+	
+	return 0;
+}
+
+
+1. std::floor 和 std::ceil都是对变量进行四舍五入，只不过四舍五入的方向不同。 
+1: std::floor -->向下取整数
+2: std::ceil   -->向上取整数：
+例如： 5.88   std::floor(5.88) = 5;
+std::ceil(5.88)   = 6;
+
+
+2.
+thread::hardware_concurrency();//获取cpu核心个数 
+
+
+3. 
+1.typeid是C++的关键字之一，等同于sizeof这类的操作符
+2.typeid操作符的返回结果是名为type_info的标准库类型的对象的引用（在头文件typeinfo中定义）
+3.C++并没有规定typeid实现标准，各个编译器可能会不一样
+4.编译器会为每一种typeid操作的类型生成一份保存在数据段的type_info数据。
+5.每种类型的type_info数据长度依赖于类型名称，至少9个字节
+
+
+4. 数字转成字符串
+
+to_string(x)
+
+5.strftime()  格式化输出时间
+6.strptime()  函数将字符串转换成 tm 结构
+7.int vsprintf(char *string, char *format, va_list param) 可变参数按照format格式输出到string
+8.int vfprintf(FILE *stream, char *format, va_list param) 可变参数按照format格式输出到文件 stream
+9.  int inet_aton(const char *cp, struct in_addr *inp) 将IPv4的字符串地址（xxx.xxx.xxx.xxx）转换成网络地址结构体 struct in_addr
+10. char *inet_ntoa(struct in_addr in)  是将网络字节序的整形转化成字符串（“xxx.xxx.xxx.xxx"）的IPv4地址
+11. int fcntl(int fd, int cmd, ...) fcntl是用来修改已经打开文件的属性的函数.
+12. void *realloc(void *ptr, size_t size); 尝试重新调整之前调用 malloc 或 calloc 所分配的 ptr 所指向的内存块的大小
+12. void *calloc(size_t n, size_t size)；
+    其比malloc函数多一个参数，并不需要人为的计算空间的大小，比如如果他要申请20个int类型空间，会int *p = (int *)calloc(20, sizeof(int)）,
+	这样就省去了人为空间计算的麻烦。但这并不是他们之间最重要的区别，malloc申请后空间的值是随机的，并没有进行初始化，而calloc却在申请后，
+	对空间逐一进行初始化，并设置值为0
+
+13. void perror(const char *s);
+    perror ( )用 来 将 上 一 个 函 数 发 生 错 误 的 原 因 输 出 到 标 准 设备 (stderr) 。参数 s 所指的字符串会先打印出,后面再加上错误原因字符串
+
+14. char* strerror(int errnum);
+15. int strerror_r(int errnum, char *buf, size_t n); 它的好处是可以把错误描述字符串放在用户自定义的buffer中
+16. std::reverse  反转  std::reverse(myvector.begin(),myvector.end()); 
+17. std::reverse_copy  myvector.resize(9) std::reverse_copy (myints, myints+9, myvector.begin());
+18. std::string reserve() 改变容器大小.
+19. struct tm *gmtime_r(const time_t *timep, struct tm *result)
+ gmtime和localtime后要立即处理结果，否则返回的指针指向的内容可能会被覆盖，一个好的方法是使用gmtime_r和localtime_r，由于使用了用户分配的内存，这两个函数是不会出错的
+ 
+20. time_t time(time_t *tloc);  ime() 是指返回自 Unix 纪元（January 1 1970 00:00:00 GMT）起的当前时间的秒数的函数，主要用来获取当前的系统时间，返回的结果是一个time_t类型
+
+21  int gethostname(char *name, size_t len);   // miao-System-Product-Name
+22. std::reverse  反转  std::reverse(myvector.begin(),myvector.end()); 
+23. std::reverse_copy  myvector.resize(9) std::reverse_copy (myints, myints+9, myvector.begin());
+24. std::string reserve() 改变容器大小.
+
+
+25. int memcmp(const void *buf1, const void *buf2, unsigned int count);
+    比较内存区域buf1和buf2的前count个字节。返回值当buf1<buf2时，返回值<0当buf1=buf2时，返回值=0当buf1>buf2时，返回值>0
+	
+26  string 构造函数
+1    string s; //生成一个空字符串s 
+2 b) string s(str) //拷贝构造函数 生成str的复制品 
+3 c) string s(str, int stridx) //将字符串str内"始于位置stridx"的部分当作字符串的初值 
+4 d) string s(str, int stridx, int strlen) //将字符串str内"始于stridx且长度顶多strlen"的部分作为字符串的初值 
+5 e) string s(const char*) //将cstr字符串作为s的初值 
+6 f) string s(chonst char*, int len) //将C字符串前chars_len个字符作为字符串s的初值。 
+7 g) string s(int num, char c) //生成一个字符串，包含num个c字符 
+8 h) string s(beg, end) //以区间beg;end(不包含end)内的字符作为字符串s的初值 
+
+
+27 std::string.assign()方法可以理解为先将原字符串清空，然后赋予新的值作替换
+   1.  string& assign ( const string& str );  将str替换原字串的内容
+   2.  string& assign ( const string& str, size_t pos, size_t n );将str的内容从位置pos起的n个字符作为原字串的新内容赋给原字串
+   3.  string& assign ( const char* s, size_t n ); 将字符数组或者字符串的首n个字符替换原字符串内容
+   4.  string& assign ( const char* s ); 将字符串或者字符数组作为新内容替换原字串
+   5.  string& assign ( size_t n, char c );   将原字串替换为n个字符c
+   6.  template <class InputIterator>   string& assign ( InputIterator first, InputIterator last)  //从终端读取字符
+   
+28. string.reserve(size_t n = 0)  //改变内存大小
+  将字符串的容量设置为至少size. 如果size指定的数值要小于当前字符串中版的字符数(亦即size < this→权size()), 容量将被设置为可以恰好容纳字符的数值. reserve()以线性时间(linear time)运行。
+  它最大的用处是为了避免反复重新分配缓冲区内存而导致效率降低
+
+29. string.resize(size_type size, char val = char())   //改变字符长度大小，
+    val默认为空格，如果size小于原来的大小，则截取size大小的字符，反之用'0'来代替.
+
+30. pid_t getpid(void); 获取进程id //26110
+
+31. pid_t getppid(void); 获取父进程id //26066
+
+32. uid_t getuid(void); 获得用户 UID 值 // 1
+
+33. int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen, struct passwd **result); 得到用户id  "miao"
+
+34. uid_t geteuid(void);用户有效 UID 值 1000
+
+35. void std::unique_ptr::reset (nullptr_t p) noexcept;  cplusplus.com/  deletes managed object, acquires new pointe
+
+36. FILE *fopen(const char *pathname, const char *mode); // 'a' appending
+
+37. void setbuffer(FILE * stream,char * buf,size_t size);
+    打开文件流后，读取内容之前，调用setbuffer()可用来设置文件流的缓冲区。参数stream为指定的文件流，参数buf指向自定的缓冲区起始地址，参数size为缓冲区大小
+
+38. int fflush(FILE *stream)
+    清除读写缓冲区，需要立即把输出缓冲区的数据进行物理写入时
+	
+39. size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream); 
+    size_t fread_unlocked(void *ptr, size_t size, size_t n, FILE *stream); fwrite_unlocked是fwrite的线程不安全版本，因为不加锁
+	
+40. int ferror(FILE *stream);  ferror 函数返回为真时就表示有错误发生
+
+41. int strerror_r(int errnum, char *buf, size_t n); 错误描述拷贝到buf中.
+
+42. int fstat(int fildes,struct stat *buf);
+    用来将参数fildes所指的文件状态，复制到参数buf所指的结构中(struct stat).
+	
+43. S_ISREG(mode)        是否是一个常规文件.
+44. S_ISDIR(mode)              是否是一个目录
+
+45. char *strchr(const char *s, int c);  returns a pointer to the first occurrence of the character c in the string s
+    
+46. char *strrchr(const char *s, int c);  returns a pointer to the last occurrence of  the character c in the string s .可以说是从右边遍历
+
+47.  static_assert(常量表达式，"提示字符串")
+    如果第一个参数常量表达式的值为false，会产生一条编译错误。错误位置就是该static_assert语句所在行，第二个参数就是错误提示字符串
+	
+48  digits10  返回得是float不损失精度的小数位; 
+    cout << "digits10(float): " << numeric_limits<float>::digits10 << endl; 6
+	
+49  digits  返回的是float不损失精度的整数位:24 
+
+50. abort()和exit()
+   共同点: 都是用来终止程序
+   不同点:
+   1)abort(): 立即结束，不做任何操作
+   2)exit():   释放所有静态全局的对象、缓存，关掉所有的I/O通道，然后终止程序.如果有函数通过atexit来注册，还会调用注册的函数，如果atexit函数抛出异常就会直接调用结束。
+
+51. int atexit(void （*func)(void));
+   很多时候我们需要在程序退出的时候做一些诸如释放资源的操作，但程序退出的方式有很多种，比如main()函数运行结束、在程序的某个地方用exit()结束程序、
+   用户通过Ctrl+C或Ctrl+break操作来终止程序等等，因此需要有一种与程序退出方式无关的方法来进行程序退出时的必要处理。方法就是用atexit()函数来注册程序正常终止时要被调用的函数
+   在一个程序中最多可以用atexit()注册32个处理函数，这些处理函数的调用顺序与其注册的顺序相反，也即最先注册的最后调用，最后注册的最先调用
+
+52.  pthread_t pthread_self(void);  // 11281
+   返回一个 pthread_t 类型的变量，指代的是调用 pthread_self 函数的线程的 “ID”。
+   怎么理解这个“ID”呢？这个“ID”是 pthread 库给每个线程定义的进程内唯一标识，是 pthread 库维持的。
+   由于每个进程有自己独立的内存空间，故此“ID”的作用域是进程级而非系统级（内核不认识）
+   其实 pthread 库也是通过内核提供的系统调用（例如clone）来创建线程的，而内核会为每个线程创建系统全局唯一的“ID”来唯一标识这个线程。
+   这个系统全局唯一的“ID”叫做线程PID（进程ID），或叫做TID（线程ID），也有叫做LWP（轻量级进程=线程）的
+   
+53   pid_t syscall(SYS_gettid) 系统调用返回一个 pid_t 类型值，即线程在内核中的ID   //140429854775040
+
+54 int isdigit(int c); 参数c表示要检测的字符或者 ASCII 码。
+   返回值为非 0（真）表示 c 是数字，返回值为 0（假）表示c不是数字
+   
+55  ssize_t readlink(const char *pathname, char *buf, size_t bufsiz)；  readlink("/proc/self/exe", buf, sizeof(buf)) 可获取exe文件目录
+
+56 int getrlimit(int resource, struct rlimit *rlp);
+　　int setrlimit(int resource, const struct rlimit *rlp);
+  我们能够通过函数getrlimit()、setrlimit()分别获得、设置每个进程能够创建的各种系统资源的限制使用量
+  资源限制是一对值：一个指定了当前（软）限制，另一个则代表一个最大（硬）限制。软限制能够被一个进程改变，
+  只要保证它不大于硬限制。一个进程能够（不能够撤回的）降低它的硬件限制，前提是大于等于软限制。仅当一个进程工作在一个系统超级用户权限下时能够提高它的硬件限制
+  
+		  名称					意义
+	RLIMIT_AS			进程总共可用的内存大小的最大值
+	RLIMIT_CORE			core文件的最大尺寸，如果为0说明不能创建core文件
+	RLIMIT_CPU			CPU时间的最大值（单位：秒）
+	RLIMIT_DATA			数据段大小的最大值
+	RLIMIT_FSIZE		创建文件的大小的最大值
+	RLIMIT_LOCKS		进程可建立的文件锁的数量的最大值
+	RLIMIT_MEMLOCK		进程中使用mlock锁定内存的最大尺寸
+	RLIMIT_NOFILE		进程中文件的打开数量的最大值
+	RLIMIT_NPROC		每个real user id的子进程数量的最大值
+	RLIMIT_RSS			最大常驻存储区大小
+	RLIMIT_SBSIZE		socket缓冲的大小的最大值
+	RLIMIT_STACK		栈的最大尺寸
+	RLIMIT_VMEM			=RLIMIT_AS
+
+57 long sysconf(int name); 获取一些系统的参数
+    printf("Size of a page in bytes:%ld\n",sysconf(_SC_PAGESIZE));                        //4096                    
+	printf("Max length of a  hostname:%ld\n",sysconf(_SC_HOST_NAME_MAX));                 //64
+	printf(" The maximum number of files that a process can have open at any time.:%ld\n",sysconf(_SC_OPEN_MAX));         //1024
+	printf("  The  number  of  clock  ticks  per  second.:%ld\n",sysconf(_SC_CLK_TCK));                      //100
+	printf("The number of processors currently online .:%ld\n",sysconf(_SC_NPROCESSORS_ONLN));               //1
+	printf("The number of processors configured..:%ld\n",sysconf(_SC_NPROCESSORS_CONF));                     //1
+    
+	
+    printf("配置的处理器数量为 :%ld\n", sysconf(_SC_NPROCESSORS_CONF));                //1
+    printf("当前在线(可用)的处理器数量为 :%ld\n", sysconf(_SC_NPROCESSORS_ONLN));       //1
+    printf ("页大小: %ld\n", sysconf(_SC_PAGESIZE));                                //4096
+    printf ("页数: %ld\n", sysconf(_SC_PHYS_PAGES));                                //248933  
+    printf ("可用页面的数量: %ld\n", sysconf(_SC_AVPHYS_PAGES));                      //17336
+    printf ("内存大小: %lld MB\n", (long long)sysconf(_SC_PAGESIZE) * (long long)sysconf(_SC_PHYS_PAGES) / ONE_MB );  
+    printf ("最大打开的文件数: %ld\n", sysconf(_SC_OPEN_MAX));                        //1024
+    printf("每秒的节拍数: %ld\n", sysconf(_SC_CLK_TCK));                             //100
+    printf ("主机名的最大长度: %ld\n", sysconf(_SC_HOST_NAME_MAX));                   //64
+    printf ("登录名的最大长度: %ld\n", sysconf(_SC_LOGIN_NAME_MAX));                  //256 
+
+58  std::atomic
+
+59 int clock_gettime(clockid_t clk_id, struct timespec* tp);
+    clk_id : 检索和设置的clk_id指定的时钟时间。
+   CLOCK_REALTIME     				 :系统实时时间,随系统实时时间改变而改变,即从UTC1970-1-1 0:0:0开始计时,
+                       					中间时刻如果系统时间被用户改成其他,则对应的时间相应改变  // second:: 1600324428, nsec:298077879
+　　CLOCK_MONOTONIC                 	:从系统启动这一刻起开始计时,不受系统时间被用户改变的影响    // second:: 184002, nsec:195857000002,
+　　CLOCK_PROCESS_CPUTIME_ID			:本进程到当前代码系统CPU花费的时间
+　　CLOCK_THREAD_CPUTIME_ID			:本线程到当前代码系统CPU花费的时间
+  
+    struct timespec
+ {
+        time_t tv_sec; /* 秒*/
+        long tv_nsec; /* 纳秒*/
+ };
+ 
+ 60 int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, 
+                               const struct timespec *restrict abstime)
+							 
+							 
+							 
+ 61 int pthread_cond_wait(pthread_cond_t *restrict cond,
+           pthread_mutex_t *restrict mutex)
+    3、wait：当前线程调用wait()后将被阻塞，直到另外某个线程调用notify_*唤醒当前线程；
+	当线程被阻塞时，该函数会自动调用std::mutex的unlock()释放锁，使得其它被阻塞在锁竞争上的线程得以继续执行。
+	一旦当前线程获得通知(notify，通常是另外某个线程调用notify_*唤醒了当前线程)，wait()函数也是自动调用std::mutex的lock()。wait分为无条件被阻塞和带条件的被阻塞两种
+		   
+62  void assert( int expression );
+   assert的作用是现计算表达式 expression ，如果其值为假（即为0），那么它先向stderr打印一条出错信息，然后通过调用 abort 来终止程序运行  
+   // fp = fopen( "noexitfile.txt", "r" )   assert( fp ); 出错的话，打印 Assertion `fp' failed  
+   已放弃使用assert()的缺点是，频繁的调用会极大的影响程序的性能，增加额外的开销。应该在debug模式下使用。
+   
+63 int prctl ( int option,unsigned long arg2,unsigned long arg3,unsigned long arg4,unsigned long arg5 )
+   这个系统调用指令是为进程制定而设计的，明确的选择取决于option:
+   PR_GET_PDEATHSIG :返回处理器信号；
+   PR_SET_NAME :把参数arg2作为调用进程的经常名字。（SinceLinux 2.6.11） 
+   备注：prctl(PR_SET_NAME, childname[i], NULL, NULL, NULL); 设置进程名字；  prctl(PR_SET_NAME, "THREAD1");设置线程名字
+   
+64 swap()
+  1. swap的函数原型：
+  template <class T> void swap ( T& a, T& b )  
+    {  
+      T c(a); a=b; b=c;  
+    }
+	
+  2.  vect中swap成员函数实现源码：
+void swap(vector<_Tp, _Alloc>& __x) {  
+    __STD::swap(_M_start, __x._M_start);  
+    __STD::swap(_M_finish, __x._M_finish);  
+    __STD::swap(_M_end_of_storage, __x._M_end_of_storage);  
+  } 
+　　仅仅是交换了指向的首尾指针和容量指针
+  
+  
+65. ssize_t pread(int fd, void *buf, size_t count, off_t offset);
+    ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset);
+	pread简单来说就是在指定偏移offset位置开始读取count个字节，同理可推``pwrite`。;
+	pread函数相当于先后调用了lseek和read函数，但是还是有区别的，有以下两点区别：1. pread函数是原子操作，而先后调用两个函数不是原子操作;2. pread函数是不会改变当前文件偏移量的，而read和wr
+	
+66. char* getenv( const char* env_var );
+    于宿主环境（操作系统）提供的环境列表搜索匹配 env_var 所指向的 C 字符串，并返回指向与匹配的列表成员关联的 C 字符串的指针。
+	
+	如果想要环境变量永久生效可以修改下面两个文件中的任何一个：
+    1 /etc/profile
+	2 .bash_profile
+  其中，/etc/profile是全局的环境变量，对所有用户生效，而.bash_profile只对当前用户启作用。
+  设置完毕，注销并重新登录，设置就生效了。
+  注意：export设置只对当前的bash登录session有效。这是存在内存里面的
+	
+	
+	
+	
+67    int getsockopt(int sock, int level, int optname, void *optval, socklen_t *optlen);
+      int setsockopt(int sock, int level, int optname, const void *optval, socklen_t optlen);
+	  
+	  sock：将要被设置或者获取选项的套接字。
+	  level：选项所在的协议层。
+	  optname：需要访问的选项名。
+	  optval：对于getsockopt()，指向返回选项值的缓冲。对于setsockopt()，指向包含新选项值的缓冲。
+	  optlen：对于getsockopt()，作为入口参数时，选项值的最大长度。作为出口参数时，选项值的实际长度。对于setsockopt()，现选项的长度
+
+68 ssize_t readv(int fd, const struct iovec *iov, int iovcnt);
+   ssize_t writev(int fd, const struct iovec *iov, int iovcnt);
+   只需一次系统调用就可以实现在文件和进程的多个缓冲区之间传送数据，免除了多次系统调用或复制数据的开销  //https://blog.csdn.net/weixin_36750623/article/details/84579243
+   
+69 int close(int fd);
+   内核中，打开的文件会被维护一个引用计数，每次close()会把文件的引用计数减一，引用计数减少到0的文件才会从内核中释放资源
+
+70 int shutdown(intsockfd,inthowto)
+   调用close()是关闭TCP连接的正常方式，但这种方式存在两个限制，而这正是引入shutdown()的原因：
+       1）close()其实只是将socket fd的引用计数减1，只有当该socket fd的引用计数减至0时，TCP传输层才会发起4次握手从而真正关闭连接。
+	      而shutdown则可以直接发起关闭连接所需的4次握手，而不用受到引用计数的限制；
+       2）close()会终止TCP的双工链路。由于TCP连接的全双工特性，可能会存在这样的应用场景：local peer不会再向remote peer发送数据，
+	      而remote peer可能还有数据需要发送过来，在这种情况下，如果local peer想要通知remote peer自己不会再发送数据但还会继续收数据这个事实，
+		  用close()是不行的，而shutdown()可以完成这个任务
+		  
+   SHUT_RD   ： 关闭读这一半，此时用户不能再从这个套接字读数据，这个套接口接收到的数据都会被丢弃，对等方不知道这个过程。
+                关闭连接的读端。也就是该套接字不再接受数据，任何当前在套接字接受缓冲区的数据将被丢弃。进程将不能对该套接字发出任何读操作。
+			    对TCP套接字该调用之后接受到的任何数据将被确认然后无声的丢弃掉。
+   SHUT_WR   ： 相应地关闭写这一半，此时用户不能再向套接字中写数据，内核会把缓存中的数据发送出去，接着不会再发送数据，对等端将会知道这一点。
+                当对等端试图去读的时候，可能会发生错误。
+   SHUT_RDWR ： 关闭读与写两半，此时用户不能从套接字中读或写。它相当于再次调用shutdown函数，并且一次指定SHUT_RD，一次指定SHUT_WR。
+   
+   a.  如果有多个进程共享一个套接字，close每被调用一次，计数减1，直到计数为0时，也就是所用进程都调用了close，套接字将被释放。
+   b.  在多进程中如果一个进程中shutdown(sfd,SHUT_RDWR)后其它的进程将无法进行通信. 如果一个进程close(sfd)将不会影响到其它进程.
+   
+   
+71      (无符号)64字节主机转网络：htobe64(uint64_t data)
+        (无符号)64字节网络转主机：be64toh(uint64_t data)
+        (无符号)32字节主机转网络：htobe32(uint32_t data)
+        (无符号)32字节网络转主机：be32toh(uint32_t data)
+        (无符号)16字节主机转网络：htobe16(uint16_t data)
+        (无符号)16字节网络转主机：be16toh(uint16_t data)
+
+72   int inet_pton(int family, const char *strptr, void *addrptr);     //将点分十进制的ip地址转化为用于网络传输的数值格式
+        返回值：若成功则为1，若输入不是有效的表达式则为0，若出错则为-1
+ 
+73   const char * inet_ntop(int family, const void *addrptr, char *strptr, size_t len);     //将数值格式转化为点分十进制的ip地址格式
+        返回值：若成功则为指向结构的指针，若出错则为NULL
+		
+74 int getsockname(int sockfd, struct sockaddr *localaddr,socklen_t *addrlen); //getsockname函数用于获取与某个套接字关联的本地协议地址
+   getsockname可以获得一个与socket相关的地址。
+   服务器端可以通过它得到相关客户端地址。
+   而客户端也可以得到当前已连接成功的socket的ip和端口。
+   对于TCP连接的情况，如果不进行bind指定IP和端口，那么调用connect连接成功后，
+   使用getsockname可以正确获得当前正在通信的socket的IP和端口地址。
+   而对于UDP的情况，无论是在调用sendto之后还是收到服务器返回的信息之后调用，
+   都无法得到正确的ip地址：使用getsockname得到ip为0，端口正确
+   
+75 getsockname函数用于获取与某个套接字关联的本地协议地址
+   getpeername函数用于获取与某个套接字关联的外地协议地址
+   int getsockname(int sockfd, struct sockaddr *localaddr, socklen_t *addrlen); // sockfd 是accept 返回的套接字 服务端可以绑定多个ip ,如多个网卡
+ 
+   int getpeername(int sockfd, struct sockaddr *peeraddr, socklen_t *addrlen); // sockfd 是accept 返回的套接字
+
+76 struct hostent *gethostbyname(const char *name); 
+   这个函数的传入值是域名或者主机名，例如"www.google.com","wpc"等等。
+  传出值，是一个hostent的结构（如下）。如果函数调用失败，将返回NULL。
+  struct hostent {
+     char *h_name;
+     char **h_aliases;
+     int h_addrtype;
+     int h_length;
+     char **h_addr_list;
+};
+
+解释一下这个结构, 其中:
+char *h_name 表示的是主机的规范名。例如www.google.com的规范名其实是www.l.google.com。
+char **h_aliases 表示的是主机的别名。www.google.com就是google他自己的别名。有的时候，有的主机可能有好几个别名，这些，其实都是为了易于用户记忆而为自己的网站多取的名字。
+int h_addrtype 表示的是主机ip地址的类型，到底是ipv4(AF_INET)，还是ipv6(AF_INET6)
+int h_length 表示的是主机ip地址的长度
+int **h_addr_lisst 表示的是主机的ip地址，注意，这个是以网络字节序存储的。千万不要直接用printf带%s参数来打这个东西，会有问题的哇。所以到真正需要打印出这个IP的话，
+需要调用inet_ntop()。
+
+
+77 int gethostbyname_r(const char *name, struct hostent *ret, char *buf, size_t buflen, struct hostent **result, int *h_errnop);
+   在网络开发中 经常出现需要从主机名得到ip地址的情况 这时就使用gethostbyname
+   但是因为gethostbyname返回的是一个指向静态变量的指针 不可重入
+   很可能刚要读时值就被其它线程修改
+   所以 新的posix中增加了另一个可重入的从主机名(域名)得到DNS的孙数 gethostbyname_r
+
+
+78 int gettimeofday(struct  timeval*tv,struct  timezone *tz ) //使用gettimeofday获得的值是Unix time。Unix time是以UTC 1970年1月1号00:00:00为基准时间。服务器一般都是以这个时间为基准
+  
+  struct  timeval{
+       long  tv_sec;/*秒*/
+       long  tv_usec;/*微妙*/
+   }；
+   
+79  int eventfd(unsigned int initval, int flags); 
+    eventfd是Linux 2.6提供的一种系统调用，它可以用来实现事件通知
+	eventfd() 创建一个 eventfd 对象，可以由用户空间应用程序实现事件等待/通知机制，或由内核通知用户空间应用程序事件。
+    该对象包含了由内核维护的无符号64位整数计数器 count 。使用参数 initval 初始化此计数器
+	
+	flags 可以是以下值的 OR 运算结果，用以改变 eventfd 的行为。
+
+	EFD_CLOEXEC (since Linux 2.6.27)	文件被设置成 O_CLOEXEC，创建子进程 (fork) 时不继承父进程的文件描述符。
+    EFD_NONBLOCK (since Linux 2.6.27)	文件被设置成 O_NONBLOCK，执行 read / write 操作时，不会阻塞。
+	EFD_SEMAPHORE (since Linux 2.6.30)	提供类似信号量语义的 read 操作，简单说就是计数值 count 递减 1
+	
+	读:
+	1.read函数会从eventfd对应的64位计数器中读取一个8字节的整型变量；
+    2.read函数设置的接收buf的大小不能低于8个字节，否则read函数会出错，errno为EINVAL;
+    3.read函数返回的值是按小端字节序的；
+    4.如果eventfd设置了EFD_SEMAPHORE，那么每次read就会返回1，并且让eventfd对应的计数器减一；
+	  如果eventfd没有设置EFD_SEMAPHORE，那么每次read就会直接返回计数器中的数值，read之后计数器就会置0。
+	  不管是哪一种，当计数器为0时，如果继续read，那么read就会阻塞（如果eventfd没有设置EFD_NONBLOCK）或者返回EAGAIN错误（如果eventfd设置了EFD_NONBLOCK)
+ 
+    写: 1.在没有设置EFD_SEMAPHORE的情况下，write函数会将发送buf中的数据写入到eventfd对应的计数器中，最大只能写入0xffffffffffffffff，否则返回EINVAL错误；
+        2.在设置了EFD_SEMAPHORE的情况下，write函数相当于是向计数器中进行“添加”，比如说计数器中的值原本是2，如果write了一个3，那么计数器中的值就变成了5。
+	  如果某一次write后，计数器中的值超过了0xfffffffffffffffe（64位最大值-1），
+	  那么write就会阻塞直到另一个进程/线程从eventfd中进行了read（如果write没有设置EFD_NONBLOCK），或者返回EAGAIN错误（如果write设置了EFD_NONBLOCK）。
+	  
+80  int epoll_create1(int flags);
+    如果flags为0，epoll_create1（）和删除了过时size参数的epoll_create（）相同。
+    如果flags中包含以下值就有不同的表现：
+    EPOLL_CLOEXEC
+    在文件描述符上面设置执行时关闭（FD_CLOEXEC）标志描述符
+	
+81 vector初始化
+(1): vector<int> ilist1;
+    默认初始化，vector为空， size为0，表明容器中没有元素，而且 capacity 也返回 0，意味着还没有分配内存空间。这种初始化方式适用于元素个数未知，需要在程序中动态添加的情况。
+(2): vector<int> ilist2(ilist);
+vector<int> ilist2  = ilist; 
+两种方式等价 ，ilist2 初始化为ilist 的拷贝，ilist必须与ilist2 类型相同，也就是同为int的vector类型，ilist2将具有和ilist相同的容量和元素
+(3): vector<int> ilist = {1,2,3.0,4,5,6,7};
+ vector<int> ilist {1,2,3.0,4,5,6,7};
+ilist 初始化为列表中元素的拷贝，列表中元素必须与ilist的元素类型相容，本例中必须是与整数类型相容的类型，整形会直接拷贝，其他类型会进行类型转换。
+(4): vector<int> ilist3(ilist.begin()+2,ilist.end()-1);
+
+ilist3初始化为两个迭代器指定范围中元素的拷贝，范围中的元素类型必须与ilist3 的元素类型相容，在本例中ilist3被初始化为{3,4,5,6}。注意：由于只要求范围中的元素类型与待初始化的容器的元素类型相容，
+因此迭代器来自不同的容器是可能的，例如，用一个double的list的范围来初始化ilist3是可行的。另外由于构造函数只是读取范围中的元素进行拷贝，因此使用普通迭代器还是const迭代器来指出范围并没有区别。
+这种初始化方法特别适合于获取一个序列的子序列。
+(5): vector<int> ilist4(7);
+默认值初始化，ilist4中将包含7个元素，每个元素进行缺省的值初始化，对于int，也就是被赋值为0，因此ilist4被初始化为包含7个0。当程序运行初期元素大致数量可预知，而元素的值需要动态获取的时候，可采用这种初始化方式。
+(6):vector<int> ilist5(7,3);
+指定值初始化，ilist5被初始化为包含7个值为3的int
+
+
+82  int epoll_ctl(int epfd, intop, int fd, struct epoll_event*event); 
+
+   epoll的事件注册函数，
+   第一个参数是epoll_create()的返回值，
+   第二个参数表示动作，用三个宏来表示：
+   EPOLL_CTL_ADD：       注册新的fd到epfd中；
+   EPOLL_CTL_MOD：      修改已经注册的fd的监听事件；
+   EPOLL_CTL_DEL：        从epfd中删除一个fd；
+   第三个参数是需要监听的fd，
+   第四个参数是告诉内核需要监听什么事件，structepoll_event结构如下：
+   
+ 
+ 83 std::map 
+   1.  void erase (iterator position);
+   2.  size_type erase (const key_type& k);
+   3.  void erase (iterator first, iterator last);
+
+ for(ITER iter=mapTest.begin();iter!=mapTest.end();)
+{
+cout<<iter->first<<":"<<iter->second<<endl;
+mapTest.erase(iter++);
+}
+ 
+ 84 int pthread_setspecific(pthread_key_t key, const void *value);
+   void *pthread_getspecific(pthread_key_t key);
+   int pthread_key_create(pthread_key_t *key, void (*destructor)(void*));
+   下面说一下线程中特有的线程存储， Thread Specific Data 。线程存储有什么用了？他是什么意思了？大家都知道，在多线程程序中，所有线程共享程序中的变量。
+   现在有一全局变量，所有线程都可以使用它，改变它的值。而如果每个线程希望能单独拥有它，那么就需要使用线程存储了。
+   表面上看起来这是一个全局变量，所有线程都可以使用它，而它的值在每一个线程中又是单独存储的。这就是线程存储的意义
+   
+1  创建一个类型为pthread_key_t类型的变量。
+2  调用 pthread_key_create(pthread_key_t *key, void (*destructor)(void*))来创建该变量。该函数有两个参数，第一个参数就是上面声明的pthread_key_t变量，第二个参数是一个清理函数，
+   用来在线程释放该线程存储的时候被调用。该函数指针可以设成 NULL，这样系统将调用默认的清理函数。该函数成功返回0.其他任何返回值都表示出现了错误。
+   
+   pthread_key_create 只需要调用一次 表面上key看起来这是一个全局变量，所有线程都可以使用它，而它的值在每一个线程中又是单独存储的
+   
+3  当线程中需要存储特殊值的时候，可以调用 pthread_setspcific() 。该函数有两个参数，第一个为前面声明的pthread_key_t变量，第二个为void*变量，这样你可以存储任何类型的值。
+4   如果需要取出所存储的值，调用pthread_getspecific()。该函数的参数为前面提到的pthread_key_t变量，该函数返回void *类型的值。下面是前面提到的函数的原型：
+
+85 int pthread_key_delete(pthread_key_t key);用来删除一个键，删除后，键所占用的内存将被释放。注销一个TSD，这个函数并不检查当前是否有线程正使用该TSD，
+   也不会调用清理函数（destr_function），而只是将TSD释放以供下一次调用pthread_key_create()使用。需要注意的是，键占用的内存被释放。与该键关联的线程数据所占用的内存并不被释放。
+   因此，线程数据的释放，必须在释放键之前完成
+   
+86 儒略历日数
+     科普小知识：天文学把24小时算作一个周期，起始和结束都是正午，这种整周期数就是儒略历日数。儒略历日的0是很久很久以前。一个方便的参考点事儒略历日244000起始于1968年5月23日。
+     如果知道历书中某天正午起始的儒略历日数，那么将其加1再对7求模，就可以知道该天是星期几。结果是0对应星期天，1对应星期一，由此类推
+	 
+87 gcc 原子操作 这些函数不需要头文件
+  n++类 
+type __sync_fetch_and_add(type *ptr, type value, ...); // m+n
+type __sync_fetch_and_sub(type *ptr, type value, ...); // m-n
+type __sync_fetch_and_or(type *ptr, type value, ...);  // m|n
+type __sync_fetch_and_and(type *ptr, type value, ...); // m&n
+type __sync_fetch_and_xor(type *ptr, type value, ...); // m^n
+type __sync_fetch_and_nand(type *ptr, type value, ...); // (~m)&n
+/* 对应的伪代码 */
+{ tmp = *ptr; *ptr op= value; return tmp; }  //op 类似于 + - 
+{ tmp = *ptr; *ptr = (~tmp) & value; return tmp; }   // nand
+
+++n类
+type __sync_add_and_fetch(type *ptr, type value, ...); // m+n
+type __sync_sub_and_fetch(type *ptr, type value, ...); // m-n
+type __sync_or_and_fetch(type *ptr, type value, ...); // m|n
+type __sync_and_and_fetch(type *ptr, type value, ...); // m&n
+type __sync_xor_and_fetch(type *ptr, type value, ...); // m^n
+type __sync_nand_and_fetch(type *ptr, type value, ...); // (~m)&n
+/* 对应的伪代码 */
+{ *ptr op= value; return *ptr; }
+{ *ptr = (~*ptr) & value; return *ptr; } // nand
+
+4.CAS类  compare and swap    CAS，就是不使用系统提供的锁，而是直接利用cpu提供的指令，实现互斥操
+  
+ bool __sync_bool_compare_and_swap (type *ptr, type oldval, type newval, ...);
+type __sync_val_compare_and_swap (type *ptr, type oldval, type newval, ...);
+/* 对应的伪代码 */
+{ if (*ptr == oldval) { *ptr = newval; return true; } else { return false; } }
+{ tmp = *ptr; if (*ptr == oldval) { *ptr = newval; } return tmp; } 
+	
+	
+88 int pthread_once(pthread_once_t *once_control, void (*init_routine) (void))；
+本函数使用初值为PTHREAD_ONCE_INIT的once_control变量保证init_routine()函数在本进程执行序列中仅执行一次。
+
+89 int atexit (void (*)(void))）atexit函数是一个特殊的函数，它是在正常程序退出时调用的函数，我们把他叫为登记函数
+	⼀个进程可以登记若⼲个（具体⾃⼰验证⼀下）个函数，这些函数由exit⾃动调⽤，这些函数被称为终⽌处理函数， 
+	atexit函数可以登记这些函数。 exit调⽤终⽌处理函数的顺序和atexit登记的顺序相反（网上很多说造成顺序相反的原因是参数压栈造成的，
+	参数的压栈是先进后出，和函数的栈帧相同），如果⼀个函数被多次登记，也会被多次调⽤
+
+90 void std::vector::resize (size_type n);
+   void std::vector::resize (size_type n, const value_type& val);
+   如果n比当前的vector元素数目要小，vector的容量要缩减到resize的第一个参数大小，既n。并移除那些超出n的元素同时销毁他们。
+   比当前vector元素数目要大，在vector的末尾扩展需要的元素数目，如果第二个参数val指定了，扩展的新元素初始化为val的副本，
+   类型默认初始化
+
+91 void std::vector::reserve (size_type n);
+   reserve表示容器预留空间,实际申请的内存不小于n
+  
+92 std::search() 
+   ForwardIterator search (ForwardIterator first1, ForwardIterator last1,
+   ForwardIterator first2, ForwardIterator last2);
+   search() 函数会返回一个正向迭代器，当函数查找成功时，该迭代器指向查找到的子序列中的第一个元素；反之，如果查找失败，则该迭代器的指向和 last1 迭代器相同
+
+93 std::find_end()
+
+94  函数原型：extern int memcmp(void *str1, void *str2, unsigned int n)
+    参数说明：str1和str2为指定作比较的字符串，比较两个字符串的前n个字节。
+    memcmp函数实现的是字节的比较，而不是字符的比较。
+
+95 函数原型：extern int memicmp(void *str1, void *str2, unsigned int count)
+   *参数说明：str1和str2为指定作比较的字符串，比较两个字符串的前count个字节，不区分大小写。
+
+96 函数原型extern void *memchr(const void *buf, int ch, size_t count)
+   功能：从buf所指内存区域的前count个字节查找字符ch。
+   说明：当第一次遇到字符ch时停止查找。如果成功，返回指向字符ch的指针；否则返回NULL。
+
+97 std::copy 
+  std::copy(start, end, std::back_inserter(container));  
+  这里，start和end是输入序列（假设有N个元素）的迭代器（iterator），container是一个容器，该容器的接口包含函数push_back。
+  假设container开始是空的，那么copy完毕后它就包含N个元素，并且顺序与原来队列中的元素顺序一样。标准库提供的back_inserter模板函数很方便，
+  因为它为container返回一个back_insert_iterator迭代器，这样，复制的元素都被追加到container的末尾了
+
+98 uLong ZEXPORT adler32 (uLong adler, const Bytef *buf, uInt len)
+
+99 void *memset (void *__s, int __c, size_t __n)
+
+100  timerfd是Linux为用户程序提供的一个定时器接口。这个接口基于文件描述符，通过文件描述符的可读事件进行超时通知，所以能够被用于select/poll的应用场景
+
+	 int timerfd_create(int clockid, int flags); 
+		timerfd_create（）函数创建一个定时器对象，同时返回一个与之关联的文件描述符。
+		clockid：clockid标识指定的时钟计数器，可选值（CLOCK_REALTIME、CLOCK_MONOTONIC。。。）
+		CLOCK_REALTIME:系统实时时间,随系统实时时间改变而改变,即从UTC1970-1-1 0:0:0开始计时,中间时刻如果系统时间被用户改成其他,则对应的时间相应改变
+		CLOCK_MONOTONIC:从系统启动这一刻起开始计时,不受系统时间被用户改变的影响
+		flags：参数flags（TFD_NONBLOCK(非阻塞模式)/TFD_CLOEXEC（表示当程序执行exec函数时本fd将被系统自动关闭,表示不传递）	 
+		
+	 
+     int timerfd_settime(int fd, int flags, const struct itimerspec *new_value, struct itimerspec *old_value);
+	 	struct timespec {
+      		time_t tv_sec;                /* Seconds */
+      		long   tv_nsec;               /* Nanoseconds */
+  		};
+	 timerfd_settime()此函数用于设置新的超时时间，并开始计时,能够启动和停止定时器;
+     fd: 参数fd是timerfd_create函数返回的文件句柄
+     flags：参数flags为1代表设置的是绝对时间（TFD_TIMER_ABSTIME 表示绝对定时器）；为0代表相对时间。
+     new_value: 参数new_value指定定时器的超时时间以及超时间隔时间
+     old_value: 如果old_value不为NULL, old_vlaue返回之前定时器设置的超时时间，具体参考timerfd_gettime()函数
+     it_interval不为0则表示是周期性定时器。
+     it_value和it_interval都为0表示停止定时器
+		
+		
+		
+  
+  		struct itimerspec {
+     		struct timespec it_interval;  /* Interval for periodic timer （定时间隔周期）*/
+     		struct timespec it_value;     /* Initial expiration (第一次超时时间)*/
+ 		};
+	 
+     int timerfd_gettime(int fd, struct itimerspec *curr_value);
+	 
+	 timerfd_gettime()函数获取距离下次超时剩余的时间
+      curr_value.it_value 字段表示距离下次超时的时间，如果改值为0，表示计时器已经解除
+      改字段表示的值永远是一个相对值，无论TFD_TIMER_ABSTIME是否被设置
+      curr_value.it_interval 定时器间隔时间
+	  
+	  read函数可以读timerfd，读的内容为uint_64，表示超时次数
+	  
+	 
+	 
+101   int pthread_atfork(void (*prepare)(void), void (*parent)(void), void (*child)(void));
+     pthread_atfork()在fork()之前调用，当调用fork时，内部创建子进程前在父进程中会调用prepare，内部创建子进程成功后，父进程会调用parent ，子进程会调用child
+	 
+	 
+102 int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
+    timeout时间内监听到事件，会立即返回。
+	epoll_create()、
+	epoll_ctl()、
+	epoll_wait()、
+	close()
+	
+    POLLIN: 		有数据可读。
+	POLLRDNORM: 	有普通数据可读。
+	POLLRDBAND:     有优先数据可读。
+	POLLPRI:		有紧迫数据可读。
+	POLLOUT:		写数据不会导致阻塞。
+	POLLWRNORM:		写普通数据不会导致阻塞。
+	POLLWRBAND:		写优先数据不会导致阻塞。
+	//POLLMSG:	SIGPOLL 消息可用。
+
+	此外，revents域中还可能返回下列事件：
+	POLLER:		指定的文件描述符发生错误。
+	POLLHUP:	指定的文件描述符挂起事件。
+	POLLNVAL:	指定的文件描述符非法。
+	
+103 	#include <arpe/inet.h>
+   这两个函数是随IPv6出现的函数，对于IPv4地址和IPv6地址都适用，函数中p和n分别代表表达（presentation)和数值（numeric)。
+   地址的表达格式通常是ASCII字符串，数值格式则是存放到套接字地址结构的二进制值
+   
+   int inet_pton(int family, const char *strptr, void *addrptr);     //将点分十进制的ip地址转化为用于网络传输的数值格式
+        返回值：若成功则为1，若输入不是有效的表达式则为0，若出错则为-1
+ 
+   const char * inet_ntop(int family, const void *addrptr, char *strptr, size_t len);     //将数值格式转化为点分十进制的ip地址格式
+   
+104 size_t strftime(char *s, size_t max, const char *format, const struct tm *tm);  strftime是一种计算机函数，根据区域设置格式化本地时间/日期，函数的功能：将时间格式化！！！，或者说格式化一个时间字符串
+
+105 struct tm *localtime_r(const time_t *timep, struct tm *result); // 根据timep 返回本地时区时间信息
+    struct tm *gmtime_r(const time_t *timep, struct tm *result); // 根据timep 返回utc时区时间信息
+	
+	
+106  读写锁 
+初始化一个读写锁pthread_rwlock_init
+读锁定读写锁      pthread_rwlock_rdlock
+非阻塞读锁定　　pthread_rwlock_tryrdlock
+写锁定读写锁      pthread_rwlock_wrlock
+非阻塞写锁定      pthread_rwlock_trywrlock
+解锁读写锁         pthread_rwlock_unlock
+释放读写锁         pthread_rwlock_destroy
+
+107 获取或设定资源使用限制
+	int getrlimit(int resource, struct rlimit *rlim);
+	int setrlimit(int resource, const struct rlimit *rlim);
+	
+resource：可能的选择有
+RLIMIT_AS //进程的最大虚内存空间，字节为单位。
+RLIMIT_CORE //内核转存文件的最大长度。
+RLIMIT_CPU //最大允许的CPU使用时间，秒为单位
+
+struct rlimit {
+　　rlim_t rlim_cur;　　//soft limit
+　　rlim_t rlim_max;　　//hard limit
+};
+
+108  char * basename(char *path)  截取path中的去目录部分的最后的文件或路径名  失败： 返回 NULL
+     char *dirname(char *path);  返回截取path中的目录路径指针   失败： 返回 NULL
+
+    path         dirname    basename
+    "/usr/lib"    "/usr"    "lib"
+    "/usr/"       "/"       "usr"
+    "usr"         "."       "usr"
+    "/"           "/"       "/"
+    "."           "."       "."
+    ".."          "."       ".."
+	
+109 std::mt19937_64  C++11生成32位/64位随机数
+
+110 int getopt(int argc,char * const argv[ ],const char * optstring);
+
+111 #define	EXIT_FAILURE	1	/* Failing exit status.  */
+    #define	EXIT_SUCCESS	0
+	
+112 int chdir（const char * path）;  函数说明：chdir（）用户将当前的工作目录改变成以参数路径所指的目录。
+
+113 char * getcwd(char * buf, size_t size);  getcwd()会将当前的工作目录绝对路径复制到参数buf 所指的内存空间，参数size 为buf 的空间大小。
+
+114 int dup(int oldfd);                复制一个已经存在的文件描述符，如果成功，返回复制成功后的文件描述符，失败返回-1
+    
+	int dup2(int fd, int fd2);    复制一个文件描述符，fd表示已经存在的打开的文件描述符，fd2是指定新的文件描述符，如果fd2等于fd，则直接返回，如果fd2存在并且打开，
+	                                   则先close(fd2)后，重新打开，这样fd2和fd就指向了同一个文件（共享打开的文件），如果fd2不存在或者没有打开，
+									   则打开fd2，并且指向fd所指向的文件。函数的返回值和fd2一致。该函数可以实现文件的重定位
+								
+115  pid_t setsid(void); 
+	当进程是会话组长时setsid()调用失败。setsid()调用成功后，进程成为新的会话组长和新的进程组长，并与原来的登录会话和进程组脱离。
+	由于会话过程对控制终端的独占性，进程同时与控制终端脱离
+
+116 int setitimer(int which, const struct itimerval *new_value, struct itimerval *old_value);
+    struct itimerval 
+{
+	/* Interval for periodic timer */
+	struct timeval it_interval;
+	/* Time until next expiration */ 
+	struct timeval it_value;    
+};
+struct timeval 
+{
+	time_t      tv_sec;         /* seconds */
+	suseconds_t tv_usec;        /* microseconds 1/1000000 seconds */
+};
+
+  new_value： 参数用来对计时器进行设置，it_interval为计时间隔，it_value为延时时长，下面例子中表示的是在setitimer方法调用成功后，延时it_value后触发一次SIGALRM信号，以后每隔it_interval触发一次SIGALRM信号。
+  settimer工作机制是，先对it_value倒计时，当it_value为零时触发信号，然后重置为it_interval，继续对it_value倒计时，一直这样循环下去
+  
+117 shared_from_this()
+    c++11中的shared_from_this()来源于boost中的enable_shared_form_this类和shared_from_this()函数，功能为返回一个当前类的std::share_ptr,使用方法如下
+
+
+118 C++11的chrono库
+
+119 bool __sync_bool_compare_and_swap (type*ptr, type oldval, type newval, ...)
+    type __sync_val_compare_and_swap (type *ptr, type oldval,  type newval, ...)
+    这两个函数提供原子的比较和交换，如果*ptr == oldval,就将newval写入*ptr,
+    第一个函数在相等并写入的情况下返回true.
+    第二个函数在返回操作之前的值。
+
+120 type __sync_lock_test_and_set (type *ptr, type value, ...)
+    将*ptr设为value并返回*ptr操作之前的值。
+
+121 void __sync_lock_release (type *ptr, ...)
+    将*ptr置0
+	
+	
+121  __sync_synchronize()  内存屏障
+    内存屏障是一个程序员要面对的涉及CPU方面知识的一个问题。在多核多线程的情况下，如果你不知道这个CPU乱序执行这个问题的话，将会是一场噩梦，
+	无论怎么进行代码走读也不可能发现的bug。不过只要加上一个__sync_synchronize()  问题就迎刃而解
+
+	
+122  int sscanf (const char *str,const char * format,........);
+     sscanf()会将参数str的字符串根据参数format字符串来转换并格式化数据
+	  返回值 成功则返回参数数目，失败则返回-1，错误原因存于errno中。 返回0表示失败    否则，表示正确格式化数据的个数    
+	  例如：sscanf(str，"%d%d%s", &i,&i2, &s);    如果三个变成都读入成功会返回3。    如果只读入了第一个整数到i则会返回1。
+	 
+	 char str[100]; sscanf("12345","%4s",str); printf("%s\n",str); 输出"1234"
+	char str[100];  sscanf("12345","%s",str);  printf("%s\n",str);  输出12345
+	char str1[100], str2[100], str3[100]; gets(str1); sscanf(str1,"%s%s",str2,str3); printf("%s %s\n",str2,str3); 输入"hello world hello" 输出"hello world"
+	
+123 信号集处理函数
+int sigemptyset(sigset_t *set);  //清空set信号集中的所有信号
+int sigfillset(sigset_t *set);  //将所有的信号赋给set信号集
+int sigaddset(sigset_t *set, int signo);  //将signo信号加入到set信号集中
+int sigdelset(sigset_t *set, int signo);  //将set信号集中的signo信号移除
+//这4和函数的返回值：成功返回0;出错返回-1
+
+int sigismember(const sigset_t *set, int signo);  //判断signo信号是否在set信号集中
+	
+124 int sigaction(int signum,const struct sigaction *act ,struct sigaction *oldact) sigaction函数用来查询和设置信号处理方式，它是用来替换早期的signal函数
+                        signum     可以指定SIGKILL和SIGSTOP以外的所有信号
+						signum参数指出要捕获的信号类型，act参数指定新的信号处理方式，oldact参数输出先前信号的处理方式（如果不为NULL的话）
+struct sigaction
+{
+void (*sa_handler) (int);
+void  (*sa_sigaction)(int, siginfo_t *, void *);
+sigset_t sa_mask;
+int sa_flags;
+void (*sa_restorer) (void);
+}
+sa_handler：此参数和signal()的参数handler相同，此参数主要用来对信号旧的安装函数signal()处理形式的支持  SIG_IGN 忽略信号
+sa_sigaction：新的信号安装机制，处理函数被调用的时候，不但可以得到信号编号，而且可以获悉被调用的原因以及产生问题的上下文的相关信息。
+sa_mask：用来设置在处理该信号时暂时将sa_mask指定的信号搁置
+sa_restorer： 此参数没有使用
+sa_flags：用来设置信号处理的其他相关操作，下列的数值可用。可用OR 运算（|）组合
+A_NOCLDSTOP:如果参数signum为SIGCHLD，则当子进程暂停时并不会通知父进程
+SA_ONESHOT/SA_RESETHAND:当调用新的信号处理函数前，将此信号处理方式改为系统预设的方式
+SA_RESTART:被信号中断的系统调用会自行重启
+SA_NOMASK/SA_NODEFER:在处理此信号未结束前不理会此信号的再次到来
+SA_SIGINFO：信号处理函数是带有三个参数的sa_sigaction
+	
+125  int clock_getres(clockid_t clk_id, struct timespec *res); 获取对应时钟类型能够提供的时间精确度 
+CLOCK_REALTIME:             系统实时时间,随系统实时时间改变而改变,即从UTC1970-1-1 0:0:0开始计时,
+                                   //中间时刻如果系统时间被用户改成其他,则对应的时间相应改变
+CLOCK_MONOTONIC:            从系统启动这一刻起开始计时,不受系统时间被用户改变的影响
+CLOCK_PROCESS_CPUTIME_ID:   本进程到当前代码系统CPU花费的时间
+CLOCK_THREAD_CPUTIME_ID:    本线程到当前代码系统CPU花费的时间
+
+struct timespec { 
+    time_t   tv_sec;        /* seconds */
+	long     tv_nsec;       /* nanoseconds 纳秒*/
+};
+
+126   int pipe(int pipefd[2]);  成功：0；失败：-1，设置errno  //https://blog.csdn.net/qq_42914528/article/details/82023408
+      函数调用成功返回r/w两个文件描述符。无需open，但需手动close。规定：fd[0] → r； fd[1] → w
+读管道： 
+1. 管道中有数据，read返回实际读到的字节数。
+2. 管道中无数据：
+(1) 管道写端被全部关闭，read返回0 (好像读到文件结尾)
+(2) 写端没有全部被关闭，read阻塞等待(不久的将来可能有数据递达，此时会让出cpu)
+
+写管道： 1. 管道读端全部被关闭， 进程异常终止(也可使用捕捉SIGPIPE信号，使进程不终止)
+2. 管道读端没有全部关闭：
+(1) 管道已满，write阻塞。
+(2) 管道未满，write将数据写入，并返回实际写入的字节数。
+
+管道容量分为pipi capacity 和 pipe_buf .这两者的区别在于pipe_buf定义的是内核管道缓冲区的大小，
+这个值的大小是由内核设定的，这个值仅需一条命令就可以查到； ulimit -a ; sizeof(pipe_buf)= 512 bytes* 8 = 4k byte
+
+而pipe capacity指的是管道的最大值，即容量 通过不断写 可以写入65536 字节
+
+127  int setjmp(jmp_buf jb);
+     void longjmp(jmp_buf jb, int r);
+  setjmp用于保存当前AR到jb变量中；
+  而longjmp用于设置当前AR为jb，并跳转到调用setjmp()；之后的第一个语句处。其结果就相当于回到了setjmp()刚执行完毕，只是偷偷的修改了setjmp的返回值。
+  setjmp()第一次调用时总是返回0，而通过longjmp(jb,r)跳转后其返回值总是被修改为r，并且r不能为0。这样程序中就很容易根据setjmp()的返回值来判断是否是longjmp()导致了跳转才执行到此
+  
+128 int system(const char*command)  std::system("ls -l >test.txt");
+   执行shell 命令
+   
+   
+129 void sync(void); 
+   在操作系统中，除非设置了自动同步，否则为了减少磁盘的写入量，延长磁盘寿命，写入文件时并不是即时写入到磁盘中，
+   而是先写入内存，这段内存区域被称为系统缓冲区。在系统缓冲区数据累计到一定数量后（具体数量因系统实际设置而定），
+   会有系统进程一次性写入所有缓冲数据。这样，如果意外断电，那么系统缓冲区内数据就会因此丢失
+   
+130 int daemon(int nochdir, int noclose); daemon()函数适用于希望从控制终端脱离并作为系统守护进程在后台运行的程序
+    如果nochdir为零，daemon()将进程的当前工作目录更改为根目录（“/”）; 否则，当前工作目录保持不变。
+    如果noclose为零，daemon()将标准输入，标准输出和标准错误重定向到/dev/null; 否则，不会对这些文件描述符进行更改。(参数为0时有效)
+    返回值：
+    deamon()调用了fork()，如果fork成功，那么父进程就调用_exit()退出，因此只能通过子进程看到进一步的错误。如果成功函数返回0，否则返回-1并设置errno
+
+131 int access(const char *pathname, int mode); 判断文件权限
+    R_OK 只判断是否有读权限
+	W_OK 只判断是否有写权限
+	X_OK 判断是否有执行权限
+	F_OK 只判断是否存在
+	
+132 char *strtok_r(char *str, const char *delim, char **saveptr);
+   
+   str是传入的字符串。需要注意的是  ：第一次使用strtok_r之后，要把str置为NULL,
+   delim指向依据分割的字符串。常见的空格“ ”    逗号“,”等
+   saveptr保存剩下待分割的字符串
+
+133  boost::spirit 
+
+134 long int strtol(const char *nptr, char **endptr, int base)             long long int strtoll(const char *nptr, char **endptr, int base);
+    strtol()会将nptr指向的字符串，根据参数base，按权转化为long int, 然后返回这个值。
+参数base的范围为2~36,和0；它决定了字符串以被转换为整数的权值。
+可以被转换的合法字符依据base而定，举例来说，当base为2时，合法字符为‘0’，‘1’；base为8时，合法字符为‘0’，‘1’，……‘7’；
+ base为10时，合法字符为‘0’，‘1’，……‘9’；base 为16时，合法字符为‘0’，‘1’，……‘9’，‘a’，……‘f’；base为24时，合法字符为‘0’，……‘9’，‘a’，……‘n’，base为36时，
+ 合法字符为‘0’，……‘9’，‘a’，……‘z’；等等。其中，不区分大小写，比如，‘A’和‘a’会都会被转化为10。
+当字符合法时，‘0’，……‘9’依次被转换为十进制的0～9，‘a’，……‘z’一次北转换为十进制的10～35。
+strtol()函数检测到第一个非法字符时，立即停止检测，其后的所有字符都会被当作非法字符处理。合法字符串会被转换为long int, 作为函数的返回值。
+非法字符串，即从第一个非法字符的地址，被赋给*endptr。**endptr是个双重指针，即指针的指针。strtol()函数就是通过它改变*endptr的值，即把第一个非法字符的地址传给endptr
+
+135 #include <signal.h> 
+int sigemptyset(sigset_t *set);                //清空set信号集中的所有信号 
+int sigfillset(sigset_t *set);                 //将所有的信号赋给set信号集
+int sigaddset(sigset_t *set, int signo);       //将signo信号加入到set信号集中
+int sigdelset(sigset_t *set, int signo);       //将set信号集中的signo信号移除
+//这4和函数的返回值：成功返回0;出错返回-1
+int sigismember(const sigset_t *set, int signo);  //判断signo信号是否在set信号集中
+//返回值：若为真返回1;若为假返回-1
+信号集类型
+  1.概念：一种类型，能够保存多个信号
+  2.类型：sigset_t
+
+136 int kill(pid_t pid, int sig);   用于向任何进程组或进程发送信号
+pid：可能选择有以下四种
+1. pid大于零时，pid是信号欲送往的进程的标识。
+2. pid等于零时，信号将送往所有与调用kill()的那个进程属同一个使用组的进程。
+3. pid等于-1时，信号将送往所有调用进程有权给其发送信号的进程，除了进程1(init)。
+4. pid小于-1时，信号将送往以-pid为组标识的进程。
+
+sig：准备发送的信号代码，假如其值为零则没有任何信号送出，但是系统会执行错误检查，通常会利用sig值为零来检验某个进程是否仍在执行
+返回值说明： 成功执行时，返回0。失败返回-1，errno被设为以下的某个值 EINVAL：指定的信号码无效（参数 sig 不合法） 
+           EPERM；权限不够无法传送信号给指定进程 ESRCH：参数 pid 所指定的进程或进程组不存在
+		 
+137 int fscanf(FILE *stream, const char *format, ...);
+    fscanf() 返回参数列表中被成功赋值的参数个数
+
+138 int daemon(int nochdir, int noclose);   daemon()函数主要用于希望脱离控制台，以守护进程形式在后台运行的程序
+    参数nochdir为0时,即可将工作目录修改为根目录
+	当noclose为0是，daemon将进程的STDIN, STDOUT, STDERR都重定向到/dev/null
+	如果成功函数返回0，否则返回-1并设置errno
+	
+139 int flock(int fd,int operation);会依参数operation所指定的方式对参数fd所指的文件做各种锁定或解除锁定的动作。
+                                    此函数只能锁定整个文件，无法锁定文件的某一区域
+   参数 operation有下列四种情况:
+   LOCK_SH 建立共享锁定。多个进程可同时对同一个文件作共享锁定。
+   LOCK_EX 建立互斥锁定。一个文件同时只有一个互斥锁定。
+   LOCK_UN 解除文件锁定状态。
+   LOCK_NB 无法建立锁定时，此操作可不被阻断，马上返回进程。通常与LOCK_SH或LOCK_EX 做OR(|)组合。
+   单一文件无法同时建立共享锁定和互斥锁定，而当使用dup()或fork()时文件描述词不会继承此种锁定。
+   返回值 返回0表示成功，若有错误则返回-1，错误代码存于errno。
+
+140  首先介绍一个重要的结构体：fd_set，它会作为下面某些函数的参数而多次用到，fd_set可以理解为一个集合，
+     这个集合中存放的是文件描述符(file descriptor)，即文件句柄
+	 
+	 1》FD_ZERO
+     用法：FD_ZERO(fd_set*);
+     用来清空fd_set集合，即让fd_set集合不再包含任何文件句柄。
+     2》FD_SET
+     用法：FD_SET(int ,fd_set *);
+     用来将一个给定的文件描述符加入集合之中
+     3》FD_CLR
+     用法：FD_CLR(int ,fd_set*);
+     用来将一个给定的文件描述符从集合中删除
+     4》FD_ISSET
+     用法：FD_ISSET(int ,fd_set*);
+     检测fd在fdset集合中的状态是否变化，当检测到fd状态发生变化时返回真，否则，返回假（也可以认为集合中指定的文件描述符是否可以读写）。
+	 
+141  FD_SETSIZE 
+
+通常，操作系统通过宏FD_SETSIZE来声明在一个进程中select所能操作的文件描述符的最大数目。例如：
+在4.4BSD的头文件中我们可以看到：
+＃ifndef FD_SETSIZE
+#define FD_SETSIZE 1024
+#endif
+在红帽Linux的头文件<bits/types.h>中我们可以看到：
+＃define __FD_SETSIZE 1024
+以及在头文件<sys/select.h>中我们可以看到：
+#include <bits/types.h>
+#define FD_SETSIZE __FD_SETSIZE
+既定义FD_SETSIZE为1024，一个整数占4个字节，既32位，那么就是用包含32个元素的整数数组来表示文件描述符集
+
+142 unsigned long int strtoul(const char *nptr, char **endptr, int base);           //字符数字转换
+    unsigned long long int strtoull(const char *nptr, char **endptr,int base);      //字符数字转换
+	
+143 int vsnprintf(char* str, size_t size, const char* format, va_list ap);
+	str 把生成的格式化的字符串存放在这里.
+    size str可接受的最大字节数,防止产生数组越界.
+    format 指定输出格式的字符串，它决定了你需要提供的可变参数的类型、个数和顺序。
+    ap 可变参数
+函数功能：将可变参数格式化输出到一个字符数组。
+返回值：执行成功，返回写入到字符数组str中的字符个数（不包含终止符），最大不超过size；执行失败，返回负值，并置errno.[1] 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

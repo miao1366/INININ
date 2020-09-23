@@ -1,0 +1,74 @@
+1. ProtoBuf   是google提供的一个开源序列化框架，类似于XML，JSON这样的数据表示语言，其最大的特点是基于二进制，因此比传统的XML表示高效短小得多
+   https://www.iteye.com/blog/aoyouzi-2288328
+   
+2  Erlang是一种通用的面向并发的编程语言. Erlang是一个结构化，动态类型编程语言，内建并行计算支持。
+   使用Erlang来编写分布式应用要简单的多，因为它的分布式机制是透明的：对于程序来说并不知道自己是在分布式运行。
+   Erlang运行时环境是一个虚拟机，有点像Java虚拟机，这样代码一经编译，同样可以随处运行。
+   它的运行时系统甚至允许代码在不被中断 的情况下更新。另外如果需要更高效的话，字节代码也可以编译成本地代码运行
+   
+3 zeroMQ，一个处理消息传输的库，重点在传输上，看起来它像是在socket上面封装了一层，让我们可以很容易的利用它来做N对M的数据传输，在分布式系统中很方便，在接收端它有round-robin负载均衡。
+  云风对zeroMQ的介绍：http://blog.codingnow.com/2011/02/zeromq_message_patterns.html
+  “在需要并行化处理数据的时候，采用消息队列通讯的方式来协作，比采用共享状态的方式要好的多。”
+  所以zeroMQ的主要用途是：分布式系统的消息通信工具
+
+4 Kafka是最初由Linkedin公司开发，是一个分布式、支持分区的（partition）、多副本的（replica），基于zookeeper协调的分布式消息系统，
+  它的最大的特性就是可以实时的处理大量数据以满足各种需求场景：比如基于hadoop的批处理系统、低延迟的实时系统、storm/Spark流式处理引擎，
+  web/nginx日志、访问日志，消息服务等等，用scala语言编写，Linkedin于2010年贡献给了Apache基金会并成为顶级开源 项目
+
+5 gperftools是Google开源的一款非常使用的性能分析工具集。主要由四个组件组成
+  1、  Tcmalloc内存分析器
+  2、Heap-profiler
+    Heap-profiler是内存监控器，可以随时知道内存的使用情况[2]。
+  3、Heap-checker
+     Heap-checker是专门检测内存泄漏的工具
+  4、Cpu-profiler
+     Cpu-profiler主要是通过采样的的方式，给出一段时间内程序实际占用cpu时间偏进行统计和分析。
+	 
+6 网易游戏服务器开发框架 Pomelo
+  pomelo最适合的应用领域是网页游戏、社交游戏、移动游戏的服务端，开发者会发现pomelo可以用如此少的代码达到强大的扩展性和伸缩性。
+  当然还不仅仅是游戏，很多人断言未来的web时代是实时web应用的时代， 我们发现用pomelo开发高实时web应用也如此合适， 
+  而且伸缩性比其它框架好。目前不推荐将pomelo用于大型的MMO rpg游戏开发，尤其是3d游戏， 还是需要象bigworld这样的商用引擎来支撑
+  
+7 flink是一个大型项目，chromium是巨型项目，mysql也是大型项目，相比之下，只有blockchain算是小型项目。
+  前面学习的skynet属于微型项目。长路漫漫，愿与君前行，不负时光
+  
+  
+8 Apache Flink是由Apache软件基金会开发的开源流处理框架，其核心是用Java和Scala编写的分布式流数据流引擎。
+  Flink以数据并行和流水线方式执行任意流数据程序，Flink的流水线运行时系统可以执行批处理和流处理程序。
+  此外，Flink的运行时本身也支持迭代算法的执行
+  
+  
+9 性能测试工具CPU profiler(gperftools)
+  # 第一个参数为你的可执行程序或动态库文件名，第二个参数为上一步生成的性能报告文件
+  pprof  ./test_capture test_capture.prof --web
+  
+  https://www.jianshu.com/p/bf2f8a5a81d0
+  https://blog.csdn.net/10km/article/details/83820080
+  
+10  Netcat
+  网络工具中有“瑞士军刀”美誉的NetCat， 在我们用了N年了至今仍是爱不释手
+  
+11 c++ 轻量跨平台构建系统 Premake
+
+12 LuaJIT即采用C语言写的Lua代码的解释器
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

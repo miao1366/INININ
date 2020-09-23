@@ -1,0 +1,15 @@
+'topN'              : 1,
+'scoreThreshold'    : 0.52,
+'deltaThreshold'    : 0.11
+
+
+determine_info.similar = float(fabsf(Max_distance - determine_info.distance) / fabsf(Max_distance - Min_distance));
+float ReMatchResultProcessor::Distance(std::vector<float> feature1, std::vector<float> feature2);
+
+欧式距离
+余弦距离
+
+
+get_feature_mutex_
+
+

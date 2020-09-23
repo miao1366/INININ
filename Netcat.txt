@@ -1,0 +1,10 @@
+nc -c 192.168.0.174 80
+POST /face/remove_out_of_range HTTP/1.0
+Content-Type: application/json; Connection:close
+{"dbName":"default_locus","count":100000}
+
+
+
+"POST /face/getdb HTTP/1.0\r\nContent-Type: application/json\r\nConnection:close\r\nUser-Agent: Mozilla/5.0\r\nContent-Length: 2\r\n\r\n{}\r\n"
+
+echo -e "POST /face/remove_out_of_range HTTP/1.0\r\nContent-Type: application/json\r\nConnection:close\r\nUser-Agent: Mozilla/5.0\r\nContent-Length: 2\r\n\r\n{\"dbName\":\"default_locus\",\"count\":100000}\r\n" | nc -nvv 192.168.0.243 8210

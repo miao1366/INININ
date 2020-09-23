@@ -1,0 +1,597 @@
+1 .Lua 在游戏领域被广泛运用只是 Lua 被所有领域广泛应用的显现。比如说 Adobe Photoshop Lightroom 的 40% - 60% 由 Lua 写成.
+2 .lua是一个简单，高效所以在游戏逻辑开发和服务器开发中（ngx_lua）得到广泛的应用
+
+优势
+1）lua是一个免费、小巧、简单、强大、高效、轻量级的嵌入式的脚本语言,lua当前的发行版本5.3.1只有276k。
+2）它是用C语言开发的项目，所以可以在大部分的操作系统上运行
+3）lua是目前速度最快的脚本语言，既可以提升语言的灵活性还可以最大限度的保留速度
+4）其语法非常简单，没有特例
+5）lua还可以作为C的API来使用
+
+不足和不同
+1）lua没有强大的库，所以很多功能实现起来没有python、perl、ruby等脚本语言简洁
+2）lua的异常处理功能饱受争议，虽然其提供了pcall和xpcall的异常处理函数
+3）lua原生语言中没有提供对unicode编码的支持，虽然可以通过一些折中的办法实现 http://www.cppblog.com/darkdestiny/archive/2009/04/25/81055.html
+4）没有提供在C++中应用很广泛的a?b:c的三元运算符操作
+5）没有switch...case...语法，只能通过if..elseif..elseif..else..end的方式折中实现
+6)在循环时没有提供continue语法
+7）没有C++中应用广泛的a++和a+=1等操作
+8）lua的索引是从1开始的，而不是我们熟悉的0（string，table）
+9）当你给一个元素赋值为nil时相当于这个元素不存在
+10）lua的数值类型只有number是没有int，float，double等之分的
+11）lua中没有类的概念，其类是通过table的形式来实现的
+12）lua中只有nil和false是表示假的，零在lua中是为真的
+13）很多程序需要（）标示才能运行，比如a={["b"]=5},print(a.b)是可运行的，但是 {["b"]=5}.b就会报错，需要（{["b"]=5}）.b才可以
+
+
+3 int lua_gettop (lua_State *L)  返回栈顶元素的索引。 因为索引是从1开始编号的， 所以这个结果等于堆栈上的元素个数（因此返回 0 表示堆栈为空）。
+4 void lua_settop (lua_State *L, int index);  
+  解释：参数允许传入任何可接受的索引以及 0 。 它将把堆栈的栈顶设为这个索引。 
+  如果新的栈顶比原来的大，超出部分的新元素将被填为 nil 。 如果 index 为 0 ，把栈上所有元素移除
+  
+5 int luaL_loadfile (lua_State *L, const char *filename); 加载某个文件  
+  //仅加载lua代码块，但是并不运行。如果成功，会加载一个编译好的代码块作为一个匿名函数放置在栈顶。
+  //只有首先执行这个代码块，lua的vm才能最终知道各函数、变量等信息 (lua_pcall)
+
+6 int luaL_dofile (lua_State *L, const char *filename);  加载并运行某个文件
+
+7 int lua_pcall (lua_State *L, int nargs, int nresults, int errfunc);
+
+8 void lua_pushcfunction (lua_State *L, lua_CFunction f);
+　　将C函数压栈；
+　　接收一个C函数的指针参数，然后将一个Lua.function类型的对象压栈
+   typedef int (*lua_CFunction) (lua_State *L);  返回的int值表示C函数返回值的个数
+
+9  lua文档  
+   https://www.codingnow.com/2000/download/lua_manual.html
+   https://itbook.xuxinkai.cn/read/lua-5.3/spilt.32.spilt.1.5.md
+   
+   https://www.cnblogs.com/chenny7/p/3993456.html     ×××
+   
+10 Lua判断OS并添加cpath
+
+Lua初始化时需要根据OS来设置package.cpath,
+如果是Windows系统则添加 ?.dll, 否则添加 ?.so.
+不然加载错误后缀名的动态库会报错。
+
+local function add_package_cpath(subDir)
+    if is_windows then
+        package.cpath = package.cpath..";"..G_LUA_ROOTPATH.."/"..subDir.."/?.dll"
+    else
+       package.cpath = package.cpath..";"..G_LUA_ROOTPATH.."/"..subDir.."/?.so"
+    end
+end
+Lua没有提供OS判断功能，所以利用 package.config 中的目录分隔符来判断。
+-- return true if os is windows
+local function get_is_windows()
+    return "\\" == package.config:sub(1,1)
+end
+local is_windows = get_is_windows()
+
+11 lua_pcall(lua_State *L,int nargs,int nresults,int errfunc)
+   nargs 参数个数  nresults 返回值个数  errFunc 错误处理函数，0表示无，表示错误处理函数在栈中的索引
+   
+--test.lua
+function test(x,y)
+    return x + y
+end
+---调用
+lua_loadfile(L,"test.lua");
+lua_pushnumber(L,10);   --x 值入栈
+lua_pushnumber(L,20);   --y 值入栈
+lua_pcall(L,2,1,0);    如果没有错误此时栈顶的值为30 
+如果运行出错，lua_pcall会返回一个非零的结果,如果指定了错误处理函数会先调用错误处理函数，然后再将错误信息入栈，在将返回结果和错误信息入栈之前会先将函数和参数从栈中移除。
+错误处理函数必须在被调用函数和其他参数之前入栈
+
+12  在C和LUA之间交互的关键在于一个虚拟栈(virtual stack)，数据交互通过栈进行。操作数据时，首先将数据拷贝到栈上，然后获取数据，
+    栈中的每个数据通过索引值进行定位，索引值为正时表示相对于栈底的偏移索引，索引值为负时表示相对于栈顶的偏移索引。
+	索引值以1或 -1起始值，因此栈顶索引值永远为-1, 栈底索引值永远为1 。
+	
+13 正则表达式  
+
+.        任意字符
+%a        字母
+%c        控制字符
+%d        数字
+%l        小写字母
+%p        标点字符
+%s        空白符
+%u        大写字母
+%w        字母和数字
+%x        十六进制数字
+%z        代表0的字符 
+上面字符类的大写形式表示小写所代表的集合的补集。例如, '%A'非字母的字符   ^
+
+% 用作特殊字符的转义字符  '%%'匹配字符 %
+
+
+Lua中的模式修饰符有四个
++        匹配前一字符1次或多次
+*        匹配前一字符0次或多次
+-        匹配前一字符0次或多次  进行的是最短匹配
+?        匹配前一字符0次或1次
+[ ]      集合
+
+^	匹配字符串开头
+$	匹配字符串结尾
+
+()	表达式中用小括号包围的子字符串为一个分组，分组从左到右（以左括号的位置），组序号从1开始递增。
+
+你可能更喜欢使用'[0-7]'而不是'[01234567]'。你可以在字符集(char-set)的开始处使用 `^′ 表示其补集: '[^0-7]' 匹配任何不是八进制数字的字符
+%b'用来匹配对称的字符.常写为 '%bxy',x和y是任意两个不同的字符；x作为匹配的开始,y作为匹配的结束。比如， '%b()'匹配以`(′开始， 以 `)′结束的字符串:
+常用的这种模式有： '%b()', '%b[]', '%b%{%}',和 '%b<>'。你也可以使用任何字符作为分隔符
+
+14  文件io  从当前位置读取整个文件。例：file.read("*a")
+
+15  os.getenv(variable)  返回环境变量的值，如果不存在，返回nil  区分大小写
+
+16 assert(v [, message])
+   当参数v的值是false或者nil的时候展示一个错误，否者返回所有的参数值。
+   其中参数message表示一个错误信息，这个参数的默认值是assertion failed！
+   local ret, ret2 = assert(100 > 99, "I can't believe")
+
+17 string.gsub 替换函数 
+   		local str = "我是一只小菜鸡\n说的很有道理"
+   		local temp = string.gsub(str,"\n",",")
+   		print(temp)   ---我是一只小菜鸡,说的很有道理
+		
+  string.gsub(code, [[%$([%w_%d]+)]], getenv) 
+  function getenv(name) return assert(os.getenv(name), [[os.getenv() failed: ]] .. name) end
+ 
+18 load函数 load的本质就是在Lua代码中运行一段存储在字符串中的代码
+   load (chunk [, chunkname [, mode [, env]]])
+   加载一个代码块。
+
+	如果 chunk 是一个字符串，代码块指这个字符串。 如果 chunk 是一个函数， load 不断地调用它获取代码块的片断。
+	每次对 chunk 的调用都必须返回一个字符串紧紧连接在上次调用的返回串之后。 当返回空串、nil、或是不返回值时，都表示代码块结束。
+	如果没有语法错误， 则以函数形式返回编译好的代码块； 否则，返回 nil 加上错误消息。
+	如果结果函数有上值， env 被设为第一个上值。 若不提供此参数，将全局环境替代它。 所有其它上值初始化为 nil。 
+	（当你加载主代码块时候，结果函数一定有且仅有一个上值 _ENV （参见 §2.2））。 
+	然而，如果你加载一个用函数（参见string.dump， 结果函数可以有任意数量的上值） 创建出来的二进制代码块时，所有的上值都是新创建出来的。 也就是说它们不会和别的任何函数共享。
+	chunkname 在错误消息和调试消息中（参见 §4.9），用于代码块的名字。 如果不提供此参数，它默认为字符串chunk 。 chunk 不是字符串时，则为 "=(load)" 。
+	字符串 mode 用于控制代码块是文本还是二进制（即预编译代码块）。 它可以是字符串 "b" （只能是二进制代码块）， "t" （只能是文本代码块）， 或 "bt" （可以是二进制也可以是文本）。 
+	默认值为 "bt"。Lua 不会对二进制代码块做健壮性检查。 恶意构造一个二进制块有可能把解释器弄崩溃
+	
+19 
+number 实数 ,可以是整数，浮点数
+string 字符串，一旦赋值不能被修改，可以通过方法string.gsub()来修改
+nil 全局变量没被赋值默认为nil，删除变量就赋值为 nil
+boolean(bool) false 和nil为假 ，其它都为真
+function 函数
+table 数组、容器
+userdata （类，其它语言转换过来就变成userdata类型）
+thread 线程
+  
+20 lua_settop(L, 0); 重新设置栈底
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
