@@ -69,7 +69,9 @@ Git 查看远端仓库地址  git remote -v
 
 21 git 新建仓库后 可以直接clone在本地，提交代码时输入用户名 密码就好了   miao1366     miao1029081208
 
-22 git reset --soft HEAD^   撤销一次commit
+22  git reset --soft HEAD^   撤销一次commit
+
+23  git config --global core.quotepath false    //git 中文文件名乱码
 
 
 
