@@ -393,6 +393,9 @@ c 字符设备
 86  sed -ri '3a$var1' c.txt     
     sed -ri "3a$var1" c.txt   //将变量var1的值添加到第三行后面，上面只会把var1添加到变量后面
 
+87  sed -ri '$a'"$var1" c.txt   //  将变量var1的值添加文件最后一行
+    sed -ri "\$a$var1" c.txt    //  将变量var1的值添加文件最后一行,效果相同
+
 
 
 
