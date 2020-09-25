@@ -265,7 +265,7 @@ sshfs firefly@192.168.0.244:/home/firefly/workspace/FaceRecognitionRK3399 ./ -o 
 
 54 find . -type f -name "*.c" | xargs cat | wc -l       //统计当前目录下.c文件共有多少行
 
-55 1.  uname   列出系统信息， 可以 --help
+55 1.  uname   列出系统信息， 可以 --help  // uname -a
 2.  cat  /../  | awk '{print $4}' | awk -F"."'{print $1"."$2}'
 3.  cat >./eof.txt <<-EOF 
 [ubuntu] 
@@ -366,7 +366,16 @@ BBB              //结束
 
 32 sed -r 's/(.)(.)(.*)/\1YYY\2\3/' passwd  // 在passwd文件每行的第一个字母后面添加YYY
    sed -r 's/(.*)(.)/\1YYY\2/' passwd       // 在passwd文件每行的倒数第二个字母后面添加YYY  
+   
+33 sudo ifconfig enp4s0  192.168.1.111
+   sudo service network-manager restart
+   sudo service networking restart
+   interface eth0
+   static ip_address=192.168.0.245
+   static routers=192.168.0.1
+   static domain_name_servers=114.114.114.114
 
+34  df -hl   //查看硬盘使用情况 
 
 
 

@@ -21,6 +21,9 @@ ftp://192.168.0.7/Pub/                             公司ftp
 抓拍盒子pub的数字
 
 
+板子 192.168.1.177
+sudo vi /etc/dhcpcd.conf
+
 
 
 
