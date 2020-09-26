@@ -396,6 +396,20 @@ c 字符设备
 87  sed -ri '$a'"$var1" c.txt   //  将变量var1的值添加文件最后一行
     sed -ri "\$a$var1" c.txt    //  将变量var1的值添加文件最后一行,效果相同
 
+88      BEGIN{}               {}                END{}
+       awk  {print1/2}    {print "ok"}      {print "..."}
+
+89  awk  
+    FS=":"   OFS="----"  //FS 分隔符, OFS 间隔补充符
+    NR     序号
+    FNR    文件序号
+
+90  $0  root:x:0:0:root:/root:/bin/bash
+          $1 $2$3$4 $5    $6     $7
+
+
+
+
 
 
 
