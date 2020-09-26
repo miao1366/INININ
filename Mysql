@@ -21,6 +21,10 @@
 
 6.  show create table 表名   //查看创建表信息 
 
+6.1  show databases;   //显示所有的数据库
+     show  tables;     //显示某个数据库中所有的表
+     use   数据库名     //选择某个数据库
+
 7.  char   
     定长字符串 char(n)     即使没存数据，也要占用n个字符  查询效率较高
     char列的长度在你建表的时候，就是你定义的固定长度。值的范围是0~255。char值存储的时候，
@@ -38,3 +42,54 @@
     create table test(id int, userid char(20), name char(10), 
 		primary key (id, userid));  
     id userid 各种可以有相同值，但是不能有相同的组合值。
+
+11  唯一约束  unique
+    create table test (
+        id int primary key,
+        userid char(18) unique
+    );
+    对于null ,不同的数据库处理方式不同，有些可以重复，有些不能重复(unique)
+
+12  外键约束
+    主表(父表):提供数据所在的表  要有主键
+    从表(子表):外键所在的表
+       外键字段要么来自于主表中的对应字段，要么为null.
+    
+    create table classes (
+       class_no int primary key,
+       class_name char(20)
+    );
+    create table student (
+        stu_no int primary key,
+        stu_name char (20) not null,
+        class_no  int ,
+        foreign key(class_no) references classes(class_no) 
+    );
+    1. 创建表时, 先创建主表，在创建从表
+    2. 被引用的字段必须是主表的主键字段
+
+13 为约束命名
+   constraint 约束名  约束规则
+   constraint 
+
+    create table test (
+        t_no int primary key,
+        t_name char(20),
+        constraint test_name_uk unique(t_name)
+    );
+    # 外键
+    constraint 约束名 foreign key (字段名) references 主表名(主表字段名) 
+
+14 自增型字段  auto_increment  自增型字段必须是主键
+   create table test(
+       t_no int primary key auto_increment
+   );
+
+
+
+
+
+
+
+
+
