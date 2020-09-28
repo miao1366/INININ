@@ -19,6 +19,7 @@
 	mosquitto_sub -t senscape_sub -u admin -P Senscape    
 
 1. mosquitto_sub -v -t /recog/senscape -u admin -P Senscape -h 192.168.0.244
+  mosquitto_sub  -t /0/1 -t /0/2 -t /0/3 -t /1/4 -u admin -P Senscape -p 1883 -h 192.168.0.201
     u:user 
 	p:password 
 	h:host
@@ -203,7 +204,8 @@ MOSQ_ERR_SUCCESS 成功。
 MOSQ_ERR_INVAL 如果输入参数无效。
 MOSQ_ERR_NOT_SUPPORTED 如果没有线程支持。
 
-
+15.  mosquitto_sub -v -t /0/# -u admin -P Senscape -h 124.206.6.6 -p 1883
+     mosquitto_sub -v -t /v/# -u admin -P Senscape -h 124.206.6.6 -p 1883
 
 
 	

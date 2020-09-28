@@ -684,6 +684,14 @@ struct rlimit {
 	当进程是会话组长时setsid()调用失败。setsid()调用成功后，进程成为新的会话组长和新的进程组长，并与原来的登录会话和进程组脱离。
 	由于会话过程对控制终端的独占性，进程同时与控制终端脱离
 
+  在Linux系统下，每一个进程都有惟一的一个定时器，该定时器提供了以秒为单位的定时功能。在定时器设置的超时时间到达后，调用alarm的进程将收到SIGALRM信号
+  unsigned int alarm(unsigned int seconds);
+參数说明：
+1）seconds：要设定的定时时间，以秒为单位。在alarm调用成功后開始计时。超过该时间将触发SIGALRM信号。
+返回值：
+返回当前进程曾经设置的定时器剩余秒数
+  
+  
 116 int setitimer(int which, const struct itimerval *new_value, struct itimerval *old_value);
     struct itimerval 
 {
@@ -761,7 +769,7 @@ sa_restorer： 此参数没有使用
 sa_flags：用来设置信号处理的其他相关操作，下列的数值可用。可用OR 运算（|）组合
 A_NOCLDSTOP:如果参数signum为SIGCHLD，则当子进程暂停时并不会通知父进程
 SA_ONESHOT/SA_RESETHAND:当调用新的信号处理函数前，将此信号处理方式改为系统预设的方式
-SA_RESTART:被信号中断的系统调用会自行重启
+SA_RESTART:被信号中断的系统调用会自行重启  //http://blog.chinaunix.net/uid-28414100-id-5751154.html  应该是函数还会继续等待执行/执行
 SA_NOMASK/SA_NODEFER:在处理此信号未结束前不理会此信号的再次到来
 SA_SIGINFO：信号处理函数是带有三个参数的sa_sigaction
 	
@@ -896,6 +904,30 @@ sig：准备发送的信号代码，假如其值为零则没有任何信号送�
      4》FD_ISSET
      用法：FD_ISSET(int ,fd_set*);
      检测fd在fdset集合中的状态是否变化，当检测到fd状态发生变化时返回真，否则，返回假（也可以认为集合中指定的文件描述符是否可以读写）。
+
+140	 int select(int maxfd, fd_set* readset, fd_set* writeset, fd_set* exceptset, const struct timeval* timeout);
+      select()用来等待文件描述词状态的改变。参数n代表最大的文件描述词加1，参数readfds、writefds和exceptfds 称为描述词组，是用来回传该描述词的读，写或例外的状况
+
+1.   int n:是一个整数值，是指集合中所有文件描述符的范围，即所有文件描述符的最大值加1，不能错！
+2.   fd_set*readfds是指向fd_set结构的指针，这个集合中应该包括文件描述符，我们是要监视这些文件描述符的读变化的，即我们关心是否可以从这些文件中读取数据了，
+     如果这个集合中有一个文件可读，select就会返回一个大于0的值，表示有文件可读，如果没有可读的文件，则根据timeout参数再判断是否超时，
+     若超出timeout的时间，select返回0，若发生错误返回负值。可以传入NULL值，表示不关心任何文件的读变化
+3.   writefds是指向fd_set结构的指针，这个集合中应该包括文件描述符，我们是要监视这些文件描述符的写变化的，即我们关心是否可以向这些文件中写入数据了，
+     如果这个集合中有一个文件可写，select就会返回一个大于0的值，表示有文件可写，如果没有可写的文件，则根据timeout参数再判断是否超时，
+     若超出timeout的时间，select返回0，若发生错误返回负值。可以传入NULL值，表示不关心任何文件的写变化
+4.   fd_set *errorfds同上面两个参数的意图，用来监视文件错误异常
+5.   timeout是select的超时时间，这个参数至关重要，它可以使select处于三种状态，第一，若将NULL以形参传入，即不传入时间结构，就是将select置于阻塞状态，
+     一定等到监视文件描述符集合中某个文件描述符发生变化为止；第二，若将时间值设为0秒0毫秒，就变成一个纯粹的非阻塞函数，不管文件描述符是否有变化，都立刻返回继续执行，
+	 文件无变化返回0，有变化返回一个正值；第三，timeout的值大于0，这就是等待的超时时间，即select在timeout时间内阻塞，超时时间之内有事件到来就返回了，
+	 否则在超时后不管怎样一定返回，返回值同上述.
+
+6.   返回值: 正值：某些文件可读写或出错     0：等待超时，没有可读写或错误的文件    负值：select错误
+
+
+
+
+
+	 
 	 
 141  FD_SETSIZE 
 
@@ -924,9 +956,29 @@ sig：准备发送的信号代码，假如其值为零则没有任何信号送�
 
 144  std::setprecision( ) 浮点数位数
 
+145 int usleep(useconds_t usec);    //睡眠 ，单位微秒
 
- snlua bootstrap
- 11111111111111111111111111111100
+146 ssize_t read(int fd,void*buf,size_t count)
+
+fd: 是文件描述符, 从command line获取数据时，为0
+buf: 为读出数据的缓冲区；
+count: 为每次读取的字节数（是请求读取的字节数，读上来的数据保
+存在缓冲区buf中，同时文件的当前读写位置向后移）
+返回值:
+成功：返回读出的字节数
+失败：返回-1，并设置errno，如果在调用read
+之前到达文件末尾，则这次read返回0
+
+147 ssize_t write(int fd,const void*buf,size_t count);
+参数说明：
+fd:是文件描述符（输出到command line，就是1）
+buf:通常是一个字符串，需要写入的字符串
+count：是每次写入的字节数
+返回值:
+成功：返回写入的字节数
+失败：返回-1并设置errno
+ps： 写常规文件时，write的返回值通常等于请求写的字节
+数count， 而向终端设备或者网络写时则不一定
 
 
 

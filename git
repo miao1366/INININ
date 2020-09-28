@@ -73,6 +73,10 @@ Git 查看远端仓库地址  git remote -v
 
 23  git config --global core.quotepath false    //git 中文文件名乱码
 
+24 git remote -v    //查看远端地址
+
+
+
 
 
 

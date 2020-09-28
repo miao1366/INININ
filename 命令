@@ -377,6 +377,11 @@ BBB              //结束
 
 34  df -hl   //查看硬盘使用情况 
 
+35 ps -ef | wc -l    //查看系统中的总的进程数
+
+36  pstree -apnh     //查看进程间关系
+
+37 mosquitto_sub -v -t /v1/# -u admin -P Senscape -h 192.168.0.201    //定阅所有推送到平台的消息
 
 
  

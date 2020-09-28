@@ -26,14 +26,9 @@
 
 13 多继承时，子类跳到不合理、莫名其妙的函数时，可能是父类指针赋值时错误。
 
+14 父类，子类指针数值是一样的吗？ 
 
-
-
-
-
-
-
-
+15 小心这样的赋值 LowVoltageSwitchBox* box = dynamic_cast<LowVoltageSwitchBox*>(box);
 
 
 
