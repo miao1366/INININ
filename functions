@@ -434,6 +434,27 @@ ilist3初始化为两个迭代器指定范围中元素的拷贝，范围中的�
    第三个参数是需要监听的fd，
    第四个参数是告诉内核需要监听什么事件，structepoll_event结构如下：
    
+   EPOLLOUT事件只有在连接时触发一次，表示可写，其他时候想要触发，那你要先准备好下面条件：
+   1.某次write，写满了发送缓冲区，返回错误码为EAGAIN。
+   2.对端读取了一些数据，又重新可写了，此时会触发EPOLLOUT
+   简单地说：EPOLLOUT事件只有在不可写到可写的转变时刻，才会触发一次，所以叫边缘触发，这叫法没错的
+   
+   EPOLLIN事件则只有当对端有数据写入时才会触发，所以触发一次后需要不断读取所有数据直到读完EAGAIN为止。
+   否则剩下的数据只有在下次对端有写入时才能一起取出来了
+   
+   EAGAIN，提示你的应用程序现在没有数据可读请稍后再试
+   
+   EPOLLIN ：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）；
+   EPOLLOUT：表示对应的文件描述符可以写；
+   EPOLLPRI：表示对应的文件描述符有紧急的数据可读（这里应该表示有带外数据到来）；
+   EPOLLERR：表示对应的文件描述符发生错误；
+   EPOLLHUP：表示对应的文件描述符被挂断；
+   EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的。
+   EPOLLONESHOT：只监听一次事件，当监听完这次事件之后，如果还需要继续监听这个socket的话，需要再次把这个socket加入到EPOLL队列里
+   
+   
+   
+   
  
  83 std::map 
    1.  void erase (iterator position);
@@ -770,6 +791,50 @@ sa_flags：用来设置信号处理的其他相关操作，下列的数值可用
 A_NOCLDSTOP:如果参数signum为SIGCHLD，则当子进程暂停时并不会通知父进程
 SA_ONESHOT/SA_RESETHAND:当调用新的信号处理函数前，将此信号处理方式改为系统预设的方式
 SA_RESTART:被信号中断的系统调用会自行重启  //http://blog.chinaunix.net/uid-28414100-id-5751154.html  应该是函数还会继续等待执行/执行
+ void int_handler (int signum)
+  {
+          printf ("int handler %d/n",signum);
+  }
+ 
+  int main(int argc, char **argv)
+  {
+          char buf[100];
+          ssize_t ret;
+          struct sigaction oldact;
+          struct sigaction act;
+ 
+          act.sa_handler = int_handler;
+          act.sa_flags=0;
+          act.sa_flags |= SA_RESTART;
+          sigemptyset(&act.sa_mask);
+          if (-1 == sigaction(SIGINT,&act,&oldact))
+          {
+                  printf("sigaction failed!/n");
+                  return -1;
+          }
+ 
+          bzero(buf,100);
+ 
+          ret = read(STDIN_FILENO,buf,10);
+          if (ret == -1)
+          {
+                  printf ("read error %s/n", strerror(errn    o))
+          }
+          printf ("read %d bytes, content is %s/n",ret,buf    );
+          sleep (10);
+          return 0;
+  }
+
+
+
+^Cint handler 2
+^Cint handler 2
+^Cint handler 2
+^Cint handler 2
+^Cint handler 2
+^Cint handler 2
+hgfd
+read 5 bytes, content is hgfd
 SA_NOMASK/SA_NODEFER:在处理此信号未结束前不理会此信号的再次到来
 SA_SIGINFO：信号处理函数是带有三个参数的sa_sigaction
 	
@@ -979,9 +1044,6 @@ count：是每次写入的字节数
 失败：返回-1并设置errno
 ps： 写常规文件时，write的返回值通常等于请求写的字节
 数count， 而向终端设备或者网络写时则不一定
-
-
-
 
 
 
