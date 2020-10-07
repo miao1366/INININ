@@ -440,9 +440,15 @@ c 字符设备
 96   awk -F: '{i=1;while{i<=10} {print $0;i++}}' //每行打印10次
 
 97   awk  数组  
+     awk -F: '{user[i++]=$1}END{for(i in user){print i, user[i]}}'
+     awk -F: '{user[$NF]++}END{for(i in user){print i, user[i]}}'
 
-
-
+98   
+     awk  gsub( )函数  int( )函数  -v参数
+     var="bash"
+     echo "unix script" |awk "gsub(/unix/, \"$var\")"
+     echo "unix script" |awk 'gsub(/unix/, "'"$var"'")'
+     echo "unix script" |awk  -v var="bash" 'gsub(/unix/, var)'
 
 
 
