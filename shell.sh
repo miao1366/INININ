@@ -450,7 +450,8 @@ c 字符设备
      echo "unix script" |awk 'gsub(/unix/, "'"$var"'")'
      echo "unix script" |awk  -v var="bash" 'gsub(/unix/, var)'
 
-
+99  echo $USER 
+    echo $LOGNAME   
 
 
 
