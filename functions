@@ -1046,8 +1046,35 @@ ps： 写常规文件时，write的返回值通常等于请求写的字节
 数count， 而向终端设备或者网络写时则不一定
 
 
+148
+
+typedef struct ucontext_t
+  {
+    unsigned long int __ctx(uc_flags);
+    struct ucontext_t *uc_link;           //为当前context执行结束之后要执行的下一个context，若uc_link为空，执行完当前context之后退出程序
+    stack_t uc_stack;                     //为当前context运行的栈信息
+    mcontext_t uc_mcontext;               //保存具体的程序执行上下文，如PC值，堆栈指针以及寄存器值等信息。它的实现依赖于底层，是平台硬件相关的。此实现不透明
+    sigset_t uc_sigmask;                  //执行当前上下文过程中需要屏蔽的信号列表，即信号掩码
+    struct _libc_fpstate __fpregs_mem;
+  } ucontext_t;
 
 
+
+148  void makecontext(ucontext_t* ucp, void (*func)(), int argc, ...);
+     初始化一个ucontext_t,func参数指明了该context的入口函数，argc为入口参数的个数，每个参数的类型必须是int类型。
+	 另外在makecontext之前，一般需要显示的初始化栈信息以及信号掩码集同时也需要初始化uc_link，以便程序退出上下文后继续执行
+149  int swapcontext(ucontext_t* olducp, ucontext_t* newucp);
+     原子操作，该函数的工作是保存当前上下文并将上下文切换到新的上下文运行 , 运行newucp指定的上下文
+150  int getcontext(ucontext_t* ucp);
+     将当前的执行上下文保存在ucp中，以便后续恢复上下文
+151  int setcontext(const ucontext_t* ucp);
+     将当前程序切换到新的context,在执行正确的情况下该函数直接切换到新的执行状态，不会返回
+ 注意:setcontext执行成功不返回，getcontext执行成功返回0，若执行失败都返回-1。若uc_link为NULL,执行完新的上下文之后程序结束。
+
+152  trdiff_t类型变量通常用来保存两个指针减法操作的结果  
+     int *a=new int(1);        //0x5602ddc65280
+     int *b=new int(2);        //0x5602ddc652a0
+     ptrdiff_t result=a-b;     //-8
 
 
 

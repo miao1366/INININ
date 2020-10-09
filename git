@@ -75,7 +75,12 @@ Git 查看远端仓库地址  git remote -v
 
 24 git remote -v    //查看远端地址
 
-
+25 git stash push <file1> <file2> <file3> [file4 ...]  //储藏部分文件
+   git stash list     //所有保存的记录列表
+  
+26 git stash
+   git pull
+   git stash pop
 
 
 
