@@ -82,7 +82,10 @@ Git 查看远端仓库地址  git remote -v
    git pull
    git stash pop  //冲突时可以git add  文件。这样冲突文件都会保存下来，不会覆盖掉
 
-
+27 git 强制pull
+   1. git fetch --all 
+   2. git reset --hard origin/master
+   3. git pull
 
 
 

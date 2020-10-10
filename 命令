@@ -238,7 +238,7 @@ route add default gw 192.168.5.1
 
 
 45 增加交换内存                    //https://blog.csdn.net/hongge_smile/article/details/105685318
-sudo fallocate -l 4G /swapfile
+sudo fallocate -l 4G /swapfile   或者sudo dd if=/dev/zero of=/swapfile bs=2048 count=2097152
 sudo mkswap /swapfile
 sudo swapon /swapfile
 
