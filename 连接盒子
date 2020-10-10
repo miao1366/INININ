@@ -25,6 +25,8 @@ ftp://192.168.0.7/Pub/                             公司ftp
 sudo vi /etc/dhcpcd.conf
 
 
+板子    ssh  senscape@192.168.0.245       senscape   
+
 
 
 

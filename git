@@ -80,7 +80,7 @@ Git 查看远端仓库地址  git remote -v
   
 26 git stash
    git pull
-   git stash pop
+   git stash pop  //冲突时可以git add  文件。这样冲突文件都会保存下来，不会覆盖掉
 
 
 

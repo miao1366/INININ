@@ -39,6 +39,8 @@ ssh firefly@192.168.0.244
 14  nvidia 显卡   安装dkms  
     sudo apt-get install dkms
 
+15 打印选择 HP_LASERJET_MFP_M230sdn_256F19_0
+
 
 
 
