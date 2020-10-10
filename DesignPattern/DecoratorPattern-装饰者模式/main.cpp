@@ -1,149 +1,87 @@
 /*
+https://blog.csdn.net/CoderAldrich/article/details/83115394
 
-https://blog.csdn.net/CoderAldrich/article/details/83114687
-适用场合
-工厂方法模式适用于产品种类结构单一的场合，为一类产品提供创建的接口；而抽象工厂方法适用于产品种类结构多的场合，主要用于创建一组（有多个种类）相关的产品，
-为它们提供创建的接口；就是当具有多个抽象角色时，抽象工厂便可以派上用场。
+动态地给一个对象添加一些额外的职责。就扩展功能而言，它比生成子类方式更为灵活。
+• 递归调用兄弟类方法。
 
 */
 
+
 #include <iostream>
 using namespace std;
- 
-// Product A
-class ProductA
+class Component
 {
 public:
-    virtual void Show() = 0;
+     virtual void Operation() = 0;
 };
- 
-class ProductA1 : public ProductA
+class ConcreteComponent : public Component
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductA1"<<endl;
-    }
+     void Operation()
+     {
+          cout<<"I am no decoratored ConcreteComponent"<<endl;
+     }
 };
- 
-class ProductA2 : public ProductA
+class Decorator : public Component
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductA2"<<endl;
-    }
+     Decorator(Component *pComponent) : m_pComponentObj(pComponent) {}
+     void Operation()
+     {
+          if (m_pComponentObj != NULL)
+          {
+               m_pComponentObj->Operation();
+          }
+     }
+protected:
+     Component *m_pComponentObj;
 };
- 
-// Product B
-class ProductB
+class ConcreteDecoratorA : public Decorator
 {
 public:
-    virtual void Show() = 0;
+     ConcreteDecoratorA(Component *pDecorator) : Decorator(pDecorator){}
+     void Operation()
+     {
+          AddedBehavior();
+          Decorator::Operation();
+     }
+     void  AddedBehavior()
+     {
+          cout<<"This is added behavior A."<<endl;
+     }
 };
- 
-class ProductB1 : public ProductB
+class ConcreteDecoratorB : public Decorator
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductB1"<<endl;
-    }
+     ConcreteDecoratorB(Component *pDecorator) : Decorator(pDecorator){}
+     void Operation()
+     {
+          AddedBehavior();
+          Decorator::Operation();
+     }
+     void  AddedBehavior()
+     {
+          cout<<"This is added behavior B."<<endl;
+     }
 };
- 
-class ProductB2 : public ProductB
+int main()
 {
-public:
-    void Show()
-    {
-        cout<<"I'm ProductB2"<<endl;
-    }
-};
- 
-// Factory
-class Factory
-{
-public:
-    virtual ProductA *CreateProductA() = 0;
-    virtual ProductB *CreateProductB() = 0;
-};
- 
-class Factory1 : public Factory
-{
-public:
-    ProductA *CreateProductA()
-    {
-        return new ProductA1();
-    }
- 
-    ProductB *CreateProductB()
-    {
-        return new ProductB1();
-    }
-};
- 
-class Factory2 : public Factory
-{
-    ProductA *CreateProductA()
-    {
-        return new ProductA2();
-    }
- 
-    ProductB *CreateProductB()
-    {
-        return new ProductB2();
-    }
-};
- 
-int main(int argc, char *argv[])
-{
-    Factory *factoryObj1 = new Factory1();
-    ProductA *productObjA1 = factoryObj1->CreateProductA();
-    ProductB *productObjB1 = factoryObj1->CreateProductB();
- 
-    productObjA1->Show();
-    productObjB1->Show();
- 
-    Factory *factoryObj2 = new Factory2();
-    ProductA *productObjA2 = factoryObj2->CreateProductA();
-    ProductB *productObjB2 = factoryObj2->CreateProductB();
- 
-    productObjA2->Show();
-    productObjB2->Show();
- 
-    if (factoryObj1 != NULL)
-    {
-        delete factoryObj1;
-        factoryObj1 = NULL;
-    }
- 
-    if (productObjA1 != NULL)
-    {
-        delete productObjA1;
-        productObjA1= NULL;
-    }
- 
-    if (productObjB1 != NULL)
-    {
-        delete productObjB1;
-        productObjB1 = NULL;
-    }
- 
-    if (factoryObj2 != NULL)
-    {
-        delete factoryObj2;
-        factoryObj2 = NULL;
-    }
- 
-    if (productObjA2 != NULL)
-    {
-        delete productObjA2;
-        productObjA2 = NULL;
-    }
- 
-    if (productObjB2 != NULL)
-    {
-        delete productObjB2;
-        productObjB2 = NULL;
-    }
+     Component *pComponentObj = new ConcreteComponent();
+     Decorator *pDecoratorAOjb = new ConcreteDecoratorA(pComponentObj);
+     pDecoratorAOjb->Operation();
+     cout<<"============================================="<<endl;
+     Decorator *pDecoratorBOjb = new ConcreteDecoratorB(pComponentObj);
+     pDecoratorBOjb->Operation();
+     cout<<"============================================="<<endl;
+     Decorator *pDecoratorBAOjb = new ConcreteDecoratorB(pDecoratorAOjb);
+     pDecoratorBAOjb->Operation();
+     cout<<"============================================="<<endl;
+     delete pDecoratorBAOjb;
+     pDecoratorBAOjb = NULL;
+     delete pDecoratorBOjb;
+     pDecoratorBOjb = NULL;
+     delete pDecoratorAOjb;
+     pDecoratorAOjb = NULL;
+     delete pComponentObj;
+     pComponentObj = NULL;
 }
