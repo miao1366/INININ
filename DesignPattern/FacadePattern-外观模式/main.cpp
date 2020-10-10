@@ -1,149 +1,72 @@
 /*
+https://blog.csdn.net/CoderAldrich/article/details/83183227
 
-https://blog.csdn.net/CoderAldrich/article/details/83114687
-适用场合
-工厂方法模式适用于产品种类结构单一的场合，为一类产品提供创建的接口；而抽象工厂方法适用于产品种类结构多的场合，主要用于创建一组（有多个种类）相关的产品，
-为它们提供创建的接口；就是当具有多个抽象角色时，抽象工厂便可以派上用场。
 
 */
+
 
 #include <iostream>
 using namespace std;
  
-// Product A
-class ProductA
+// 语法分析子系统
+class CSyntaxParser
 {
 public:
-    virtual void Show() = 0;
+     void SyntaxParser()
+     {
+          cout<<"Syntax Parser"<<endl;
+     }
 };
  
-class ProductA1 : public ProductA
+// 生成中间代码子系统
+class CGenMidCode
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductA1"<<endl;
-    }
+     void GenMidCode()
+     {
+          cout<<"Generate middle code"<<endl;
+     }
 };
  
-class ProductA2 : public ProductA
+// 生成汇编代码子系统
+class CGenAssemblyCode
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductA2"<<endl;
-    }
+     void GenAssemblyCode()
+     {
+          cout<<"Generate assembly code"<<endl;
+     }
 };
  
-// Product B
-class ProductB
+// 链接生成可执行应用程序或库子系统
+class CLinkSystem
 {
 public:
-    virtual void Show() = 0;
+     void LinkSystem()
+     {
+          cout<<"Link System"<<endl;
+     }
 };
  
-class ProductB1 : public ProductB
+class Facade
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductB1"<<endl;
-    }
+     void Compile()
+     {
+          CSyntaxParser syntaxParser;
+          CGenMidCode genMidCode;
+          CGenAssemblyCode genAssemblyCode;
+          CLinkSystem linkSystem;
+          syntaxParser.SyntaxParser();
+          genMidCode.GenMidCode();
+          genAssemblyCode.GenAssemblyCode();
+          linkSystem.LinkSystem();
+     }
 };
  
-class ProductB2 : public ProductB
+// 客户端
+int main()
 {
-public:
-    void Show()
-    {
-        cout<<"I'm ProductB2"<<endl;
-    }
-};
- 
-// Factory
-class Factory
-{
-public:
-    virtual ProductA *CreateProductA() = 0;
-    virtual ProductB *CreateProductB() = 0;
-};
- 
-class Factory1 : public Factory
-{
-public:
-    ProductA *CreateProductA()
-    {
-        return new ProductA1();
-    }
- 
-    ProductB *CreateProductB()
-    {
-        return new ProductB1();
-    }
-};
- 
-class Factory2 : public Factory
-{
-    ProductA *CreateProductA()
-    {
-        return new ProductA2();
-    }
- 
-    ProductB *CreateProductB()
-    {
-        return new ProductB2();
-    }
-};
- 
-int main(int argc, char *argv[])
-{
-    Factory *factoryObj1 = new Factory1();
-    ProductA *productObjA1 = factoryObj1->CreateProductA();
-    ProductB *productObjB1 = factoryObj1->CreateProductB();
- 
-    productObjA1->Show();
-    productObjB1->Show();
- 
-    Factory *factoryObj2 = new Factory2();
-    ProductA *productObjA2 = factoryObj2->CreateProductA();
-    ProductB *productObjB2 = factoryObj2->CreateProductB();
- 
-    productObjA2->Show();
-    productObjB2->Show();
- 
-    if (factoryObj1 != NULL)
-    {
-        delete factoryObj1;
-        factoryObj1 = NULL;
-    }
- 
-    if (productObjA1 != NULL)
-    {
-        delete productObjA1;
-        productObjA1= NULL;
-    }
- 
-    if (productObjB1 != NULL)
-    {
-        delete productObjB1;
-        productObjB1 = NULL;
-    }
- 
-    if (factoryObj2 != NULL)
-    {
-        delete factoryObj2;
-        factoryObj2 = NULL;
-    }
- 
-    if (productObjA2 != NULL)
-    {
-        delete productObjA2;
-        productObjA2 = NULL;
-    }
- 
-    if (productObjB2 != NULL)
-    {
-        delete productObjB2;
-        productObjB2 = NULL;
-    }
+     Facade facade;
+     facade.Compile();
 }

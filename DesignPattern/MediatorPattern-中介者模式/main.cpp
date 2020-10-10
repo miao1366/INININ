@@ -1,149 +1,131 @@
-/*
+/* 
+https://blog.csdn.net/CoderAldrich/article/details/83183587
 
-https://blog.csdn.net/CoderAldrich/article/details/83114687
-适用场合
-工厂方法模式适用于产品种类结构单一的场合，为一类产品提供创建的接口；而抽象工厂方法适用于产品种类结构多的场合，主要用于创建一组（有多个种类）相关的产品，
-为它们提供创建的接口；就是当具有多个抽象角色时，抽象工厂便可以派上用场。
+与外观模式的区别
+
+我在看中介者模式时，第一眼就感觉中介者模式和外观模式超级像。外观模式与中介者模式的不同之处在于它是对一个对象子系统进行抽象，
+从而提供了一个更为方便的接口；外观模式的协议是单向的，即外观模式向子系统提出请求，但反过来则不行；而对于中介者模式，是进行多个对象之间的协作，通信是多向的。
 
 */
+
+
 
 #include <iostream>
 using namespace std;
  
-// Product A
-class ProductA
+#define SAFE_DELETE(p) if (p) { delete p; p = NULL; }
+ 
+class Mediator;
+ 
+class Colleague
 {
 public:
-    virtual void Show() = 0;
+     Colleague(Mediator *pMediator) : m_pMediator(pMediator){}
+ 
+     virtual void Send(wchar_t *message) = 0;
+ 
+protected:
+     Mediator *m_pMediator;
 };
  
-class ProductA1 : public ProductA
+class ConcreteColleague1 : public Colleague
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductA1"<<endl;
-    }
+     ConcreteColleague1(Mediator *pMediator) : Colleague(pMediator){}
+ 
+     void Send(wchar_t *message);
+ 
+     void Notify(wchar_t *message)
+     {
+          wcout<<message<<endl;
+     }
 };
  
-class ProductA2 : public ProductA
+class ConcreteColleague2 : public Colleague
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductA2"<<endl;
-    }
+     ConcreteColleague2(Mediator *pMediator) : Colleague(pMediator){}
+ 
+     void Send(wchar_t *message);
+ 
+     void Notify(wchar_t *message)
+     {
+          cout<<"ConcreteColleague2 is handling the message."<<endl;
+          wcout<<message<<endl;
+     }
 };
  
-// Product B
-class ProductB
+class Mediator
 {
 public:
-    virtual void Show() = 0;
+     virtual void Sent(wchar_t *message, Colleague *pColleague) = 0;
 };
  
-class ProductB1 : public ProductB
+class ConcreteMediator : public Mediator
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductB1"<<endl;
-    }
+     // The mediator forward the message
+     void Sent(wchar_t *message, Colleague *pColleague)
+     {
+          ConcreteColleague1 *pConcreteColleague1 = dynamic_cast<ConcreteColleague1 *>(pColleague);
+          if (pConcreteColleague1)
+          {
+               cout<<"The message is from ConcreteColleague1. Now mediator forward it to ConcreteColleague2"<<endl;
+               if (m_pColleague2)
+               {
+                    m_pColleague2->Notify(message);
+               }
+          }
+          else
+          {
+               if (m_pColleague1)
+               {
+                    m_pColleague1->Notify(message);
+               }
+          }
+     }
+ 
+     void SetColleague1(Colleague *pColleague)
+     {
+          m_pColleague1 = dynamic_cast<ConcreteColleague1 *>(pColleague);
+     }
+ 
+     void SetColleague2(Colleague *pColleague)
+     {
+          m_pColleague2 = dynamic_cast<ConcreteColleague2 *>(pColleague);
+     }
+ 
+private:
+     // The Mediator knows all the Colleague
+     ConcreteColleague1 *m_pColleague1;
+     ConcreteColleague2 *m_pColleague2;
 };
  
-class ProductB2 : public ProductB
+void ConcreteColleague1::Send(wchar_t *message)
 {
-public:
-    void Show()
-    {
-        cout<<"I'm ProductB2"<<endl;
-    }
-};
+     // The second parameter mark where the message comes from
+     m_pMediator->Sent(message, this);
+}
  
-// Factory
-class Factory
+void ConcreteColleague2::Send(wchar_t *message)
 {
-public:
-    virtual ProductA *CreateProductA() = 0;
-    virtual ProductB *CreateProductB() = 0;
-};
+     m_pMediator->Sent(message, this);
+}
  
-class Factory1 : public Factory
+int main()
 {
-public:
-    ProductA *CreateProductA()
-    {
-        return new ProductA1();
-    }
+     // Create the mediator
+     Mediator *pMediator = new ConcreteMediator();
  
-    ProductB *CreateProductB()
-    {
-        return new ProductB1();
-    }
-};
+     Colleague *pColleague1 = new ConcreteColleague1(pMediator);
+     Colleague *pColleague2 = new ConcreteColleague2(pMediator);
  
-class Factory2 : public Factory
-{
-    ProductA *CreateProductA()
-    {
-        return new ProductA2();
-    }
+     ConcreteMediator *pConcreteMediator = dynamic_cast<ConcreteMediator *>(pMediator);
+     pConcreteMediator->SetColleague1(pColleague1);
+     pConcreteMediator->SetColleague2(pColleague2);
  
-    ProductB *CreateProductB()
-    {
-        return new ProductB2();
-    }
-};
+     wchar_t message[260] = L"Where are you from?";
+     pColleague1->Send(message);
  
-int main(int argc, char *argv[])
-{
-    Factory *factoryObj1 = new Factory1();
-    ProductA *productObjA1 = factoryObj1->CreateProductA();
-    ProductB *productObjB1 = factoryObj1->CreateProductB();
- 
-    productObjA1->Show();
-    productObjB1->Show();
- 
-    Factory *factoryObj2 = new Factory2();
-    ProductA *productObjA2 = factoryObj2->CreateProductA();
-    ProductB *productObjB2 = factoryObj2->CreateProductB();
- 
-    productObjA2->Show();
-    productObjB2->Show();
- 
-    if (factoryObj1 != NULL)
-    {
-        delete factoryObj1;
-        factoryObj1 = NULL;
-    }
- 
-    if (productObjA1 != NULL)
-    {
-        delete productObjA1;
-        productObjA1= NULL;
-    }
- 
-    if (productObjB1 != NULL)
-    {
-        delete productObjB1;
-        productObjB1 = NULL;
-    }
- 
-    if (factoryObj2 != NULL)
-    {
-        delete factoryObj2;
-        factoryObj2 = NULL;
-    }
- 
-    if (productObjA2 != NULL)
-    {
-        delete productObjA2;
-        productObjA2 = NULL;
-    }
- 
-    if (productObjB2 != NULL)
-    {
-        delete productObjB2;
-        productObjB2 = NULL;
-    }
+     return 0;
 }

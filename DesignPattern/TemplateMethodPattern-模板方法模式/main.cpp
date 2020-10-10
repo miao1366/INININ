@@ -1,149 +1,73 @@
 /*
+https://blog.csdn.net/CoderAldrich/article/details/83270337
 
-https://blog.csdn.net/CoderAldrich/article/details/83114687
-适用场合
-工厂方法模式适用于产品种类结构单一的场合，为一类产品提供创建的接口；而抽象工厂方法适用于产品种类结构多的场合，主要用于创建一组（有多个种类）相关的产品，
-为它们提供创建的接口；就是当具有多个抽象角色时，抽象工厂便可以派上用场。
+定义一个操作中的算法的骨架，而将一些步骤延迟到子类中。Template Method 使得子类可以不改变一个算法的结构即可重定义该算法的某些特定步骤
+
 
 */
 
 #include <iostream>
 using namespace std;
  
-// Product A
-class ProductA
+class AbstractClass
 {
 public:
-    virtual void Show() = 0;
+     void TemplateMethod()
+     {
+          PrimitiveOperation1();
+          cout<<"TemplateMethod"<<endl;
+          PrimitiveOperation2();
+     }
+ 
+protected:
+     virtual void PrimitiveOperation1()
+     {
+          cout<<"Default Operation1"<<endl;
+     }
+ 
+     virtual void PrimitiveOperation2()
+     {
+          cout<<"Default Operation2"<<endl;
+     }
 };
  
-class ProductA1 : public ProductA
+class ConcreteClassA : public AbstractClass
 {
-public:
-    void Show()
-    {
-        cout<<"I'm ProductA1"<<endl;
-    }
+protected:
+          virtual void PrimitiveOperation1()
+     {
+          cout<<"ConcreteA Operation1"<<endl;
+     }
+ 
+     virtual void PrimitiveOperation2()
+     {
+          cout<<"ConcreteA Operation2"<<endl;
+     }
 };
  
-class ProductA2 : public ProductA
+class ConcreteClassB : public AbstractClass
 {
-public:
-    void Show()
-    {
-        cout<<"I'm ProductA2"<<endl;
-    }
+protected:
+          virtual void PrimitiveOperation1()
+     {
+          cout<<"ConcreteB Operation1"<<endl;
+     }
+ 
+     virtual void PrimitiveOperation2()
+     {
+          cout<<"ConcreteB Operation2"<<endl;
+     }
 };
  
-// Product B
-class ProductB
+int main()
 {
-public:
-    virtual void Show() = 0;
-};
+     AbstractClass *pAbstractA = new ConcreteClassA;
+     pAbstractA->TemplateMethod();
  
-class ProductB1 : public ProductB
-{
-public:
-    void Show()
-    {
-        cout<<"I'm ProductB1"<<endl;
-    }
-};
+     AbstractClass *pAbstractB = new ConcreteClassB;
+     pAbstractB->TemplateMethod();
  
-class ProductB2 : public ProductB
-{
-public:
-    void Show()
-    {
-        cout<<"I'm ProductB2"<<endl;
-    }
-};
- 
-// Factory
-class Factory
-{
-public:
-    virtual ProductA *CreateProductA() = 0;
-    virtual ProductB *CreateProductB() = 0;
-};
- 
-class Factory1 : public Factory
-{
-public:
-    ProductA *CreateProductA()
-    {
-        return new ProductA1();
-    }
- 
-    ProductB *CreateProductB()
-    {
-        return new ProductB1();
-    }
-};
- 
-class Factory2 : public Factory
-{
-    ProductA *CreateProductA()
-    {
-        return new ProductA2();
-    }
- 
-    ProductB *CreateProductB()
-    {
-        return new ProductB2();
-    }
-};
- 
-int main(int argc, char *argv[])
-{
-    Factory *factoryObj1 = new Factory1();
-    ProductA *productObjA1 = factoryObj1->CreateProductA();
-    ProductB *productObjB1 = factoryObj1->CreateProductB();
- 
-    productObjA1->Show();
-    productObjB1->Show();
- 
-    Factory *factoryObj2 = new Factory2();
-    ProductA *productObjA2 = factoryObj2->CreateProductA();
-    ProductB *productObjB2 = factoryObj2->CreateProductB();
- 
-    productObjA2->Show();
-    productObjB2->Show();
- 
-    if (factoryObj1 != NULL)
-    {
-        delete factoryObj1;
-        factoryObj1 = NULL;
-    }
- 
-    if (productObjA1 != NULL)
-    {
-        delete productObjA1;
-        productObjA1= NULL;
-    }
- 
-    if (productObjB1 != NULL)
-    {
-        delete productObjB1;
-        productObjB1 = NULL;
-    }
- 
-    if (factoryObj2 != NULL)
-    {
-        delete factoryObj2;
-        factoryObj2 = NULL;
-    }
- 
-    if (productObjA2 != NULL)
-    {
-        delete productObjA2;
-        productObjA2 = NULL;
-    }
- 
-    if (productObjB2 != NULL)
-    {
-        delete productObjB2;
-        productObjB2 = NULL;
-    }
+     if (pAbstractA) delete pAbstractA;
+     if (pAbstractB) delete pAbstractB;
 }
+
