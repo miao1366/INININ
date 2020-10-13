@@ -87,7 +87,8 @@ Git 查看远端仓库地址  git remote -v
    2. git reset --hard origin/master
    3. git pull
 
-
+28 git branch -d yourbranch           // 删除本地分支
+   git push origin -d yourbranch      // 删除远程分支
 
 
 
