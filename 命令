@@ -402,6 +402,7 @@ Command：进程启动的启动命令名称，如果这一行显示不下，进�
 40  sudo ldconfig  // 加载库文件
 
 41  chown -R  // 更换文件用户
+    sudo chown -R  senscape:senscape ./sensorcontroller/    //     sudo chown -R  用户名:密码   目录
 
 42 ping www.sohu.com -I wwan0
 	
