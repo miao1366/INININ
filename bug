@@ -30,7 +30,11 @@
 
 15 小心这样的赋值 LowVoltageSwitchBox* box = dynamic_cast<LowVoltageSwitchBox*>(box);
 
-
+16 "undefined reference to XXX"  经常会遇到"undefined reference to XXX"的问题，直白地说
+    就是在**链接**(从.cpp源代码到可执行的ELF文件，要经过预处理->编译->链接三个阶段，
+    此时预处理和编译已经通过了)的时候，链接器找不到XXX这个函数的定义了
+	
+	可能是库 和源码 头文件 版本不一致
 
 
 

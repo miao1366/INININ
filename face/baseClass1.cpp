@@ -1,3 +1,4 @@
+#include <stdio.h>
 class A
 {
 public:
@@ -34,7 +35,7 @@ int main(void)
     p->fun();
     A *ptr = (A *)&b;
     ptr->foo();
-        ptr->fun();
+    ptr->fun();
     return 0;
 }
 
