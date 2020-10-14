@@ -36,6 +36,9 @@
 6 int luaL_dofile (lua_State *L, const char *filename);  加载并运行某个文件
 
 7 int lua_pcall (lua_State *L, int nargs, int nresults, int errfunc);
+  nargs 参数个数
+  nresults 返回值个数
+  errFunc 错误处理函数，0表示无，表示错误处理函数在栈中的索引
 
 8 void lua_pushcfunction (lua_State *L, lua_CFunction f);
 　　将C函数压栈；
@@ -211,6 +214,8 @@ package.path = "../myLuaTest/myLuaCode/?.lua;"..package.path
     @repeated 代表可重复，我们可以理解为数组
 
 38 compat  n. 兼容
+
+39 luaL_newstate()  lua_newstate(arg1, arg2)  //创建新的虚拟机
 
   
   

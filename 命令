@@ -406,7 +406,7 @@ Command：进程启动的启动命令名称，如果这一行显示不下，进�
 
 42 ping www.sohu.com -I wwan0
 	
-
+43 tar cf a.tar ./0820/*.txt   // 打包0820目录下所有txt文件
 
 
 
