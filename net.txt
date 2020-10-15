@@ -163,10 +163,13 @@ backlog的上限值受到系统全局设定的限制。
 // https://blog.csdn.net/hyg0811/article/details/102366854?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param
 
 9 tcp 单词缩写
-  ack        acknowledge  vt. 承认；答谢；报偿；告知已收到
+  ack        acknowledge  vt. 承认；答谢；报偿；告知已收到 确认号
   SYN        Synchronize Sequence Numbers  同步序列编号
   seq        sequence   序列；顺序；序号；续发事件
   
+  SYN        同步序号
+  ACK        确认序号
+
        
   （1）序号：seq序号，占32位，用来标识从TCP源端向目的端发送的字节流，发起方发送数据时对此进行标记。
   （2）确认序号：ack序号，占32位，只有ACK标志位为1时，确认序号字段才有效，Ack=Seq+1。
@@ -326,14 +329,35 @@ PPID 指父进程 id；PID 指进程 id；PGID 指进程组 id
 SID 指会话 id；TTY 指会话的控制终端设备；COMMAND 指进程所执行的命令
 TPGID 指前台进程组的 PGID 
 
-8 
+8    一句话概括，TCP连接握手，握的是啥？
+     通信双方数据原点的序列号
+     TCP可靠传输的精髓：TCP连接的一方A，由操作系统动态随机选取一个32位长的序列号（Initial Sequence Number），
+     假设A的初始序列号为1000，以该序列号为原点，对自己将要发送的每个字节的数据进行编号，1001，1002，1003…，并把自己的初始序列号ISN告诉B，
+     让B有一个思想准备，什么样编号的数据是合法的，什么编号是非法的，比如编号900就是非法的，同时B还可以对A每一个编号的字节数据进行确认。
+     如果A收到B确认编号为2001，则意味着字节编号为1001-2000，共1000个字节已经安全到达。
+ 
+     同理B也是类似的操作，假设B的初始序列号ISN为2000，以该序列号为原点，对自己将要发送的每个字节的数据进行编号，2001，2002，2003…，
+     并把自己的初始序列号ISN告诉A，以便A可以确认B发送的每一个字节。如果B收到A确认编号为4001，则意味着字节编号为2001-4000，共2000个字
+     节已经安全到达。
+     一句话概括，TCP连接握手，握的是啥？
+     通信双方数据原点的序列号！
 
+9    四次分手
+发送FIN的一方就是主动关闭(客户端)，而另一方则为被动关闭(服务器)。
+当一方发送了FIN，则表示在这一方不再会有数据的发送。
+其中当被动关闭方受到对方的FIN时，此时往往可能还有数据需要发送过去，因此无法立即发送FIN(也就是无法将FIN与ACK合并发送)，
+而是在等待自己的数据发送完毕后再单独发送FIN，因此整个过程需要四次交互
 
+10   1.TIME_WAI产生的原因
+    上图可以看到，TCP状态转换机中，TIME_WAIT出现是为了解决:
+1 ACk全部到达服务器端
+2 等待2MSL 为了使得本次连接的全部数据报消失在网络中
 
+2.TIME_WAIT状态的危害
+当TCP连接处于TIME_WAIT的时候，所用的端口号，都禁止使用
 
-
-
-
+3.如何解决
+修改Linux内核中的参数，使得新的TCP连接可以重用处于TIME_WAIT的连接
 
 
 

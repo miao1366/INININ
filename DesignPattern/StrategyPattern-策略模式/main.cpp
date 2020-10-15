@@ -1,149 +1,83 @@
 /*
+https://blog.csdn.net/CoderAldrich/article/details/83270248
 
-https://blog.csdn.net/CoderAldrich/article/details/83114687
-适用场合
-工厂方法模式适用于产品种类结构单一的场合，为一类产品提供创建的接口；而抽象工厂方法适用于产品种类结构多的场合，主要用于创建一组（有多个种类）相关的产品，
-为它们提供创建的接口；就是当具有多个抽象角色时，抽象工厂便可以派上用场。
+当存在以下情况时使用Strategy模式：
+许多相关的类仅仅是行为有异。“策略”提供了一种用多个行为中的一个行为来配置一个类的方法；
+需要使用一个算法的不同变体；
+算法使用客户不应该知道的数据。可使用策略模式以避免暴露复杂的、与算法相关的数据结构；
+一个类定义了多种行为，并且这些行为在这个类的操作中以多个条件语句的形式出现。将相关的条件分支移入它们各自的Strategy类中以替代这些条件语句。（是不是和状态模式有点一样哦？）
 
 */
 
 #include <iostream>
 using namespace std;
  
-// Product A
-class ProductA
+// The abstract strategy
+class Strategy
 {
 public:
-    virtual void Show() = 0;
+     virtual void AlgorithmInterface() = 0;
 };
  
-class ProductA1 : public ProductA
+class ConcreteStrategyA : public Strategy
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductA1"<<endl;
-    }
+     void AlgorithmInterface()
+     {
+          cout<<"I am from ConcreteStrategyA."<<endl;
+     }
 };
  
-class ProductA2 : public ProductA
+class ConcreteStrategyB : public Strategy
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductA2"<<endl;
-    }
+     void AlgorithmInterface()
+     {
+          cout<<"I am from ConcreteStrategyB."<<endl;
+     }
 };
  
-// Product B
-class ProductB
+class ConcreteStrategyC : public Strategy
 {
 public:
-    virtual void Show() = 0;
+     void AlgorithmInterface()
+     {
+          cout<<"I am from ConcreteStrategyC."<<endl;
+     }
 };
  
-class ProductB1 : public ProductB
+class Context
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductB1"<<endl;
-    }
+     Context(Strategy *pStrategyArg) : pStrategy(pStrategyArg)
+     {
+     }
+     void ContextInterface()
+     {
+          pStrategy->AlgorithmInterface();
+     }
+private:
+     Strategy *pStrategy;
 };
  
-class ProductB2 : public ProductB
+int main()
 {
-public:
-    void Show()
-    {
-        cout<<"I'm ProductB2"<<endl;
-    }
-};
+     // Create the Strategy
+     Strategy *pStrategyA = new ConcreteStrategyA;
+     Strategy *pStrategyB = new ConcreteStrategyB;
+     Strategy *pStrategyC = new ConcreteStrategyC;
+     Context *pContextA = new Context(pStrategyA);
+     Context *pContextB = new Context(pStrategyB);
+     Context *pContextC = new Context(pStrategyC);
+     pContextA->ContextInterface();
+     pContextB->ContextInterface();
+     pContextC->ContextInterface();
  
-// Factory
-class Factory
-{
-public:
-    virtual ProductA *CreateProductA() = 0;
-    virtual ProductB *CreateProductB() = 0;
-};
+     if (pStrategyA) delete pStrategyA;
+     if (pStrategyB) delete pStrategyB;
+     if (pStrategyC) delete pStrategyC;
  
-class Factory1 : public Factory
-{
-public:
-    ProductA *CreateProductA()
-    {
-        return new ProductA1();
-    }
- 
-    ProductB *CreateProductB()
-    {
-        return new ProductB1();
-    }
-};
- 
-class Factory2 : public Factory
-{
-    ProductA *CreateProductA()
-    {
-        return new ProductA2();
-    }
- 
-    ProductB *CreateProductB()
-    {
-        return new ProductB2();
-    }
-};
- 
-int main(int argc, char *argv[])
-{
-    Factory *factoryObj1 = new Factory1();
-    ProductA *productObjA1 = factoryObj1->CreateProductA();
-    ProductB *productObjB1 = factoryObj1->CreateProductB();
- 
-    productObjA1->Show();
-    productObjB1->Show();
- 
-    Factory *factoryObj2 = new Factory2();
-    ProductA *productObjA2 = factoryObj2->CreateProductA();
-    ProductB *productObjB2 = factoryObj2->CreateProductB();
- 
-    productObjA2->Show();
-    productObjB2->Show();
- 
-    if (factoryObj1 != NULL)
-    {
-        delete factoryObj1;
-        factoryObj1 = NULL;
-    }
- 
-    if (productObjA1 != NULL)
-    {
-        delete productObjA1;
-        productObjA1= NULL;
-    }
- 
-    if (productObjB1 != NULL)
-    {
-        delete productObjB1;
-        productObjB1 = NULL;
-    }
- 
-    if (factoryObj2 != NULL)
-    {
-        delete factoryObj2;
-        factoryObj2 = NULL;
-    }
- 
-    if (productObjA2 != NULL)
-    {
-        delete productObjA2;
-        productObjA2 = NULL;
-    }
- 
-    if (productObjB2 != NULL)
-    {
-        delete productObjB2;
-        productObjB2 = NULL;
-    }
+     if (pContextA) delete pContextA;
+     if (pContextB) delete pContextB;
+     if (pContextC) delete pContextC;
 }
