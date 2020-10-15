@@ -96,3 +96,18 @@ FIN  发送端完成发送任务位,当TCP完成数据传输需要断开时,提�
      1+1+2+1+4+3=12
      元素数=6
      所以：平均查找长度=12/6=2
+    
+18. 实现底层为红黑树的set、multiset、map、multimap    // multimap  multiset key值可以重复
+
+     multimap<string,int> multimapSTRint;
+     multimapSTRint.insert(make_pair("strtrest",125));
+     multimapSTRint.insert(make_pair("strtrest",126))
+     typedef multimap<string,int>::iterator iterTest;
+     iterTest beg = multimapSTRint.lower_bound("strtrest");
+     iterTest end = multimapSTRint.upper_bound("strtrest");
+     while(beg != end)
+     {
+      int Nstr = beg->second;
+      ++beg;
+     }
+19 
