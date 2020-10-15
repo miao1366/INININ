@@ -1,149 +1,272 @@
 /*
 
-https://blog.csdn.net/CoderAldrich/article/details/83114687
-适用场合
-工厂方法模式适用于产品种类结构单一的场合，为一类产品提供创建的接口；而抽象工厂方法适用于产品种类结构多的场合，主要用于创建一组（有多个种类）相关的产品，
-为它们提供创建的接口；就是当具有多个抽象角色时，抽象工厂便可以派上用场。
+https://blog.csdn.net/CoderAldrich/article/details/83183521
 
+使用场合
+1. 访问一个聚合对象的内容而无需暴露它的内部表示；
+2. 支持对聚合对象的多种遍历（从前到后，从后到前）；
+3. 为遍历不同的聚合结构提供一个统一的接口，即支持多态迭代。
+ 
+作用
+1. 它支持以不同的方式遍历一个聚合，甚至都可以自己定义迭代器的子类以支持新的遍历；
+2. 迭代器简化了聚合的接口，有了迭代器的遍历接口，聚合本身就不再需要类似的遍历接口了。这样就简化了聚合的接口；
+3. 在同一个聚合上可以有多个遍历，每个迭代器保持它自己的遍历状态；因此，我们可以同时进行多个遍历
 */
 
 #include <iostream>
 using namespace std;
  
-// Product A
-class ProductA
+typedef struct tagNode
+{
+     int value;
+     tagNode *pNext;
+}Node;
+ 
+class JTList
 {
 public:
-    virtual void Show() = 0;
+     JTList() : m_pHead(NULL), m_pTail(NULL){};
+     JTList(const JTList &);
+     ~JTList();
+     JTList &operator=(const JTList &);
+ 
+     long GetCount() const;
+     Node *Get(const long index) const;
+     Node *First() const;
+     Node *Last() const;
+     bool Includes(const int &) const;
+ 
+     void Append(const int &);
+     void Remove(Node *pNode);
+     void RemoveAll();
+ 
+private:
+     Node *m_pHead;
+     Node *m_pTail;
+     long m_lCount;
 };
  
-class ProductA1 : public ProductA
+class Iterator
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductA1"<<endl;
-    }
+     virtual void First() = 0;
+     virtual void Next() = 0;
+     virtual bool IsDone() const = 0;
+     virtual Node *CurrentItem() const  = 0;
 };
  
-class ProductA2 : public ProductA
+class JTListIterator : public Iterator
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductA2"<<endl;
-    }
+     JTListIterator(JTList *pList) : m_pJTList(pList), m_pCurrent(NULL){}
+ 
+     virtual void First();
+     virtual void Next();
+     virtual bool IsDone() const;
+     virtual Node *CurrentItem() const;
+ 
+private:
+     JTList *m_pJTList;
+     Node *m_pCurrent;
 };
  
-// Product B
-class ProductB
+JTList::~JTList()
 {
-public:
-    virtual void Show() = 0;
-};
+     Node *pCurrent = m_pHead;
+     Node *pNextNode = NULL;
+     while (pCurrent)
+     {
+          pNextNode = pCurrent->pNext;
+          delete pCurrent;
+          pCurrent = pNextNode;
+     }
+}
  
-class ProductB1 : public ProductB
+long JTList::GetCount()const
 {
-public:
-    void Show()
-    {
-        cout<<"I'm ProductB1"<<endl;
-    }
-};
+     return m_lCount;
+}
  
-class ProductB2 : public ProductB
+Node *JTList::Get(const long index) const
 {
-public:
-    void Show()
-    {
-        cout<<"I'm ProductB2"<<endl;
-    }
-};
+     // The min index is 0, max index is count - 1
+     if (index > m_lCount - 1 || index < 0)
+     {
+          return NULL;
+     }
  
-// Factory
-class Factory
+     int iPosTemp = 0;
+     Node *pNodeTemp = m_pHead;
+     while (pNodeTemp)
+     {
+          if (index == iPosTemp++)
+          {
+               return pNodeTemp;
+          }
+          pNodeTemp = pNodeTemp->pNext;
+     }
+     return NULL;
+}
+ 
+Node *JTList::First() const
 {
-public:
-    virtual ProductA *CreateProductA() = 0;
-    virtual ProductB *CreateProductB() = 0;
-};
+     return m_pHead;
+}
  
-class Factory1 : public Factory
+Node *JTList::Last() const
 {
-public:
-    ProductA *CreateProductA()
-    {
-        return new ProductA1();
-    }
+     return m_pTail;
+}
  
-    ProductB *CreateProductB()
-    {
-        return new ProductB1();
-    }
-};
- 
-class Factory2 : public Factory
+bool JTList::Includes(const int &value) const
 {
-    ProductA *CreateProductA()
-    {
-        return new ProductA2();
-    }
+     Node *pNodeTemp = m_pHead;
+     while (pNodeTemp)
+     {
+          if (value == pNodeTemp->value)
+          {
+               return true;
+          }
+          pNodeTemp = pNodeTemp->pNext;
+     }
+     return false;
+}
  
-    ProductB *CreateProductB()
-    {
-        return new ProductB2();
-    }
-};
- 
-int main(int argc, char *argv[])
+void JTList::Append(const int &value)
 {
-    Factory *factoryObj1 = new Factory1();
-    ProductA *productObjA1 = factoryObj1->CreateProductA();
-    ProductB *productObjB1 = factoryObj1->CreateProductB();
+     // Create the new node
+     Node *pInsertNode = new Node;
+     pInsertNode->value = value;
+     pInsertNode->pNext = NULL;
  
-    productObjA1->Show();
-    productObjB1->Show();
+     // This list is empty
+     if (m_pHead == NULL)
+     {
+          m_pHead = m_pTail = pInsertNode;
+     }
+     else
+     {
+          m_pTail->pNext = pInsertNode;
+          m_pTail = pInsertNode;
+     }
+     ++m_lCount;
+}
  
-    Factory *factoryObj2 = new Factory2();
-    ProductA *productObjA2 = factoryObj2->CreateProductA();
-    ProductB *productObjB2 = factoryObj2->CreateProductB();
+void JTList::Remove(Node *pNode)
+{
+     if (pNode == NULL || m_pHead == NULL || m_pTail == NULL)
+     {
+          return;
+     }
  
-    productObjA2->Show();
-    productObjB2->Show();
+     if (pNode == m_pHead) // If the deleting node is head node
+     {
+          Node *pNewHead = m_pHead->pNext;
+          m_pHead = pNewHead;
+     }
+     else
+     {
+          // To get the deleting node's previous node
+          Node *pPreviousNode = NULL;
+          Node *pCurrentNode = m_pHead;
+          while (pCurrentNode)
+          {
+               pPreviousNode = pCurrentNode;
+               pCurrentNode = pCurrentNode->pNext;
+               if (pCurrentNode == pNode)
+               {
+                    break;
+               }
+          }
  
-    if (factoryObj1 != NULL)
-    {
-        delete factoryObj1;
-        factoryObj1 = NULL;
-    }
+          // To get the deleting node's next node
+          Node *pNextNode = pNode->pNext;
  
-    if (productObjA1 != NULL)
-    {
-        delete productObjA1;
-        productObjA1= NULL;
-    }
+          // If pNextNode is NULL, it means the deleting node is the tail node, we should change the m_pTail pointer
+          if (pNextNode == NULL)
+          {
+               m_pTail = pPreviousNode;
+          }
  
-    if (productObjB1 != NULL)
-    {
-        delete productObjB1;
-        productObjB1 = NULL;
-    }
+          // Relink the list
+          pPreviousNode->pNext = pNextNode;
+     }
  
-    if (factoryObj2 != NULL)
-    {
-        delete factoryObj2;
-        factoryObj2 = NULL;
-    }
+     // Delete the node
+     delete pNode;
+     pNode = NULL;
+     --m_lCount;
+}
  
-    if (productObjA2 != NULL)
-    {
-        delete productObjA2;
-        productObjA2 = NULL;
-    }
+void JTList::RemoveAll()
+{
+     delete this;
+}
  
-    if (productObjB2 != NULL)
-    {
-        delete productObjB2;
-        productObjB2 = NULL;
-    }
+void JTListIterator::First()
+{
+     m_pCurrent = m_pJTList->First();
+}
+ 
+void JTListIterator::Next()
+{
+     m_pCurrent = m_pCurrent->pNext;
+}
+ 
+bool JTListIterator::IsDone() const
+{
+     return m_pCurrent == m_pJTList->Last()->pNext;
+}
+ 
+Node *JTListIterator::CurrentItem() const
+{
+     return m_pCurrent;
+}
+ 
+int main()
+{
+     JTList *pJTList = new JTList;
+     pJTList->Append(10);
+     pJTList->Append(20);
+     pJTList->Append(30);
+     pJTList->Append(40);
+     pJTList->Append(50);
+     pJTList->Append(60);
+     pJTList->Append(70);
+     pJTList->Append(80);
+     pJTList->Append(90);
+     pJTList->Append(100);
+ 
+     Iterator *pIterator = new JTListIterator(pJTList);
+ 
+     // Print the list by JTListIterator
+     for (pIterator->First(); !pIterator->IsDone(); pIterator->Next())
+     {
+          cout<<pIterator->CurrentItem()->value<<"->";
+     }
+     cout<<"NULL"<<endl;
+ 
+     // Test for removing
+     Node *pDeleteNode = NULL;
+     for (pIterator->First(); !pIterator->IsDone(); pIterator->Next())
+     {
+          pDeleteNode = pIterator->CurrentItem();
+          if (pDeleteNode->value == 100)
+          {
+               pJTList->Remove(pDeleteNode);
+               break;
+          }
+     }
+ 
+     // Print the list by JTListIterator
+     for (pIterator->First(); !pIterator->IsDone(); pIterator->Next())
+     {
+          cout<<pIterator->CurrentItem()->value<<"->";
+     }
+     cout<<"NULL"<<endl;
+ 
+     delete pIterator;
+     delete pJTList;
+ 
+     return 0;
 }

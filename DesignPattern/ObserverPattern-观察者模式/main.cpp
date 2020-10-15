@@ -1,149 +1,120 @@
 /*
 
-https://blog.csdn.net/CoderAldrich/article/details/83114687
-适用场合
-工厂方法模式适用于产品种类结构单一的场合，为一类产品提供创建的接口；而抽象工厂方法适用于产品种类结构多的场合，主要用于创建一组（有多个种类）相关的产品，
-为它们提供创建的接口；就是当具有多个抽象角色时，抽象工厂便可以派上用场。
+在以下任一情况下都可以使用观察者模式：
+1. 当一个抽象模型有两个方面，其中一个方面依赖于另一方面。将这二者封装在独立的对象中以使它们可以各自独立的改变和复用；
+2. 当对一个对象的改变需要同时改变其它对象，而不知道具体有多少对象有待改变；
+3. 当一个对象必须通知其它对象，而它又不能假定其它对象是谁；也就是说，你不希望这些对象是紧密耦合的。
 
 */
 
 #include <iostream>
+#include <list>
 using namespace std;
  
-// Product A
-class ProductA
+class Observer
 {
 public:
-    virtual void Show() = 0;
+     virtual void Update(int) = 0;
 };
  
-class ProductA1 : public ProductA
+class Subject
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductA1"<<endl;
-    }
+     virtual void Attach(Observer *) = 0;
+     virtual void Detach(Observer *) = 0;
+     virtual void Notify() = 0;
 };
  
-class ProductA2 : public ProductA
+class ConcreteObserver : public Observer
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductA2"<<endl;
-    }
+     ConcreteObserver(Subject *pSubject) : m_pSubject(pSubject){}
+ 
+     void Update(int value)
+     {
+          cout<<"ConcreteObserver get the update. New State:"<<value<<endl;
+     }
+ 
+private:
+     Subject *m_pSubject;
 };
  
-// Product B
-class ProductB
+class ConcreteObserver2 : public Observer
 {
 public:
-    virtual void Show() = 0;
+     ConcreteObserver2(Subject *pSubject) : m_pSubject(pSubject){}
+ 
+     void Update(int value)
+     {
+          cout<<"ConcreteObserver2 get the update. New State:"<<value<<endl;
+     }
+ 
+private:
+     Subject *m_pSubject;
 };
  
-class ProductB1 : public ProductB
+class ConcreteSubject : public Subject
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductB1"<<endl;
-    }
+     void Attach(Observer *pObserver);
+     void Detach(Observer *pObserver);
+     void Notify();
+ 
+     void SetState(int state)
+     {
+          m_iState = state;
+     }
+ 
+private:
+     std::list<Observer *> m_ObserverList;
+     int m_iState;
 };
  
-class ProductB2 : public ProductB
+void ConcreteSubject::Attach(Observer *pObserver)
 {
-public:
-    void Show()
-    {
-        cout<<"I'm ProductB2"<<endl;
-    }
-};
+     m_ObserverList.push_back(pObserver);
+}
  
-// Factory
-class Factory
+void ConcreteSubject::Detach(Observer *pObserver)
 {
-public:
-    virtual ProductA *CreateProductA() = 0;
-    virtual ProductB *CreateProductB() = 0;
-};
+     m_ObserverList.remove(pObserver);
+}
  
-class Factory1 : public Factory
+void ConcreteSubject::Notify()
 {
-public:
-    ProductA *CreateProductA()
-    {
-        return new ProductA1();
-    }
+     std::list<Observer *>::iterator it = m_ObserverList.begin();
+     while (it != m_ObserverList.end())
+     {
+          (*it)->Update(m_iState);
+          ++it;
+     }
+}
  
-    ProductB *CreateProductB()
-    {
-        return new ProductB1();
-    }
-};
- 
-class Factory2 : public Factory
+int main()
 {
-    ProductA *CreateProductA()
-    {
-        return new ProductA2();
-    }
+     // Create Subject
+     ConcreteSubject *pSubject = new ConcreteSubject();
  
-    ProductB *CreateProductB()
-    {
-        return new ProductB2();
-    }
-};
+     // Create Observer
+     Observer *pObserver = new ConcreteObserver(pSubject);
+     Observer *pObserver2 = new ConcreteObserver2(pSubject);
  
-int main(int argc, char *argv[])
-{
-    Factory *factoryObj1 = new Factory1();
-    ProductA *productObjA1 = factoryObj1->CreateProductA();
-    ProductB *productObjB1 = factoryObj1->CreateProductB();
+     // Change the state
+     pSubject->SetState(2);
  
-    productObjA1->Show();
-    productObjB1->Show();
+     // Register the observer
+     pSubject->Attach(pObserver);
+     pSubject->Attach(pObserver2);
  
-    Factory *factoryObj2 = new Factory2();
-    ProductA *productObjA2 = factoryObj2->CreateProductA();
-    ProductB *productObjB2 = factoryObj2->CreateProductB();
+     pSubject->Notify();
  
-    productObjA2->Show();
-    productObjB2->Show();
+     // Unregister the observer
+     pSubject->Detach(pObserver);
  
-    if (factoryObj1 != NULL)
-    {
-        delete factoryObj1;
-        factoryObj1 = NULL;
-    }
+     pSubject->SetState(3);
+     pSubject->Notify();
  
-    if (productObjA1 != NULL)
-    {
-        delete productObjA1;
-        productObjA1= NULL;
-    }
- 
-    if (productObjB1 != NULL)
-    {
-        delete productObjB1;
-        productObjB1 = NULL;
-    }
- 
-    if (factoryObj2 != NULL)
-    {
-        delete factoryObj2;
-        factoryObj2 = NULL;
-    }
- 
-    if (productObjA2 != NULL)
-    {
-        delete productObjA2;
-        productObjA2 = NULL;
-    }
- 
-    if (productObjB2 != NULL)
-    {
-        delete productObjB2;
-        productObjB2 = NULL;
-    }
+     delete pObserver;
+     delete pObserver2;
+     delete pSubject;
 }

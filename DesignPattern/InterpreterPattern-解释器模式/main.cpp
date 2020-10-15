@@ -1,149 +1,295 @@
 /*
 
-https://blog.csdn.net/CoderAldrich/article/details/83114687
-适用场合
-工厂方法模式适用于产品种类结构单一的场合，为一类产品提供创建的接口；而抽象工厂方法适用于产品种类结构多的场合，主要用于创建一组（有多个种类）相关的产品，
-为它们提供创建的接口；就是当具有多个抽象角色时，抽象工厂便可以派上用场。
+https://blog.csdn.net/CoderAldrich/article/details/83183467
+
+在以下情况下可以考虑使用解释器模式：
+1. 可以将一个需要解释执行的语言中的句子表示为一个抽象语法树；
+2. 一些重复出现的问题可以用一种简单的语言来进行表达；
+3. 一个语言的文法较为简单；
+4. 执行效率不是关键问题。【注：高效的解释器通常不是通过直接解释抽象语法树来实现的，而是需要将它们转换成其他形式，使用解释器模式的执行效率并不高。】
 
 */
 
 #include <iostream>
+#include <vector>
+#include <string.h>
+#include <wchar.h>
+
 using namespace std;
  
-// Product A
-class ProductA
+#define MAX_SIZE 256
+#define SAFE_DELETE(p) if (p) { delete p; p = NULL; }
+ 
+const wchar_t *const DOWN = L"down";
+const wchar_t *const UP = L"up";
+const wchar_t *const LEFT = L"left";
+const wchar_t *const RIGHT = L"right";
+ 
+const wchar_t *const MOVE = L"move";
+const wchar_t *const WALK = L"walk";
+ 
+class AbstractNode
 {
 public:
-    virtual void Show() = 0;
+     virtual wchar_t *Interpret() = 0;
 };
  
-class ProductA1 : public ProductA
+class AndNode : public AbstractNode
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductA1"<<endl;
-    }
+     AndNode(AbstractNode *left, AbstractNode *right) : m_pLeft(left), m_pRight(right){}
+ 
+     wchar_t *Interpret()
+     {
+          wchar_t *pResult = new wchar_t[MAX_SIZE];
+          memset(pResult, 0, MAX_SIZE * sizeof(wchar_t));
+ 
+          wchar_t *pLeft = m_pLeft->Interpret();
+          wchar_t *pRight = m_pRight->Interpret();
+          wcscat_s(pResult, MAX_SIZE, pLeft);
+          wcscat_s(pResult, MAX_SIZE, pRight);
+ 
+          SAFE_DELETE(pLeft);
+          SAFE_DELETE(m_pRight);
+ 
+          return pResult;
+     }
+ 
+private:
+     AbstractNode *m_pLeft;
+     AbstractNode *m_pRight;
 };
  
-class ProductA2 : public ProductA
+class SentenceNode : public AbstractNode
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductA2"<<endl;
-    }
+     SentenceNode(AbstractNode *direction, AbstractNode *action, AbstractNode *distance) :
+          m_pDirection(direction), m_pAction(action), m_pDistance(distance){}
+ 
+     wchar_t *Interpret()
+     {
+          wchar_t *pResult = new wchar_t[MAX_SIZE];
+          memset(pResult, 0, MAX_SIZE * sizeof(wchar_t));
+ 
+          wchar_t *pDirection = m_pDirection->Interpret();
+          wchar_t *pAction = m_pAction->Interpret();
+          wchar_t *pDistance = m_pDistance->Interpret();
+          wcscat_s(pResult, MAX_SIZE, pDirection);
+          wcscat_s(pResult, MAX_SIZE, pAction);
+          wcscat_s(pResult, MAX_SIZE, pDistance);
+ 
+          SAFE_DELETE(pDirection);
+          SAFE_DELETE(pAction);
+          SAFE_DELETE(pDistance);
+ 
+          return pResult;
+     }
+ 
+private:
+     AbstractNode *m_pDirection;
+     AbstractNode *m_pAction;
+     AbstractNode *m_pDistance;
 };
  
-// Product B
-class ProductB
+class DirectionNode : public AbstractNode
 {
 public:
-    virtual void Show() = 0;
+     DirectionNode(wchar_t *direction) : m_pDirection(direction){}
+ 
+     wchar_t *Interpret()
+     {
+          wchar_t *pResult = new wchar_t[MAX_SIZE];
+          memset(pResult, 0, MAX_SIZE * sizeof(wchar_t));
+ 
+          if (!_wcsicmp(m_pDirection, DOWN))
+          {
+               wcscat_s(pResult, MAX_SIZE, L"向下");
+          }
+          else if (!_wcsicmp(m_pDirection, UP))
+          {
+               wcscat_s(pResult, MAX_SIZE, L"向上");
+          }
+          else if (!_wcsicmp(m_pDirection, LEFT))
+          {
+               wcscat_s(pResult, MAX_SIZE, L"向左");
+          }
+          else if (!_wcsicmp(m_pDirection, RIGHT))
+          {
+               wcscat_s(pResult, MAX_SIZE, L"向右");
+          }
+          else
+          {
+               wcscat_s(pResult, MAX_SIZE, L"无效指令");
+          }
+ 
+          SAFE_DELETE(m_pDirection);
+          return pResult;
+     }
+ 
+private:
+     wchar_t *m_pDirection;
 };
  
-class ProductB1 : public ProductB
+class ActionNode : public AbstractNode
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductB1"<<endl;
-    }
+     ActionNode(wchar_t *action) : m_pAction(action){}
+ 
+     wchar_t *Interpret()
+     {
+          wchar_t *pResult = new wchar_t[MAX_SIZE];
+          memset(pResult, 0, MAX_SIZE * sizeof(wchar_t));
+ 
+          if (!_wcsicmp(m_pAction, MOVE))
+          {
+               wcscat_s(pResult, MAX_SIZE, L"移动");
+          }
+          else if (!_wcsicmp(m_pAction, WALK))
+          {
+               wcscat_s(pResult, MAX_SIZE, L"走动");
+          }
+          else
+          {
+               wcscat_s(pResult, MAX_SIZE, L"无效指令");
+          }
+ 
+          SAFE_DELETE(m_pAction);
+          return pResult;
+     }
+ 
+private:
+     wchar_t *m_pAction;
 };
  
-class ProductB2 : public ProductB
+class DistanceNode : public AbstractNode
 {
 public:
-    void Show()
-    {
-        cout<<"I'm ProductB2"<<endl;
-    }
+     DistanceNode(wchar_t *distance) : m_pDistance(distance){}
+ 
+     wchar_t *Interpret()
+     {
+          wchar_t *pResult = new wchar_t[MAX_SIZE];
+          memset(pResult, 0, MAX_SIZE * sizeof(wchar_t));
+ 
+          wcscat_s(pResult, MAX_SIZE, m_pDistance);
+ 
+          SAFE_DELETE(m_pDistance);
+          return pResult;
+     }
+ 
+private:
+     wchar_t *m_pDistance;
 };
  
-// Factory
-class Factory
+class InstructionHandler
 {
 public:
-    virtual ProductA *CreateProductA() = 0;
-    virtual ProductB *CreateProductB() = 0;
+     InstructionHandler(wchar_t *instruction) : m_pInstruction(instruction), m_pTree(NULL){}
+ 
+     void Handle();
+     void Output();
+ 
+private:
+     void SplitInstruction(wchar_t **&instruction, int &size);
+ 
+     wchar_t *m_pInstruction;
+     AbstractNode *m_pTree;
 };
  
-class Factory1 : public Factory
+void InstructionHandler::Handle()
 {
-public:
-    ProductA *CreateProductA()
-    {
-        return new ProductA1();
-    }
+     AbstractNode *pLeft = NULL;
+     AbstractNode *pRight = NULL;
+     AbstractNode *pDirection = NULL;
+     AbstractNode *pAction = NULL;
+     AbstractNode *pDistance = NULL;
  
-    ProductB *CreateProductB()
-    {
-        return new ProductB1();
-    }
-};
+     vector<AbstractNode *> node; // Store the instruction expression
  
-class Factory2 : public Factory
+     // Split the instruction by " "
+     wchar_t **InstructionArray = NULL;
+     int size;
+     SplitInstruction(InstructionArray, size);
+     for (int i = 0; i < size; ++i)
+     {
+          if (!_wcsicmp(InstructionArray[i], L"and")) // The instruction is composited by two expressions
+          {
+               wchar_t *pDirectionStr = InstructionArray[++i];
+               pDirection = new DirectionNode(pDirectionStr);
+ 
+               wchar_t *pActionStr = InstructionArray[++i];
+               pAction = new ActionNode(pActionStr);
+ 
+               wchar_t *pDistanceStr = InstructionArray[++i];
+               pDistance = new DistanceNode(pDistanceStr);
+ 
+               pRight = new SentenceNode(pDirection, pAction, pDistance);
+               node.push_back(new AndNode(pLeft, pRight));
+          }
+          else
+          {
+               wchar_t *pDirectionStr = InstructionArray[i];
+               pDirection = new DirectionNode(pDirectionStr);
+ 
+               wchar_t *pActionStr = InstructionArray[++i];
+               pAction = new ActionNode(pActionStr);
+ 
+               wchar_t *pDistanceStr = InstructionArray[++i];
+               pDistance = new DistanceNode(pDistanceStr);
+ 
+               pLeft = new SentenceNode(pDirection, pAction, pDistance);
+               node.push_back(pLeft);
+          }
+     }
+ 
+     m_pTree = node[node.size() - 1];
+}
+ 
+void InstructionHandler::Output()
 {
-    ProductA *CreateProductA()
-    {
-        return new ProductA2();
-    }
+     wchar_t *pResult = m_pTree->Interpret();
  
-    ProductB *CreateProductB()
-    {
-        return new ProductB2();
-    }
-};
+     setlocale(LC_ALL,"");
+     wprintf_s(L"%s\n", pResult);
  
-int main(int argc, char *argv[])
+     SAFE_DELETE(pResult);
+}
+ 
+void InstructionHandler::SplitInstruction(wchar_t **&instruction, int &size)
 {
-    Factory *factoryObj1 = new Factory1();
-    ProductA *productObjA1 = factoryObj1->CreateProductA();
-    ProductB *productObjB1 = factoryObj1->CreateProductB();
+     instruction = new wchar_t*[10];
+     memset(instruction, 0, 10 * sizeof( wchar_t*));
  
-    productObjA1->Show();
-    productObjB1->Show();
+     for (int i = 0; i < 10; ++i)
+     {
+          instruction[i] = new wchar_t[10];
+          memset(instruction[i], 0, 10 * sizeof(wchar_t));
+     }
  
-    Factory *factoryObj2 = new Factory2();
-    ProductA *productObjA2 = factoryObj2->CreateProductA();
-    ProductB *productObjB2 = factoryObj2->CreateProductB();
+     size = 0;
+     int n = 0;
+     while (*m_pInstruction != L'\0')
+     {
+          if (*m_pInstruction == L' ')
+          {
+               size++;
+               m_pInstruction++;
+               n = 0;
+               continue;
+          }
  
-    productObjA2->Show();
-    productObjB2->Show();
+          instruction[size][n++] = *m_pInstruction++;
+     }
+     size++;
+}
  
-    if (factoryObj1 != NULL)
-    {
-        delete factoryObj1;
-        factoryObj1 = NULL;
-    }
+int main()
+{
+     wchar_t *pInstructionStr = L"up move 5 and down walk 10";
  
-    if (productObjA1 != NULL)
-    {
-        delete productObjA1;
-        productObjA1= NULL;
-    }
+     InstructionHandler *pInstructionHandler = new InstructionHandler(pInstructionStr);
+     pInstructionHandler->Handle();
+     pInstructionHandler->Output();
  
-    if (productObjB1 != NULL)
-    {
-        delete productObjB1;
-        productObjB1 = NULL;
-    }
- 
-    if (factoryObj2 != NULL)
-    {
-        delete factoryObj2;
-        factoryObj2 = NULL;
-    }
- 
-    if (productObjA2 != NULL)
-    {
-        delete productObjA2;
-        productObjA2 = NULL;
-    }
- 
-    if (productObjB2 != NULL)
-    {
-        delete productObjB2;
-        productObjB2 = NULL;
-    }
+     SAFE_DELETE(pInstructionHandler);
 }
