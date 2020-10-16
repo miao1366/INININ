@@ -50,7 +50,16 @@ public:
     }
 };
 
-class B : public A {
+class C {
+public:  
+    C() {
+        std::cout << "C is created"  << std::endl;
+        std::cout << this << std::endl;
+    }
+    virtual void func() = 0;
+ };
+
+class B : public C, public A {
 public:  
     B() {
         std::cout << "B is created"  << std::endl;
@@ -63,10 +72,13 @@ public:
     virtual void Print() {
         std::cout << "B:: Print()."  << std::endl;
     }
+    virtual void func() {
+
+    }
 };
 
 int main(void) {
-   A* a = new B();
+   B* a = new B();
    delete a;
    return 0;
 }

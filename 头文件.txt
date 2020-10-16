@@ -30,3 +30,19 @@ uint64_t数八进制输出：%llo
 11 #include <stdlib.h> malloc, free, calloc, realloc
 
 12 #include<stdint.h>  一些数据类型头文件 int32_t  int64
+
+13 在C/C++编程中时常需要使用整数的最大值最小值，通常这两个常用是跟平台和操作系统有关的，不同的平台会有不同的值，因此可移植的办法就是推荐使用库函数提供的常量定义。
+   （1）类似的常量定义在limits.h和float.h头文件中，可以查看源文件获取类似常量的使用办法。在头文件中，整数的最值通常是这样的名字：INT_MAX, INT_MIN，直接使用即可。
+   （2）当然这两个最值完全可以通过编程实现：
+    #define MAX_INT ((unsigned)(-1)>>1)
+    #define MIN_INT (~MAX_INT)
+
+14 
+
+
+
+
+
+
+
+
