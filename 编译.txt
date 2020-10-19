@@ -1,3 +1,17 @@
 
--Wconversion 		当隐式类型转换可能改变值时给出警告
--Wold-style-cast 	程序使用C风格的类型转换时给出警告 
+1.  -Wconversion 	当隐式类型转换可能改变值时给出警告
+2.  -Wold-style-cast 	程序使用C风格的类型转换时给出警告
+3.  debug版本的项目生成的可执行文件需要有调试信息并且不需要进行优化，而release版本的不需要调试信息但是需要优化。
+    这些特性在gcc/g++中通过编译时的参数来决定的，如果将优化程度调到最高需要设置 -O3 ，最低的是 -O0 即不做优化，添加调试信息的参数是 -g  -ggdb 
+
+4.  CMake 中有一个变量 CMAKE_BUILD_TYPE ,可以的取值是 Debug Release Rel WithDebInfo 和 MinSizeRel。当这个变量值为 Debug 的时候,
+    CMake 会使用变量 CMAKE_CXX_FLAGS_DEBUG 和 CMAKE_C_FLAGS_DEBUG 中的字符串作为编译选项生成 Makefile ,当这个变量值为 Release 的时候,
+    工程会使用变量 CMAKE_CXX_FLAGS_RELEASE 和 CMAKE_C_FLAGS_RELEASE 选项生成 Makefile。
+
+5.  -g和-ggdb之间只有细微的区别。
+    具体来说，-g产生的debug信息是OS native format， GDB可以使用之。而-ggdb产生的debug信息更倾向于给GDB使用的。
+    所以，如果你用的GDB调试器，那么使用-ggdb选项。如果是其他调试器，则使用-g
+
+6. value has been optimized out  变量被编译优化掉了，看不到了
+
+7. 由于gcc在编译过程中默认使用-O2优化选项，希望进行单步跟踪调试时，应使用-O0选项
