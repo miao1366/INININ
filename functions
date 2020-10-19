@@ -1105,7 +1105,7 @@ typedef struct ucontext_t
      int *b=new int(2);        //0x5602ddc652a0
      ptrdiff_t result=a-b;     //-8
 
-
+153  reverse  反转序列   //<algorithm>
 
 
 
