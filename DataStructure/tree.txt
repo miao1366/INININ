@@ -23,3 +23,5 @@
     
 6. 完全二叉树：
    若在一棵满二叉树中，在最下层从最右侧起去掉相邻的若干子节点，得到的二叉树即为完全二叉树   完全二叉树如果有N个节点，那么叶子节点M=(N+1)/2  ？？？
+
+7. https://leetcode-cn.com/problems/binary-tree-level-order-traversal/solution/er-cha-shu-ceng-xu-bian-li-deng-chang-wo-yao-da-sh/
