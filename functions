@@ -1107,6 +1107,7 @@ typedef struct ucontext_t
 
 153  reverse  反转序列   //<algorithm>
 
+154 unordered_set和unordered_map内部实现是基于哈希表(hashtable)
 
 
 

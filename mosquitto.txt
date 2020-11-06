@@ -207,6 +207,16 @@ MOSQ_ERR_NOT_SUPPORTED 如果没有线程支持。
 15.  mosquitto_sub -v -t /0/# -u admin -P Senscape -h 124.206.6.6 -p 1883
      mosquitto_sub -v -t /v/# -u admin -P Senscape -h 124.206.6.6 -p 1883
 
+16.
+开启 mosquitto:
+sudo service mosquitto start
+停止 mosquitto：
+sudo service mosquitto stop
+查看 mosquitto 状态：
+sudo service mosquitto status
+查看监听的端口:
+sudo lsof -i:1883
+
 
 	
 	

@@ -412,4 +412,44 @@ Command：进程启动的启动命令名称，如果这一行显示不下，进�
 
 45 sudo ip address add 192.168.1.188/24 dev eno1
 
+46  &命令
+    功能：加在一个命令的最后，可以把这个命令放在后台执行
+
+47 jobs命令
+   功能：查看当前终端后台运行的任务
+   
+48-- 网关部署
+    cd /userdata/project_run
+	cp ./smart_gateway.service  /lib/systemd/system/
+    
+	systemctl enable smart_gateway.service #开机运行服务
+	service smart_gateway start  //开启服务
+	
+	sudo apt-get install mosquitto
+	修改 /lib/systemd/system/mosquitto.service文件  -c参数为/userdata/project_run/toolsets/senscape.conf
+	
+	sudo apt-get install mosquitto -y
+	sudo apt-get install mosquitto-clients -y
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
 
