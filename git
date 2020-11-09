@@ -91,8 +91,11 @@ Git 查看远端仓库地址  git remote -v
    git push origin -d yourbranch      // 删除远程分支
 
 
+29 git reset --soft HEAD~1   // 撤销一次commit 
 
-
+30  
+   git reset HEAD                   // add后对所有文件进行撤销
+   git reset HEAD XXX/XXX/XXX.java  // add后对某个文件进行撤销
 
 
 
