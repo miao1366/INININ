@@ -1109,6 +1109,14 @@ typedef struct ucontext_t
 
 154 unordered_set和unordered_map内部实现是基于哈希表(hashtable)
 
+155 erase()返回值都是一个迭代器，该迭代器指向被删除元素后面的元素（这个是重点）
+    for(vector<int>::iterator iter = ivec.begin(); iter != ivec.end(); ) {
+			if((*iter) %2 == 0){
+				iter = ivec.erase(iter);
+			} else {
+                iter++;
+            }
+	}
 
 
 

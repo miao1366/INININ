@@ -37,6 +37,13 @@
 	可能是库 和源码 头文件 版本不一致
 
 
+17  free() delete 空指针 没有问题， if ptr is null , no operation is performed;
+
+18 运行docker容器 报错 Unknown runtime specified nvidia.
+  1. 显卡驱动或许有问题，建议重装。
+  2. docker 版本
+   
+
 
 
 
