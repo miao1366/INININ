@@ -110,17 +110,59 @@ create database choose;
 
     创建教师表
     表名: teacher
-    字段: teacher_no      char(10) 主键         --教师工号
+    字段: teacher_no      char(10) 主键          --教师工号
           teacher_name    char(10) 非空         --教师姓名
           teacher_contact char(20) 非空         --联系方式
     创建学生表
     表名: student
 
+1. create database choose character set=utf8; //创建choose 数据库
+
+创建班级表
+表名: classes
+字段: class_no          整型          自增长              主键         //班级编号
+     class_name        char(20)     非空                唯一         //班级名称
+     department_name   char(20)     非空                非空         //院系名称
+    
+ create table classes(class_no int auto_increment primary key, 
+            class_name char(10) unique not null, 
+            department_name char(20) not null );
 
 
+创建教师表
+表名: teacher
+字段: teacher_no          char(10)                        主键         //教师编号
+     teacher_name        char(20)     非空                非空         //教师姓名
+     teacher_contact     char(20)     非空                非空         //联系方式
 
+create table teacher(teacher_no char(10) primary key, 
+            teacher_name char(20) not null, 
+            teacher_contact char(20) not null);
 
+创建学生表
+表名: student;
+字段: student_no          char(11)                        主键         //教师编号
+     student_name        char(20)     非空                非空         //教师姓名
+     student_contact     char(20)     非空                非空         //联系方式
+     class_no            int          外键
 
+create table student(student_no char(10) primary key, 
+            student_name char(20) not null, 
+            student_contact char(20) not null
+            class_no int );
 
+创建课程表
+表名: course;
+字段: course_no          int           自增长             主键         
+     course_name        char(20)     非空                非空         
+     up_limit           int          默认                60
+     description        varchar(100)                     非空
+     status             char(6)      默认                未审核         
+     teacher_no         char(10)     非空     唯一       外键
+
+create table student(student_no char(10) primary key, 
+            student_name char(20) not null, 
+            student_contact char(20) not null
+            class_no int );
 
 

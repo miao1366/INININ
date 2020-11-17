@@ -128,7 +128,7 @@ SQLite中创建自增字段:
 若可能的最大键已存在于表中，INSERT操作将失败并返回一个SQLITE_FULL错误码.
 
 
-
+delete from image where id = 7;  // 删除image表 id=7 的数据
 
 
 

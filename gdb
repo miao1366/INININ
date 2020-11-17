@@ -48,6 +48,16 @@ info registers <regname >  查看所指定的寄存器的情况
 
 6 pstack 是 Linux（比如 Red Hat Linux 系统、Ubuntu Linux 系统等）下一个很有用的工具，它的功能是打印输出此进程的堆栈信息
 
+(gdb) bt：显示所有栈帧，backtrace。
+(gdb) bt 10：显示前面10个栈帧。
+(gdb) bt -10：显示后面10个栈帧。
+(gdb) bt full：显示栈帧以及局部变量。
+(gdb) bt full 10：显示前面10个栈帧以及局部变量。
+(gdb) bt full -10：显示后面10个栈帧以及局部变量。
+(gdb) frame <栈帧编号>：进入指定的栈帧中，然后可以查看当前栈帧中的局部变量，以及栈帧内容等信息。
+(gdb) info frame <栈帧编号>：可以查看指定栈帧的详细信息。
+(gdb) up：进入上层栈帧。
+(gdb) down：进入下层栈帧。
 
 
 
