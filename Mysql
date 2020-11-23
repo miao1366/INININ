@@ -146,10 +146,12 @@ create table teacher(teacher_no char(10) primary key,
      student_contact     char(20)     非空                非空         //联系方式
      class_no            int          外键
 
-create table student(student_no char(10) primary key, 
-            student_name char(20) not null, 
-            student_contact char(20) not null
-            class_no int );
+create table student(student_no char(11) primary key,
+    student_name char(20) not null,
+    student_contact char(20) not null,
+    class_no  int, 
+    constraint student_class_fk foreign key
+    (class_no) references classes(class_no));;
 
 创建课程表
 表名: course;
@@ -160,9 +162,639 @@ create table student(student_no char(10) primary key,
      status             char(6)      默认                未审核         
      teacher_no         char(10)     非空     唯一       外键
 
-create table student(student_no char(10) primary key, 
-            student_name char(20) not null, 
-            student_contact char(20) not null
-            class_no int );
+    create table course(
+        course_no int auto_increment primary key,
+        course_name char(16) not null,
+        up_limit int default 60,
+        description varchar(100) not null,
+        status char(6) default '未审核',
+        teacher_no char(10) unique not null,
+        constraint course_teacher_fk foreign key (teacher_no) references teacher(teacher_no));
+
+创建选课表
+表名:choose
+字段:
+    choose_no          int                 自增长         主键
+    student_no         char(10)
+    score                     
+    choose_time
+    course_no
+
+    create table choose( 
+        choose_no int auto_increment primary key, 
+        student_no char(11) not null, 
+        course_no int not null, 
+        choose_time datetime not null, 
+        score tinyint unsigned, 
+        constraint choose_student_fk foreign key (student_no) references student(student_no), 
+        constraint choose_course_fk foreign key (course_no) references course(course_no) 
+        );
+    
+    引用的外键需要是其他表的主键，外键要和引用的主键类型一致，名字可以不同。
+
+    DECIMAL数据类型用于要求非常高的精确度的计算中，这些类型允许指定数值的
+    精确度和计数方法作为选择参数。精确度在这里是指为这个值保存的有效数字的总个数，
+    而计数方法表示小数点后数字的个数。例如，语句DECIMAL(5,2)规定了存储的值将不会超过5位数字，
+    并且小数点后面有2位数字。
+
+    复制表结构 (但是这样外键并没有复制)
+    1. create table 表名 like 源表
+    2. create table 表名  select * (也可以是部分数据) from 源表 (复制源表结构和数据)
+    
+    修改表结构
+        可修改表的字段名、类型、约束条件、表名...
+        也可以删除表的字段、约束条件...
+    
+    删除一个主表时，如果一个表的外键是主表的索引时，先要删除子表，或者把字表的外键删除掉。
+    
+    dmi     删除 修改 增加
+    curd    代表创建（Create） 、 更新（Update） 、 读取（Read） 和 删除（Delete） 操作 应该是查询语句相关。
+
+    desc  table teacher;
+    desc  teacher;
+    
+    显示创建表语句 show create table  表名
+    
+    达内 Mysql pdf文档[]代表 可选项
+
+    对于自增长时，insert失败、delete数据都会造成自增长的值不连续。
+    insert 可以同时插入多条数据。 
+
+    不可否认主键时唯一的，但是当一个表有两个主键时，此时是两个主键一起做为主键，即联合主键，
+    两个主键只要有一个不同，就算作不同的。但当两个主键完全一样时，才会报错，说主键不能重复
+
+    insert into course values(null, 'c语言', 230, '暂无', '已审核', '003');
+    insert into course values(null, 'mysql', 150, '暂无', '已审核', '002');
+    insert into course values(null, 'java语言', default, '暂无', '已审核', '001');
+ 
+
+    create table stu like student;
+    insert into stu select * from student;  //student表中所有数据插入 stu中。
+    update stu set student_name = '张三丰' ,class_no=2  where student_name= '张三';
+
+    select distinct class_no  from student;  //获取不重复数据，排重
+
+    delete表数据，下次插入数据时，自增字段数据也会中断，不会有连续
+    turncate删除数据，自增数据也会删除。
+
+    增删改支持事务的回滚， turncate不支持回滚
+
+char() varchar() 区别
+    char（n）和varchar（n）中括号中n代表字符的个数，并不代表字节个数，
+    所以当使用了中文的时候(UTF8)意味着可以插入m个中文，但是实际会占用m*3个字节
+1、char（n）和varchar（n）中括号中n代表字符的个数，并不代表字节个数，所以当使用了中文的时候(UTF8)意味着可以插入m个中文，但是实际会占用m*3个字节。
+2、同时char和varchar最大的区别就在于char不管实际value都会占用n个字符的空间，而varchar只会占用实际字符应该占用的空间+1，并且实际空间+1<=n。
+3、超过char和varchar的n设置后，字符串会被截断。
+4、char的上限为255字节，varchar的上限65535字节，text的上限为65535。
+5、char在存储的时候会截断尾部的空格，varchar和text不会。
+6、varchar会使用1-3个字节来存储长度，text不会
+7、 char在存储的时候会将右侧空格进行剔除，保留左侧空格。
+    varchar在存储的时候保留所有空格，不进行任何删除
+    varchar和char在查询的时候都只会根据where条件中的左侧空格进行判断，右侧末尾的空格会忽略
+
+    子表有引用主表主键时，如果删除有子表引用的主表主键，会删除失败。
+
+   select  department_name 院系 from classes;  // department_name 取别名院系
+   select distinct department_name 院系 from classes;  // department_name 去重
+   select distinct class_no,department_name 院系 from classes;  //class_no department_name 都相同时才会去重
+   
+   select count(*) from information_schema.tables; // information_schema.tables 系统库里的保存所有表信息的
+select table_schema, table_name ,table_rows from information_schema.tables limit 10;  //获取前十行
+select table_schema, table_name ,table_rows from information_schema.tables where table_rows = 0  limit 3；
+
+// 从第三行开始取三行数据
+select table_schema, table_name ,table_rows from information_schema.tables where table_rows = 0  limit 3, 3;
+
+select student.student_no 学号, student.student_name 姓名,
+classes.class_name 班级, classes.department_name 学院 from classes inner join student
+on student.class_no = classes.class_no;
 
 
+
+select s.student_no 学号, s.student_name 姓名,
+c.class_name 班级, c.department_name 学院 from classes c inner join student s
+on s.class_no = c.class_no;  // 给表取别名
+
+
+
+select student_no 学号, student_name 姓名,
+class_name 班级, department_name 学院 from classes c inner join student s
+on s.class_no = c.class_no;  // 不重复的字段名可以不加表的名字。建议加表名
+
+
+select  course_name , teacher_name from  course inner join teacher on course.teacher_no = teacher.teacher_no;
+
+drop table  表名  //删除表
+
+SQL注入即是指web应用程序对用户输入数据的合法性没有判断或过滤不严，
+攻击者可以在web应用程序中事先定义好的查询语句的结尾上添加额外的SQL语句，
+在管理员不知情的情况下实现非法操作，以此来实现欺骗数据库服务器执行非授权的任意查询，
+从而进一步得到相应的数据信息
+
+查询语句中，表定义了别名后就要用别名了，不能用原名。 字段可以
+
+表连接
+    内连接 ()
+    select 列名1 别名1，列名2 别名2...
+    from 表名1 别名1 inner join 表名2 别名2 on 多表间的关联关系
+    where 条件
+    order by 排序1 asc|desc，排列2 asc|desc....；
+
+
+on 语句先执行 select , from语句最新执行。
+
+左外连接(根据左表数据匹配右表， 左表为主)
+左外连接的结果集=内连接的结果集+左表匹配不上的记录
+语法:
+from 表1 left join 表2 on 表1和表2之间的连接条件
+    左外连接 left outer join....on，也称为左连接 left join...on
+    以左边的表作为主表，无论右边的表是否可以匹配到都显示主表中的数据
+    语法:
+        select 列名1 别名1，列名2 别名2...
+        from 表名1别名1 left join 表名2 别名2 on 多表的关联关系
+        where 条件
+        order by 排序列1 asc|desc，排序列2 asc|desc...；　
+
+右外连接(根据右表数据匹配左表，右表为主)
+– 右外连接的结果集=内连接的结果集+右表匹配不上的记录
+– 语法
+    右外连接 right outer join...on 也称为 right join...on
+    以右边的表为主表，无论如何都会显示主表中的所有数据
+
+全连接  full 
+    mysql不支持全连接。oracle支持
+    
+mysql> select * from teacher1;
++------------+--------------+
+| teacher_no | teacher_name |
++------------+--------------+
+|          1 | 张老师       |
+|          2 | 王老师       |
++------------+--------------+
+
+mysql> select * from course1;
++-----------+-------------+------------+
+| course_no | course_name | teacher_no |
++-----------+-------------+------------+
+|         1 | 数学        |          1 |
+|         2 | 语文        |          1 |
++-----------+-------------+------------+
+
+右连接
+mysql> select teacher1.teacher_no, teacher_name ,course_name  from teacher1 inner join course1 on teacher1.teacher_no = course1.teacher_no;
++------------+--------------+-------------+
+| teacher_no | teacher_name | course_name |
++------------+--------------+-------------+
+|          1 | 张老师       | 语文        |
+|          1 | 张老师       | 数学        |
++------------+--------------+-------------+
+
+左外连接
+select teacher1.teacher_no, teacher_name ,course_name  from teacher1  left join course1 on teacher1.teacher_no = course1.teacher_no;
++------------+--------------+-------------+
+| teacher_no | teacher_name | course_name |
++------------+--------------+-------------+
+|          1 | 张老师       | 语文        |
+|          1 | 张老师       | 数学        |
+|          2 | 王老师       | NULL        |
++------------+--------------+-------------+
+
+多表联查
+使用三表内连接，列出学生的学号、姓名、所在班级名称、成绩。
+mysql> select * from student;
++------------+--------------+-----------------+----------+
+| student_no | student_name | student_contact | class_no |
++------------+--------------+-----------------+----------+
+| 2017001    | 张三         | 13012222000     |        1 |
+| 2017002    | 李四         | 13012222000     |        1 |
+| 2017003    | 王五         | 14312222000     |        3 |
+| 2017004    | 赵六         | 14312222000     |        2 |
+| 2017005    | 田七         | 14312222000     |        2 |
+| 2017006    | 小刘         | 20000000000     |     NULL |
++------------+--------------+-----------------+----------+
+
+mysql> select * from classes;
++----------+-------------------+-----------------+
+| class_no | class_name        | department_name |
++----------+-------------------+-----------------+
+|        1 | 2017自动化1班      | 机电工程        |
+|        2 | 2017自动化2班      | 机电工程        |
+|        3 | 2017自动化3班      | 机电工程        |
+|        4 | 计算机1班          | 信息学院        |
++----------+-------------------+-----------------+
+
+mysql> select * from choose;
++-----------+------------+-----------+---------------------+-------+
+| choose_no | student_no | course_no | choose_time         | score |
++-----------+------------+-----------+---------------------+-------+
+|         1 | 2017001    |         1 | 2020-11-20 19:58:43 |    40 |
+|         2 | 2017002    |         1 | 2020-11-20 19:58:58 |    50 |
+|         3 | 2017001    |         2 | 2020-11-20 19:59:19 |    60 |
+|         4 | 2017003    |         3 | 2020-11-20 19:59:36 |    70 |
+|         5 | 2017004    |         2 | 2020-11-20 19:59:51 |    80 |
+|         6 | 2017005    |         1 | 2020-11-20 20:00:07 |    90 |
+|         7 | 2017003    |         1 | 2020-11-20 20:00:18 |  NULL |
++-----------+------------+-----------+---------------------+-------+
+
+select student.student_no ,student.student_name ,classes.class_name ,
+choose.score from student inner join  classes on student.class_no = 
+classes.class_no inner join choose on student.student_no = choose.student_no;
++------------+--------------+-------------------+-------+
+| student_no | student_name | class_name        | score |
++------------+--------------+-------------------+-------+
+| 2017001    | 张三         | 2017自动化1班     |    40 |
+| 2017001    | 张三         | 2017自动化1班     |    60 |
+| 2017002    | 李四         | 2017自动化1班     |    50 |
+| 2017004    | 赵六         | 2017自动化2班     |    80 |
+| 2017005    | 田七         | 2017自动化2班     |    90 |
+| 2017003    | 王五         | 2017自动化3班     |    70 |
+| 2017003    | 王五         | 2017自动化3班     |  NULL |
++------------+--------------+-------------------+-------+
+
+修改表结构 alter;
+alter table student drop class_no //表student删除class_no字段
+
+//表student添加 userid字段,默认添加到最后，可用 first 、after修饰
+alter table student add userid char(18) first  
+
+//表student userid数据类型修改为int, 如果表中userid不是全数字字符，会修改失败。
+alter table student modify userid userid int  
+
+//表student student_name 添加唯一约束
+alter table student add constraint s_name_uk unique(student_name) 
+
+//表student 删除主键  一个表中只有一个主键，可以有组合主键
+alter table student drop constraint primary key
+
+//表student 删除 s_name_uk 索引
+alter table student drop index s_name_uk
+
+
+//表student 改名为stu;  rename table student to stu  这样也可以。
+alter table student rename stu;
+
+turncate 可清除数据库,但不支持回滚。
+
+mysql> select * from classes;
++----------+-------------------+-----------------+
+| class_no | class_name        | department_name |
++----------+-------------------+-----------------+
+|        1 | 2017自动化1班     | 机电工程        |
+|        2 | 2017自动化2班     | 机电工程        |
+|        3 | 2017自动化3班     | 机电工程        |
+|        4 | 计算机1班         | 信息学院        |
++----------+-------------------+-----------------+
+4 rows in set (0.00 sec)
+
+mysql> select * from student;
++------------+--------------+-----------------+----------+
+| student_no | student_name | student_contact | class_no |
++------------+--------------+-----------------+----------+
+| 2017001    | 张三         | 13012222000     |        1 |
+| 2017002    | 李四         | 13012222000     |        1 |
+| 2017003    | 王五         | 14312222000     |        3 |
+| 2017004    | 赵六         | 14312222000     |        2 |
+| 2017005    | 田七         | 14312222000     |        2 |
+| 2017006    | 小刘         | 20000000000     |     NULL |
++------------+--------------+-----------------+----------+
+
+// 列出 ‘2017自动化2班’的所有学生的信息，列出学号、姓名和班级名称
+
+mysql> select student_no, student_name, 
+class_name from student inner join classes on student.class_no = 
+classes.class_no where classes.class_no = 2;
+
+// where语句实现内连接
+select student_no, student_name, class_name from student ,
+classes classes where student.class_no= classes.class_no 
+and classes.class_no =2;
+
++------------+--------------+-------------------+
+| student_no | student_name | class_name        |
++------------+--------------+-------------------+
+| 2017004    | 赵六         | 2017自动化2班     |
+| 2017005    | 田七         | 2017自动化2班     |
++------------+--------------+-------------------+
+
+// 查找没有学生的班级
+select classes.class_no, class_name from classes  left join student on 
+classes.class_no = student.class_no 
+where student_no is null;
++----------+---------------+
+| class_no | class_name    |
++----------+---------------+
+|        4 | 计算机1班     |
++----------+---------------+
+
+
+
+delimiter  一般情况下，mysql默认遇到分号';'就会执行命令,
+delimiter可以修改这一属性；
+now()函数
+
+concat() 函数用于将多个字符串连接成一个字符串
+select  concat(student_no ,'的名字是', student_name) 信息  from student;
+
+substring() 字符裁剪
+
+// between .. and
+select student_no,course_no ,score from choose where score between 50 and 60
+
+// in 
+select student_no, student_name from student where class_no in(1,3);
+使用 not in ()时， ()中不能包含null 
+class_no in (1,2,null) ===> class_no=1 or class_no=2 or class_no=null.
+
+class_no not in (1,null) ===> not （class_no=1  or class_no=null）
+                         ===> class_no !=1 and  class_no!=null ===>条件永远为假
+
+null  表示空值，不能用于比较符。
+
+通配符
+_  : 一个任意字符
+%  : 任意长度的任意字符
+
+// 查找所有田姓学生
+select student_no, student_name from student where student_name like '田%'
+
+// 学生姓名最少两个字
+select student_no, student_name from student where student_name like '田_%'
+
+like; not like ; null ; not null;
+
+escape  //自定义转义字符， 默认\
+select student_no, student_name from student where student_name like '小|_%' escape '|';
+
+order by // 排序，默认按升许，null是最小值， 
+select * from choose order by score
+select * from choose order by course_no, student_no;  // 排序后再按照学号排序
+
+聚合函数  //(对待null值采用忽略处理)
+count():统计一组数据的行数、参数可以是任何类型、也可以是*(* 号包含null) 
+max():统计一组数据的最大值, 参数可以是任何数值、字符串、日期类型
+min():统计一组数据的最小值，参数要是数值类型
+sum():统计一组数据的累加值，参数要是数值类型，null值忽略
+avg():统计一组数据的平均值，参数要是数值类型，null值忽略
+
+聚合函数的参数可以排重(distinct)
+mysql> select * from student;
++------------+--------------+-----------------+----------+
+| student_no | student_name | student_contact | class_no |
++------------+--------------+-----------------+----------+
+| 2017001    | 张三         | 13012222000     |        1 |
+| 2017002    | 李四         | 13012222000     |        1 |
+| 2017003    | 王五         | 14312222000     |        3 |
+| 2017004    | 赵六         | 14312222000     |        2 |
+| 2017005    | 田七         | 14312222000     |        2 |
+| 2017006    | 小刘         | 20000000000     |     NULL |
++------------+--------------+-----------------+----------+
+6 rows in set (0.00 sec)
+
+mysql> select * from choose;
++-----------+------------+-----------+---------------------+-------+
+| choose_no | student_no | course_no | choose_time         | score |
++-----------+------------+-----------+---------------------+-------+
+|         1 | 2017001    |         1 | 2020-11-20 19:58:43 |    40 |
+|         2 | 2017002    |         1 | 2020-11-20 19:58:58 |    50 |
+|         3 | 2017001    |         2 | 2020-11-20 19:59:19 |    60 |
+|         4 | 2017003    |         3 | 2020-11-20 19:59:36 |    70 |
+|         5 | 2017004    |         2 | 2020-11-20 19:59:51 |    80 |
+|         6 | 2017005    |         1 | 2020-11-20 20:00:07 |    90 |
+|         7 | 2017003    |         1 | 2020-11-20 20:00:18 |  NULL |
++-----------+------------+-----------+---------------------+-------+
+7 rows in set (0.00 sec)
+
+// 列出张三的平均分
+select avg(score) from choose join student on student.student_no = choose.student_no and student_name = '张三';
++------------+
+| avg(score) |
++------------+
+|    50.0000 |
++------------+
+
+// 统计每个班级的人数，
+select class_no, count(student_no) from student group by class_no;
+
+
+// 统计每个学生的最高分，最低分 ，平均分
+mysql> select * from choose;
++-----------+------------+-----------+---------------------+-------+
+| choose_no | student_no | course_no | choose_time         | score |
++-----------+------------+-----------+---------------------+-------+
+|         1 | 2017001    |         1 | 2020-11-20 19:58:43 |    40 |
+|         2 | 2017002    |         1 | 2020-11-20 19:58:58 |    50 |
+|         3 | 2017001    |         2 | 2020-11-20 19:59:19 |    60 |
+|         4 | 2017003    |         3 | 2020-11-20 19:59:36 |    70 |
+|         5 | 2017004    |         2 | 2020-11-20 19:59:51 |    80 |
+|         6 | 2017005    |         1 | 2020-11-20 20:00:07 |    90 |
+|         7 | 2017003    |         1 | 2020-11-20 20:00:18 |  NULL |
++-----------+------------+-----------+---------------------+-------+
+7 rows in set (0.00 sec)
+
+mysql> select student_no, max(score),min(score),avg(score) from choose group by student_no;
++------------+------------+------------+------------+
+| student_no | max(score) | min(score) | avg(score) |
++------------+------------+------------+------------+
+| 2017001    |         60 |         40 |    50.0000 |
+| 2017002    |         50 |         50 |    50.0000 |
+| 2017003    |         70 |         70 |    70.0000 |
+| 2017004    |         80 |         80 |    80.0000 |
+| 2017005    |         90 |         90 |    90.0000 |
++------------+------------+------------+------------+
+
+// select 后面 添加内容最好只有order by 后面的字段
+select student_no, max(score),min(score),avg(score) from choose group by student_no;
+
+//筛选出选修课程数大于1的学生，列出学号和选修课程数
+select * from choose;
++-----------+------------+-----------+---------------------+-------+
+| choose_no | student_no | course_no | choose_time         | score |
++-----------+------------+-----------+---------------------+-------+
+|         1 | 2017001    |         1 | 2020-11-20 19:58:43 |    40 |
+|         2 | 2017002    |         1 | 2020-11-20 19:58:58 |    50 |
+|         3 | 2017001    |         2 | 2020-11-20 19:59:19 |    60 |
+|         4 | 2017003    |         3 | 2020-11-20 19:59:36 |    70 |
+|         5 | 2017004    |         2 | 2020-11-20 19:59:51 |    80 |
+|         6 | 2017005    |         1 | 2020-11-20 20:00:07 |    90 |
+|         7 | 2017003    |         1 | 2020-11-20 20:00:18 |  NULL |
++-----------+------------+-----------+---------------------+-------+
+7 rows in set (0.00 sec)
+
+mysql> select student_no ,count(student_no) cnt from  choose   group by  student_no having cnt >1;
++------------+-----+
+| student_no | cnt |
++------------+-----+
+| 2017001    |   2 |
+| 2017003    |   2 |
++------------+-----+
+
+select student_name, student.student_no ,count(student.student_no)cn from student join choos
+e on student.student_no= choose.student_no group by  student.student_no having cn>1;
++--------------+------------+----+
+| student_name | student_no | cn |
++--------------+------------+----+
+| 张三         | 2017001    |  2 |
+| 王五         | 2017003    |  2 |
++--------------+------------+----+
+
+
+语法:
+    1.where子句中不能使用字段或者表达式的别名
+    2.where子句中不能使用聚合函数(组函数)
+
+having子句
+    功能：在分组语句中，根据条件筛选符合条件的组(可以使用字段或者表达式的别名)
+
+sql语法输入顺序
+   select
+      from
+        where
+          group by
+            having
+              order by
+
+sql执行顺序
+    from
+      where
+        select
+          group by
+            having
+              order by
+
+group_concat()函数
+mysql> select * from  student;
++------------+--------------+-----------------+----------+
+| student_no | student_name | student_contact | class_no |
++------------+--------------+-----------------+----------+
+| 2017001    | 张三         | 13012222000     |        1 |
+| 2017002    | 李四         | 13012222000     |        1 |
+| 2017003    | 王五         | 14312222000     |        3 |
+| 2017004    | 赵六         | 14312222000     |        2 |
+| 2017005    | 田七         | 14312222000     |        2 |
+| 2017006    | 小刘         | 20000000000     |     NULL |
++------------+--------------+-----------------+----------+
+6 rows in set (0.00 sec)
+
+mysql> select group_concat(student_name) 学生名单 ,count(*) 人数 from student group by class_no;
++---------------+--------+
+| 学生名单      | 人数   |
++---------------+--------+
+| 小刘          |      1 |
+| 张三,李四     |      2 |
+| 赵六,田七     |      2 |
+| 王五          |      1 |
++---------------+--------+
+
+
+
+with rollup选项 (对数据进行统计)
+mysql> select * from  student;
++------------+--------------+-----------------+----------+
+| student_no | student_name | student_contact | class_no |
++------------+--------------+-----------------+----------+
+| 2017001    | 张三         | 13012222000     |        1 |
+| 2017002    | 李四         | 13012222000     |        1 |
+| 2017003    | 王五         | 14312222000     |        3 |
+| 2017004    | 赵六         | 14312222000     |        2 |
+| 2017005    | 田七         | 14312222000     |        2 |
+| 2017006    | 小刘         | 20000000000     |     NULL |
++------------+--------------+-----------------+----------+
+6 rows in set (0.00 sec)
+
+mysql> select class_no 班级 ,count(*) 人数 from student group by class_no with rollup;
++--------+--------+
+| 班级   | 人数   |
++--------+--------+
+|   NULL |      1 |
+|      1 |      2 |
+|      2 |      2 |
+|      3 |      1 |
+|   NULL |      6 |
++--------+--------+
+
+union 合并结果集
+mysql> select student_no ,student_name from student;
++------------+--------------+
+| student_no | student_name |
++------------+--------------+
+| 2017001    | 张三         |
+| 2017002    | 李四         |
+| 2017003    | 王五         |
+| 2017004    | 赵六         |
+| 2017005    | 田七         |
+| 2017006    | 小刘         |
++------------+--------------+
+6 rows in set (0.00 sec)
+
+mysql> select teacher_no,teacher_name from teacher;
++------------+--------------+
+| teacher_no | teacher_name |
++------------+--------------+
+| 001        | 王老师       |
+| 002        | 李老师       |
+| 003        | 张老师       |
++------------+--------------+
+
+mysql> select teacher_no,teacher_name from teacher union select student_no ,student_name from student;
++------------+--------------+
+| teacher_no | teacher_name |
++------------+--------------+
+| 001        | 王老师       |
+| 002        | 李老师       |
+| 003        | 张老师       |
+| 2017001    | 张三         |
+| 2017002    | 李四         |
+| 2017003    | 王五         |
+| 2017004    | 赵六         |
+| 2017005    | 田七         |
+| 2017006    | 小刘         |
++------------+--------------+
+
+SQL语言共分为四大类：数据查询语言DQL，数据操纵语言DML，数据定义语言DDL，数据控制语言DCL
+
+子查询返回单列：
+列出比‘张三’平均分高的成绩
+ 1.列出'2017001'的平均分
+   select avg(score) from choose where student_no='2017001'; //50
+ 2. 列出成绩高于50的信息
+   select student_no,course_no,score from choose where score > 50;
+ 3. 合并上面两条语句
+ select student_no,course_no,score from choose where score > 
+ (select avg(score) from choose where student_no='2017001');
+   
+ select * from choose;
++-----------+------------+-----------+---------------------+-------+
+| choose_no | student_no | course_no | choose_time         | score |
++-----------+------------+-----------+---------------------+-------+
+|         1 | 2017001    |         1 | 2020-11-20 19:58:43 |    40 |
+|         2 | 2017002    |         1 | 2020-11-20 19:58:58 |    50 |
+|         3 | 2017001    |         2 | 2020-11-20 19:59:19 |    60 |
+|         4 | 2017003    |         3 | 2020-11-20 19:59:36 |    70 |
+|         5 | 2017004    |         2 | 2020-11-20 19:59:51 |    80 |
+|         6 | 2017005    |         1 | 2020-11-20 20:00:07 |    90 |
+|         7 | 2017003    |         1 | 2020-11-20 20:00:18 |  NULL |
++-----------+------------+-----------+---------------------+-------+
+7 rows in set (0.00 sec)
+
+mysql> select student_no,course_no,score from choose where score > 
+    ->  (select avg(score) from choose where student_no='2017001');
++------------+-----------+-------+
+| student_no | course_no | score |
++------------+-----------+-------+
+| 2017001    |         2 |    60 |
+| 2017003    |         3 |    70 |
+| 2017004    |         2 |    80 |
+| 2017005    |         1 |    90 |
++------------+-----------+-------+
+4 rows in set (0.02 sec)
+
+子查询返回多列
+列出'2017自动化1班'学生的成绩
+
+
+primary      主要的；
+distinct     截然不同的；
+unique       独特的
+   
+    
+    

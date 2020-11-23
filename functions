@@ -1109,7 +1109,8 @@ typedef struct ucontext_t
 
 154 unordered_set和unordered_map内部实现是基于哈希表(hashtable)
 
-155 erase()返回值都是一个迭代器，该迭代器指向被删除元素后面的元素（这个是重点）
+155 迭代器失效    (insert, erase都会导致迭代器失效)  
+   (vector deque) erase()返回值都是一个迭代器，该迭代器指向被删除元素后面的元素（这个是重点） map没有返回值
     for(vector<int>::iterator iter = ivec.begin(); iter != ivec.end(); ) {
 			if((*iter) %2 == 0){
 				iter = ivec.erase(iter);
@@ -1118,10 +1119,64 @@ typedef struct ucontext_t
             }
 	}
 
+    void deleteValueFromVector(Vec &v, int n = 5) {
+        typedef vector<int> Vec;
+        typedef vector<int>::iterator VecIt;
+        VecIt it;
+        for(it = v.begin(); it != v.end(); /*不能再自增了*/) {
+            if(0 == *it % n) {
+                v.erase(it); // vector元素自动向前挪动了(关联的map容器元素不会自动挪动)， 所以不能再把it进行++了,it 如果是最后一个有效值呢(这样也可以)
+            } else {
+                it++;
+            }
+        }
+    }
+
+    void deleteValueFromMap(Map &m, int n = 5) {
+    typedef map<int, int> Map;
+    typedef map<int, int>::iterator MapIt;
+    MapIt it;
+    for(it = m.begin(); it != m.end(); /*不能再自增了*/) {
+        if(0 == it->second % n) {
+            m.erase(it++);
+        } else {
+            it++;
+        }
+    }
+
+156  int stat(const char *restrict path, struct stat *restrict buf);    //获取文件信息
+    返回值：成功返回0，失败返回-1；
+    ​参数：文件路径（名），struct stat 类型的结构体
+
+157  key_t ftok(const char *pathname, int proj_id);  //把从pathname导出的信息与id的低序8位组合成一个整数IPC键
+    pathname：指定的文件，此文件必须存在且可存取
+    proj_id：计划代号（project ID）
+成功：返回key_t值（即IPC 键值）
+出错：-1，错误原因存于error中
+
+158  int msgget(key_t key, int msgflg)  该函数用来创建和访问一个消息队列
+
+159  size_t msgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg);   该函数用来从一个消息队列获取消息
+
+msqid: 由消息队列的标识符
+msgp :消息缓冲区指针。消息缓冲区结构为：
+struct msgbuf {
+long mtype;
+char mtext[1];
+｝
+msgsz: 消息数据的长度
+msgtyp: 决定从队列中返回哪条消息：
+=0 返回消息队列中第一条消息
+>0 返回消息队列中等于mtype 类型的第一条消息。
+<0 返回mtype<=type 绝对值最小值的第一条消息。
+msgflg 为０表示阻塞方式，设置IPC_NOWAIT 表示非阻塞方式
+msgrcv 调用成功返回0，不成功返回-1。
 
 
 
-
+160  int msgsnd(int msqid, const void *msgp, size_t msgsz, int msgflg);  用来向消息队列发送消息的
+     msgflg 取0 忽略标志位， 取IPC_NOWAIT 如果消息队列已满，函数返回。否则会阻塞等待消息队列不为满，写入消息
+     返回值 0 成功 -1 失败
 
 
 

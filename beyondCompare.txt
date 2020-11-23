@@ -1,0 +1,4 @@
+https://blog.csdn.net/leoeitail/article/details/100032971
+
+删除  /home/.config/bcompare 目录下 BCSessions.xml BCState.xml BCState.xml.bak BCSessions.xml.bak 
+这几个文件
