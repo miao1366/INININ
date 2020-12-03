@@ -40,7 +40,9 @@ tar -xvf file.tar //解压 tar包
 tar -xzvf file.tar.gz //解压tar.gz
 tar -xjvf file.tar.bz2   //解压 tar.bz2
 tar -xZvf file.tar.Z   //解压tar.Z
+
 unzip file.zip //解压zip
+zip -r tmp.zip ./tmp/
 
 压缩文件：
 tar -cf all.tar *.jpg   -c是表示产生新的包，-f指定包的文件名。
@@ -102,6 +104,7 @@ l 多线程，克隆线程
 2>1 | tee a.log  标准错误输出重定向到标准输出，然后标准输出定向到a.log
 2>&1 | tee a.log  标准错误输出重定向到标准输出，然后标准输出定向到a.log 控制台也有输出打印
 
+./fms_master 2>&1 | tee a.log
 
 11 网络抓包
 sudo tcpdump -i enp4s0 -w test.pcap
@@ -431,10 +434,13 @@ Command：进程启动的启动命令名称，如果这一行显示不下，进�
 	sudo apt-get install mosquitto -y
 	sudo apt-get install mosquitto-clients -y
    
-   
-   
-   
-   
+49  nohup command &   // 后台运行程序
+
+50  readelf命令，一般用于查看ELF格式的文件信息，常见的文件如在Linux上的可执行文件，
+    动态库(*.so)或者静态库(*.a) 等包含ELF格式的文件  // readelf ./smart_gateway -ld
+
+
+
    
    
    

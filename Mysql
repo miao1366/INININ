@@ -788,13 +788,426 @@ mysql> select student_no,course_no,score from choose where score >
 +------------+-----------+-------+
 4 rows in set (0.02 sec)
 
-子查询返回多列
-列出'2017自动化1班'学生的成绩
+
+//没有选课的老师
+
+mysql> select * from course;
++-----------+-------------+----------+-------------+-----------+------------+
+| course_no | course_name | up_limit | description | status    | teacher_no |
++-----------+-------------+----------+-------------+-----------+------------+
+|         1 | java语言    |       60 | 暂无        | 已审核    | 001        |
+|         2 | mysql       |      150 | 暂无        | 已审核    | 002        |
+|         3 | c语言       |      230 | 暂无        | 已审核    | 003        |
++-----------+-------------+----------+-------------+-----------+------------+
+3 rows in set (0.00 sec)
+
+mysql> select * from choose;
++-----------+------------+-----------+---------------------+-------+
+| choose_no | student_no | course_no | choose_time         | score |
++-----------+------------+-----------+---------------------+-------+
+|         1 | 2017001    |         1 | 2020-11-20 19:58:43 |    40 |
+|         2 | 2017002    |         1 | 2020-11-20 19:58:58 |    50 |
+|         3 | 2017001    |         2 | 2020-11-20 19:59:19 |    60 |
+|         4 | 2017003    |         3 | 2020-11-20 19:59:36 |    70 |
+|         5 | 2017004    |         2 | 2020-11-20 19:59:51 |    80 |
+|         6 | 2017005    |         1 | 2020-11-20 20:00:07 |    90 |
+|         7 | 2017003    |         1 | 2020-11-20 20:00:18 |  NULL |
++-----------+------------+-----------+---------------------+-------+
+7 rows in set (0.00 sec)
+
+mysql> select * from teacher;
++------------+--------------+-----------------+
+| teacher_no | teacher_name | teacher_contact |
++------------+--------------+-----------------+
+| 001        | 王老师       | 11000000000000  |
+| 002        | 李老师       | 1120000000000   |
+| 003        | 张老师       | 1320000000000   |
+| 004        | 杨老师       | 155544444       |
++------------+--------------+-----------------+
+4 rows in set (0.00 sec)
+
+mysql> select teacher.teacher_no,teacher.teacher_name from teacher 
+    -> where teacher.teacher_no not in(select distinct course.teacher_no 
+    -> from choose join course on course.teacher_no=choose.course_no);
++------------+--------------+
+| teacher_no | teacher_name |
++------------+--------------+
+| 004        | 杨老师       |
++------------+--------------+
+
+where子句， 内连接， 外连接
+
+
+1. 索引 index
+    1.1 作用
+    提高查询效率，降低增加 、删除、改的料率
+    创建索引需要大量的时间和空间。
+
+ 经常用来筛选，排序，查找的字段可以考虑用来添加索引
+ 数据量较少(10万)时，不适合添加索引。
+
+mysql> create table test_index(id int auto_increment primary key, 
+userid int, name char(10), unique index ix_test_uid (userid));
+
+查看一个表的索引
+show index from test_index \G    // \G 垂直打印内容
+show keys from test_index \G
+
+删除索引
+    drop index 索引名 on 表名
+
+视图 view
+作用: 
+    1.简化复杂查询
+    2.数据安全 
+
+with check option (后面操作要满足view的选项)
+视图（view）是一种虚拟存在的表，是一个逻辑表，本身并不包含数据。作为一个select语句保存在数据字典中的
+https://blog.csdn.net/qq_38712932/article/details/83050768
+
+注意mysql类型的隐式转换
+
+会话变量
+set @User_name='张三';
+mysql> select @User_name;
++------------+
+| @User_name |
++------------+
+| 张三       |
++------------+
+
+mysql> set @User_name=100;                // 没有给定类型，类型可变
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select @User_name;
++------------+
+| @User_name |
++------------+
+|        100 |
++------------+
+
+局部变量
+delcare     变量名    数据类型
+
+begin .... end // 类似于{}
+函数
+    无参的函数
+    delimiter    //重置命令结束标志
+create function row_no_fn() returns int
+begin
+    set @r_no = @r_no + 1;
+    return @r_no;
+end;
+
+正确地创建合适的索引是数据库性能优化的基础
+数据库索引是一种为了加速数据表中行记录检索的数据结构
+数据库中的索引存储于磁盘中
+索引->磁盘数据
+
+哈希索引:
+hashmap 高低16位的异或， 等同于取模
+hashmap 查找复杂度 O(1)
+1. 等值匹配是非常高效的
+2. 不支持范围查找
+
+二叉树索引:
+1. io次数过多
+2. io效率过低
+
+
+操作系统页      4kb
+数据库页        16kb
+空间局部性原理  预加载
+
+操作系统与磁盘
+B树  B变种树
+
+
+
+
+搜索引擎
+innodb    Myisam
+
+mysql官方建议主键采用自增序列
+经常变动的列不建议创建索引
+mysql 左闭合
+
+B+树的优势 (b+树只有叶子节点保存了数据，叶子节点)
+1. B+树是B-树的加强版
+2. IO能力
+3. 基于索引的表扫描性能
+4. 排序能力
+5. 查询稳定
+
+插拔式的存储引擎
+
+//查看mysql数据存储路径
+show variables like 'datadir';
+innodb  聚集索引
+聚集索引：指数据库表行中数据的物理顺序与键值的逻辑(索引)顺序相同。
+在innodb引擎中，只有主键才是聚集索引，其他索引都是非聚集索引
+
+innodb 有三种方式创建索引，用户没有显示的创建索引的话，innodb会用rowid创建索引
+主键索引    辅助索引    回表
+辅助索引存储的是主键索引的值
+
+列的离散性， 
+离散度过低的话，查询会不走索引
+
+count(distinct col): count(col)    //比值越高离散性越好
+1. 若列的离散性越好，列的选择性越好
+2. 选择性好的列作为索引更合适
+3. 离散性很差的列作为索引可能适得其反
+
+数据隐式转换
+utf8mb4
+
+1. 联合索引是一个索引
+2.联合索引的使用遵循最左前置原则
+    最左前置原则(最常用列 > 离散度高 > 最少空间)
+3. 单列索引是一种特殊的联合索引
+索引重复
+
+覆盖索引
+通过索引项的信息可直接返回所需的查询列，则该索引称之为查询SQL的覆盖索引
+只需要在一棵索引树上就能获取SQL所需的所有列数据，无需回表，速度更快
+https://zhuanlan.zhihu.com/p/107125866
+
+select * 要禁止使用
+https://blog.csdn.net/qq_38836118/article/details/88708933?biz_id=102&utm_term=%E5%B0%B1%E4%BC%9A%E5%8D%81%E5%88%86%E7%BC%93%E6%85%A2%EF%BC%8C%E5%B9%B6%E4%B8%94%E4%BC%9A%E9%80%A0%E6%88%90%E9%A2%9D%E5%A4%96%E7%9A%84%E7%BD%91%E7%BB%9C%E5%BC%80%E9%94%80&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-0-88708933&spm=1018.2118.3001.4449
+为什么还是不推荐select * ?
+1. 网络IO问题
+    select * 会查询出不需要的、额外的数据，那么这些额外的数据在网络上进行传输，
+    必定会造成性能延迟。假设你的table中，有一个列的类型为binary。此时，你的select *操作，
+    就会十分缓慢，并且会造成额外的网络开销
+2. 索引问题
+
+3. 扩展性问题
+
+innodb中一条sql语句只会用到一个索引
+
+聚簇(聚集)索引
+* 如果表设置了主键，则主键就是聚簇索引
+* 如果表没有主键，则会默认第一个NOT NULL，且唯一（UNIQUE）的列作为聚簇索引
+* 以上都没有，则会默认创建一个隐藏的row_id作为聚簇索引
+
+数据库中的每张表只能有一个主键，不可能有多个主键
+
+联合索引、联合主键
+
+SQL常用优化规则
+1. SQL的查询一定要基于索引完成SQL的结果集扫描
+2. 避免索引列上使用函数或者运算，这样会导致索引失效
+3. 避免列的隐式转换
+4. where 子句中like 模糊匹配%, %放置在查询条件右边
+5. 使用索引扫描，联合索引中的列从左往右，命中越多越好
+6. 尽可能使用SQL语句用到的索引完成排序，避免使用文件排序的方式
+7. 查询有效的列信息即可。少用*代替列信息
+
+MVCC
+NIO
+DML DDL  Lexical
+DBA
+show engines\G;  //列出mysql引擎
+
+存储引擎
+1. 存储引擎用于修饰表
+2. 默认存储引擎是innodb
+3. 存储引擎是插拔式的，可随时加载和卸载
+
+csv存储引擎
+1. 不能定义索引、列定义必须为not null, 不能设置自增列
+2. csv表的数据的存储格式用‘,’隔开，可直接编辑文件进行数据的编排
+3. 数据安全性低
+
+archive存储引擎
+1. 压缩协议(ARZ文件格式)进行数据的存储，磁盘占用少
+2. 只支持insert和select两种操作
+3. 只允许自增ID列建立索引
+
+应用场景:
+    1.数据备份系统(如:日志系统，文档归档等)
+    2.大量设备高频的数据采集
+
+memory存储引擎
+特点:
+    1. 数据都是存储在内存中，处理效率高，表大小限定默认16M
+    2. 不支持大数据存储类型的字段如 blog text varchar(n)->char(n)
+    3. 支持hash索引，等值查询效率高
+    4. 数据的可高性低，重启或系统崩溃数据丢失
+应用场景:
+    1. 热点数据快速加载(功能类似缓存中间件)
+    2. MySQL临时表存储(查询结果于内存中计算的数据)
+
+Myisam存储引擎
+    1.较快的数据插入和读取性能
+    2.数据存储具有较小的磁盘空间占用
+    3.支持表级别的锁，不支持事务
+    4.数据文件与索引文件分库存储。主键索引与辅助索引同级
+    5.针对数据统计有额外的常数存储。故而count(*)的查询效率很高
+  应用场景:
+    只读应用或者以读为主的业务
+
+Innodb存储引擎
+   1. 支持事务
+   2. 行级锁
+   3. 聚集索引
+   4. 外键支持，保证数据的完整性
+  
+  应用场景
+     无脑选择
+
+DQL  数据查询语言     select 
+DML  数据操纵语言     update insert delete
+DDL  数据定义语言     create table/view/index ...
+DCL  数据控制语言     grant
+
+通讯方式:
+    长连接    半双工
+
+单工： 类似于电视的遥控器
+全双工: 类似于两个人打电话
+半双工： 类似于对讲机
+
+mysql> show variables like 'max_allowe%';
++--------------------+----------+
+| Variable_name      | Value    |
++--------------------+----------+
+| max_allowed_packet | 67108864 |
++--------------------+----------+
+
+max_allowed_packet //客户端向服务端发送sql语句的最大大小
+
+
+// 查看所有连接
+mysql> show full processlist;
++----+-----------------+-----------+--------+---------+---------+------------------------+-----------------------+
+| Id | User            | Host      | db     | Command | Time    | State                  | Info                  |
++----+-----------------+-----------+--------+---------+---------+------------------------+-----------------------+
+|  5 | event_scheduler | localhost | NULL   | Daemon  | 1474276 | Waiting on empty queue | NULL                  |
+| 33 | root            | localhost | choose | Query   |       0 | starting               | show full processlist |
++----+-----------------+-----------+--------+---------+---------+------------------------+-----------------------+
+
+
+// 查看所有线程
+mysql> show status like 'Thread%';
++-------------------+-------+
+| Variable_name     | Value |
++-------------------+-------+
+| Threads_cached    | 0     |
+| Threads_connected | 1     |
+| Threads_created   | 1     |
+| Threads_running   | 2     |
++-------------------+-------+
+
+kill id    // 杀掉连接  id为上上图列举的Id
+
+mysql> show variables like 'max_connections';    //查看最大连接数
++-----------------+-------+
+| Variable_name   | Value |
++-----------------+-------+
+| max_connections | 151   |
++-----------------+-------+
+1 row in set (0.00 sec)
+
+查询缓存(鸡肋)
+    缓存失效与表数据是一致的.即表数据发生任何改动都将让缓存失效
+    需要手工开启。在MySQL5.6以后默认关闭了查询缓存功能
+    判断条件苛刻.SQL语句必须完全一致
+    带来额外的性能消耗。数据的返回过程中若开启了缓存需先缓存SQL和结果
+
+optimizer(优化器)
+  找到执行SQL最优的执行计划
+  基于此计划通过执行引擎调用各存储引擎执行数据操作
+
+物理优化
+    1. 等价变化规则
+    2. 基于联合索引调整查询条件位置
+    ....
+
+逻辑优化
+    1. 针对不同引擎优化count min max等相关函数
+    2. 针对覆盖索引扫描优化
+    3. 针对冗余子查询的优化
+    4. 执行SQL提前终止查询
+    5. WHERE字句中in的条件优化  全盘扫描的方式
+    6. ...
+
+
+mysql> desc select count(*) from choose\G;  // 查看sql执行计划 explain也可以
+*************************** 1. row ***************************
+           id: 1
+  select_type: SIMPLE
+        table: choose
+   partitions: NULL
+         type: index
+possible_keys: NULL
+          key: choose_course_fk
+      key_len: 4
+          ref: NULL
+         rows: 7
+     filtered: 100.00
+        Extra: Using index
+1 row in set, 1 warning (0.00 sec)
+
+ERROR: 
+No query specified
+mysql> 
+
+执行计划-id
+SQL执行的序号，一组数字表示查询中执行select字句或操作的顺序
+id相同:执行顺序由上至下
+
+SQL执行类型，包含(普通查询、联合查询、子查询等)
+Simple          简单查询
+PRIMARY         最外层查询
+SUBQUERY        子查询
+UNION           连接查询
+UNION RESULT    连接查询的结果集
+
+执行计划-table
+    查询涉及到的表或者表的别名
+    <unionM, N>  查询id为M和N两个结果的并集结果
+    <derivedN>   查询id为N的派生表结果集
+    <subqueryN>  查询id为N的子查询结果集
+
+执行计划-type
+SQL执行数据获取的方式
+SQL执行优化中一个很重要的指标，评测SQL最直观的参数
+取值:
+    system
+    const    唯一性索引(主键和唯一索引 unique key)常量比较
+    eq_ref   唯一性索引扫描
+    ref      普通索引扫描
+    range    基于索引的范围查找
+    index    full index scan    基于index扫描
+    all      full table scan    全表扫描
+
+    system > const > eq_ref > ref > range > index > all    性能排序
+
+
+
+
+
+
+
+
+
+
 
 
 primary      主要的；
 distinct     截然不同的；
 unique       独特的
-   
     
+
+
+
+
+
+
+
+
+
+
     
