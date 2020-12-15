@@ -131,11 +131,19 @@ SQLite中创建自增字段:
 delete from image where id = 7;  // 删除image表 id=7 的数据
 
 
+https://blog.csdn.net/linux_wgl/article/details/51620343
+
+sqlite3  database file
+.tables  show all table
+
+delete from search_history where (select count(keyword) from search_history 
+)> 50 and keyword in (select keyword from search_history order by time desc limit (select count(keyword) from search_history) offset 50 )
 
 
+insert into PublishTable (TimeStamp, data) values(strftime('%s','now'),"ss");
 
 
-
+http://www.bejson.com/validators/yaml_editor/
 
 
 

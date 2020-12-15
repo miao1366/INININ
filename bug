@@ -46,8 +46,11 @@
    
  人脸扣取->人脸对齐->提取人脸特征值->人脸匹配
 
+19. localtime_r     localtime_r之前应该先调用tzset函数  localtime
 
+20 read date only one ,or failed
 
+21 
 
 
 
