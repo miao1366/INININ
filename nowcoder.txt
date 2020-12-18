@@ -1,0 +1,49 @@
+1. 设x为整型变量,不能正确表达数学关系：8<x<13的c++语言表达式是_____
+    !(x<=8)||!(x>13)  不能表达
+    !(x<=8)&&(x<13)   能表达 
+
+    总结: ! 的运算符优先级高于 &&  ||
+
+2. 有如下程序段：
+    char fun(char *);
+    main() {
+        char *s = “one”, a[5] = {0}, (*f1)(char *) = fun, ch;
+    }
+    则对函数fun的调用语句正确的是: f1(&ch);    （*f1）(s) 
+    总结: 正常使用f1应该使用(*f1)(s)，与f1（s）效果相同
+
+3. 以下函数中，和其他函数不属于一类的是____
+    lseek()函数：移动文件的读写位置
+    read() write()读写文件
+    pread() pwrite()带偏移量的读写文件
+    都属于系统调用函数
+    
+    feek() 库函数
+
+4. 以下函数用法正确的个数是：
+void test1() {
+    unsigned char array[MAX_CHAR+1],i;
+    for(i=0;i<=MAX_CHAR;i++){  //i是无符号类型， MAX_CHAR 大于 255时，会溢出
+        array[i]=i;
+    }
+}
+
+char*test2() {
+    char p[] = "hello world";
+    return p;         // 返回局部变量
+}
+
+char *p =test2();
+void test3() {
+    char str[10];
+    str++;              //str是常亮指针
+    *str='0';
+}
+
+5. 已知int a[3][4];则下列能表示a[1][2]元素值的是  (A)
+    A:  *（*（a+1）+2）
+    B:  *(a+1+2)
+    C:  (&a[0]+1)[2]
+    D:  *(a[0]+1)
+
+6. 

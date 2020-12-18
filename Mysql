@@ -1185,16 +1185,25 @@ SQL执行优化中一个很重要的指标，评测SQL最直观的参数
 
     system > const > eq_ref > ref > range > index > all    性能排序
 
+执行计划-key_len
 
+rows      根据表统计信息及索引选用情况，大致估算出找到所需的记录所需要读取的行数
+filtered  它指返回结果的行占需要读取的行(row列的值)的百分比
+          值越高越好，表示扫描数据的准确性越高
 
+执行计划 - Extra  
 
+Buffer Pool
+BinLog
 
+XA两阶段提交协议
 
+双写机制
+缓冲池污染    mvcc    lbcc
 
+Buffer Pool;   Change Buffer;     
 
-
-
-
+刷脏:将innodb Buffer Pool 中未提交到磁盘的变更数据，提交到磁盘中
 
 primary      主要的；
 distinct     截然不同的；
