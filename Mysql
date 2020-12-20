@@ -1196,7 +1196,12 @@ filtered  它指返回结果的行占需要读取的行(row列的值)的百分�
 Buffer Pool
 BinLog
 
-XA两阶段提交协议
+XA的两阶段提交来保证事务最终的提交
+
+事务的ACID
+原子性回滚   
+    Undo log
+Undo log 是逻辑日志，记录的是事务过程中每条数据的变化情况
 
 双写机制
 缓冲池污染    mvcc    lbcc
@@ -1204,19 +1209,151 @@ XA两阶段提交协议
 Buffer Pool;   Change Buffer;     
 
 刷脏:将innodb Buffer Pool 中未提交到磁盘的变更数据，提交到磁盘中
+刷脏的风险分析
+    数据库io的最小单位是页，大小为16kb
+    操作系统io的最小单位是页，大小为4kb
+如果在刷脏过程出现系统意外宕机，导致脏页数据部分数据写入成功，部分数据写入失败，
+就出现了页断裂也叫部分写失败(partial page write)
+
+DoubleWrite Buffer    双写机制
+
+autocommit
+show variables like 'autocommit'
+mysql 一条sql语句默认为一个事务
+
+隔离性问题分析
+    1. 脏读             Dirty read
+    2. 不可重复读问题     Non-repeatable read
+    3. 幻读             Phantom
+sql92标准  
+Read Uncommitted    未提交读                                 --未解决并发问题
+    事务未提交对其他事务也是可见的，脏读
+Read Committed      提交读                                   --解决脏读问题
+    一个事务开始之后，智能看到自己提交的事务所做的修改，可以重复读
+Repeatable Read     可重复读                                 --解决不可重复读问题
+    在同一个事务中多次读取同样的数据结果是一样的，这种隔离级别未定义解决幻读的问题
+Serializable        串行化                                   --解决所有问题
+    最高的隔离级别，通过强制事务的串行执行
+
+默认隔离级别是RR  可重复读
+
+innodb隔离性问题解决
+Lock Based Concurrency Control(LBCC)
+    事务开始操作数据前，对其加锁，阻止其他事务对数据进行修改
+    ---->当前读
+    DML 语句都是当前读语句
+    update、delete、insert、select...lock in share mode、
+    select... for update 都是当前读 
+
+Muti Version Concurrency Control(MVCC)
+        事务开始操作数据前，将数据在当下时间点进行一份数据快照(Snapshot)的备份，并用这个快照
+    来提供给其他事务进行一致性读取
+        并发访问(读或写)数据库时，对正在事务内处理的数据做多版本的管理。避免写操作的堵塞，从而
+    引发读操作的并发阻塞问题
+        ---->快照读
+    普通的 select 就是快照读
+    如 select * from table where col > 1 and col < 100;
+
+innodb    中的锁
+锁的分类
+    共享锁(行锁): shared Locks 
+    排他锁(行锁): Exclusive Locks
+
+行锁默认为临键锁
+
+临键锁 = 间隙锁 + 记录锁；
+
+行锁的具体实现 
+    临键锁  Next-key Locks           范围查询
+    间隙锁  Gap Locks                当sql执行按照索引进行数据的检索时
+                                    且查询条件的数据不存在时(左开右闭)
+    记录锁  Record Locks             精准匹配且命中数据
+
+唯一索引    主键索引
+innodb的行锁是通过给索引上的索引项加锁实现的
+innodb安装辅助索引进行数据操作时，辅助索引和主键索引都将锁定指定的索引项
+通过索引进行数据检索，innodb才使用行级锁，否则将使用表锁    
+
+sql语句最好要基于索引操作
+
+DB_TRX_ID
+DB_ROLL_PTR
+DB_ROW_ID
+
+MySql的优化
+    1. 硬件&操作系统的优化
+    2. 系统架构优化              读写分离，主从复制，分库分表，
+    3. MySql服务的配置优化        
+    4. Sql优化
+
+1. 硬件&操作系统的优化
+    a. 更合适的CPU
+        OLTP  
+        OLAP  
+    b. 更多的RAM            越多越好
+    c. 更快的磁盘存储
+    d. 优化网络、操作系统
+
+热点数据缓存在redis、memasned等等中。(缓存穿透，缓存击穿) 
+
+MySql配置两大特点。
+    配置的作用域
+    配置是否热加载
+
+注意:
+    全局参数的设定对于已经存在的会话无法生效
+    会话参数的设定随着会话的销毁而失效
+    全局类的统一配置建议配置在默认配置文件中，否则重启服务会导致配置失效
+
+max_connections                                       客户端的最大连接数
+port                                                 MySql监听的服务端口
+datadir                                              数据存放目录
+bin-log                                               binlog日志文件存放路径
+tmp_table_size=16M                                    临时表大小限定
+bind-address=0.0.0.0                                  限制访问ip
+sort_buffer_size/join_buffer_size                    排序缓冲区大小/关联查询缓冲区大小
+Innodb_buffer_pool_size                              innodb缓冲区大小
+innodb_write_io_threads/innodb_read_io_threads       后台工作线程
+
+
+慢查询定位
+    业务驱动
+    测试驱动
+    慢查询日志
+
+show variables like 'slow_query_log'
+set global log_queries_not_using_indexes=on //sql语句没有用到索引时会被记录到慢查询日志里
+set global long_query_time=0.1 (秒)  //sql语句执行时间大于0.1时，会被记录到慢查询日志里
+
+慢查询排查---------------
+
+-->mysqldumpslow 
+
+show profile是mysql 提供的可以用来分析当前会话中sql语句执行的资源消耗情况的工具，
+可用于sql调试的测试
+
+-->show profile    //打印出sql执行信息
+
+-->show profile  for query 4    //打印出最新的4条sql执行信息
+
+-->show profile cpu for query 4;
+
+-->show profile cpu, block io for query 4;
+
+SQL常见优化规则
+    1.sql的查询一定要基于索引完成sql的结果集扫描
+    2.避免索引列上使用函数或者运算，这样会导致索引失效
+    3.避免列的隐式转换
+    4.where子句中like模糊匹配%，%放置在查询条件右边
+    5.使用索引扫描，联合索引中的列从左往右，命中越多越好
+    6.尽可能使用SQL语句用到的索引完成排序，避免使用文件排序的方式
+    7.查询有效的列信息即可。少用*代替列信息
+    8.如果无法避免join查询，永远用小结果集驱动大结果集
+        以小结果集驱动能减少循环次数，从而减少对被驱动结果集的访问
+        执行时会以最左边的表为基础表循环与右边表数据做笛卡尔积
+    
+空间换时间
 
 primary      主要的；
 distinct     截然不同的；
 unique       独特的
-    
-
-
-
-
-
-
-
-
-
-
-    
