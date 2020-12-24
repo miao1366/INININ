@@ -5,3 +5,23 @@
 {"dbName": "test","faces":[{"imageId":"8a4f51ec-c095-4f8d-b18b-14988d104d51"}]}
 
 {"array":["hello","hello","hello","hello"]}
+
+
+{
+    "circuit_breaker":[
+        {
+            "gateway_id":"c33432234bvs23",
+            "device_id":"breaker",
+            "device_type":1,
+            "timestamp":1234354345,
+            "telemetry_general_signal_data":[
+                {
+                    "name":"TempOverLoad",
+                    "type":"int",
+                    "value":2,
+                    "leval":1
+                }
+            ]
+        }
+    ]
+}
