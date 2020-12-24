@@ -37,7 +37,11 @@ uint64_t数八进制输出：%llo
     #define MAX_INT ((unsigned)(-1)>>1)
     #define MIN_INT (~MAX_INT)
 
-14 
+14 #include<stddef.h>  stddef .h 头文件定义了各种变量类型和宏。这些定义中的大部分也出现在其它头文件中。
+ptrdiff_t   size_t   wchar_t   	NULL   	offsetof(type, member-designator)
+
+
+
 
 
 
