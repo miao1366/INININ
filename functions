@@ -1179,7 +1179,7 @@ msgrcv 调用成功返回0，不成功返回-1。
      返回值 0 成功 -1 失败
 
 
-
+170 喂狗  int ioctl(int fd, unsigned long request, ...);
 
 
 

@@ -218,6 +218,10 @@ sudo service mosquitto status
 sudo lsof -i:1883
 
 
+17 mosquitto 客户端网线拔了一晚上，第二天插了网线，客户端能自动连上broker
+   mosquitto 客户端 4g down 了一小时，后up上了后，客户端能自动连上broker
+
+
 	
 	
 	
