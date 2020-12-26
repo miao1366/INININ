@@ -5,8 +5,3 @@
 2. 做事要认真。负责， 凡事多想想
 
 
-Hadoop: 分布式计算系统
-HDFS: Hadoop 分布式文件系统
-yarn
-MapReduce
-Ozone
