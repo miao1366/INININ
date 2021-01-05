@@ -1,9 +1,9 @@
-1 stdbool.h
+1 #include <stdbool.h>
    在支持C99标准中，新增了关键字_Bool，其值只能为0或1，这样只要导入 stdbool.h ，就能非常方便的使用我们常用的bool false true来操作布尔类型
-2 inttypes.h  
+2 #include <inttypes.h>  
    提供整数输入的各种转换宏, 举个例子，PRIi8、PRIu8、PRIo8以及PRIx8，其中i为有符号，u为无符号，o为8进制以及x为16进制。
 
-3 stdint.h
+3 #include <stdint.h>
  定义了几种扩展的整数类型和宏     uintptr_t    uint32_t   uint64_t
  在64位的机器上，intptr_t和uintptr_t分别是long int、unsigned long int的别名；在32位的机器上，intptr_t和uintptr_t分别是int、unsigned int的别名
 
@@ -12,8 +12,7 @@ uint64_t数的输出：%llu ;
 uint64_t数十六进制输出：%llx ;
 uint64_t数八进制输出：%llo
 
-4 stddef.h
-  定义了各种变量类型和宏。这些定义中的大部分也出现在其它头文件中。
+4 #include <stddef.h> 定义了各种变量类型和宏。这些定义中的大部分也出现在其它头文件中。
 
 5 #include <pthread.h>
 
@@ -40,8 +39,12 @@ uint64_t数八进制输出：%llo
 14 #include<stddef.h>  stddef .h 头文件定义了各种变量类型和宏。这些定义中的大部分也出现在其它头文件中。
 ptrdiff_t   size_t   wchar_t   	NULL   	offsetof(type, member-designator)
 
+15 在苹果提供的 SDK 中的 usr/include/TargetConditionals.h 文件中会自动配置编译器所要编译的代码将要使用的
+   微处理器指令集、运行系统以及运行时环境。TargetConditionals.h 适用于所有的编译器，
+   但是它只能被运行于 Mac OS X 系统上的编译器所识别。
 
-
+16 #include <iosfwd> 该文件的全称是“input output stream forward”，即输入输出流前向声明
+    顾名思义，该头文件的主要目的就是为用户提供所有输入输出类的声明
 
 
 

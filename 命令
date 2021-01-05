@@ -447,6 +447,10 @@ Command：进程启动的启动命令名称，如果这一行显示不下，进�
     who -r         查看当前系统运行时间
     last reboot    可以看到Linux系统历史启动的时间
 
+    uptime -p      //up 1 week, 2 days, 38 minutes
+    
+    ps -p 1391 -o etime    //    ELAPSED 9-00:45:28
+
 53  ps -aux
     user      pid      %CPU      %MEM      VSZ       RSS      TTY      STAT      START      TIME      COMMAND
 USER      //用户名 
@@ -483,3 +487,4 @@ l      //多线程，克隆线程（使用 CLONE_THREAD, 类似 NPTL pthreads）
     STIME  //进程启动到现在的时间 
     TTY    //该进程在那个终端上运行，若与终端无关，则显示? 若为pts/0等，则表示由网络连接主机进程。 
     CMD    //命令的名称和参数
+

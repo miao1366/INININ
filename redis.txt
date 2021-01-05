@@ -35,3 +35,113 @@ NoSQL  Not Only SQL
 压力一定会越来越大，适者生存！ 一定要逼着自己学习，这是在这个社会生存的唯一法则
 
 mysql单表数据超过300万条，就要建立索引了。
+
+
+append key value    //往key中增加字符 key不存在时，新建key
+
+incr key            // 加一
+decr key            // 减一
+
+incrby  key  10     //加10 
+decrby  key  10     //减10 
+
+getrange key start end  //获取范围内容
+
+SETRANGE key offset value  //代替局部内容
+
+setex  (set with expire)  设置过期时间
+
+setnx  (set if not exist)  //不存在就设置   分布式锁中常常使用
+
+mset key1 value1 key2 value2 ...// 设置多个值
+
+mget key1 key2   // 获取多个值
+
+msetnx key1 value1 key2 value2  //设置多个值，原子操作
+
+getset    //获取原来的值，设置新的值
+
+--------------------------------------------------
+list    列表
+
+lpush    li    one// 键li 插入 one
+llen     li//键li里面的value的长度
+
+移除指定的值
+lrem key num value; 
+
+
+
+
+keys * //显示所有的key
+
+flushdb    //清楚数据库中所有数据
+
+ltrim   key start stop  //保留指定范围的value
+127.0.0.1:6379> rpush list hello
+(integer) 1
+127.0.0.1:6379> rpush list hello1
+(integer) 2
+127.0.0.1:6379> rpush list hello2
+(integer) 3
+127.0.0.1:6379> rpush list hello3
+(integer) 4
+127.0.0.1:6379> ltrim list 1 2
+OK
+127.0.0.1:6379> Lrange list 0 -1
+1) "hello1"
+2) "hello2"
+
+
+rpoplpush    //组合命令
+127.0.0.1:6379> rpush list hello
+(integer) 1
+127.0.0.1:6379> rpush list hello1
+(integer) 2
+127.0.0.1:6379> rpush list hello2
+(integer) 3
+127.0.0.1:6379> rpoplpush list list1
+"hello2"
+127.0.0.1:6379> Lrange list1 0 -1
+1) "hello2"
+127.0.0.1:6379> 
+
+
+lset key index value  //更新下标 index 的值
+
+linsert key BEFORE|AFTER pivot value  //节点pivot下插入值 
+
+
+-----------------------------------------------------------
+set 集合 
+    不能重复相同的值
+
+127.0.0.1:6379> sadd s1 hello    //sadd  set中添加成员
+(integer) 1
+127.0.0.1:6379> sadd s1 hello1
+(integer) 1
+127.0.0.1:6379> sadd s1 hello2
+(integer) 1
+127.0.0.1:6379> smembers s1     //smembers 打印set中所有成员
+1) "hello2"
+2) "hello"
+3) "hello1"
+
+SISMEMBER s1 hello               // SISMEMBER 是否是set中成员
+scard s1                         // set 中成员个数
+SREM s1 hello                    // 移除set某个元素
+SRANDMEMBER key [count]          // set 随机获取元素
+SPOP key [count]                 // 随机删除一些元素
+SMOVE source destination member  // 移动元素到另一个set中
+SDIFF key1 [key2 ...]            // 获取key1中不在key2存在的值    差集
+SINTER key [key ...]             // 获取所有key中元素的交集
+SUNION key [key ...]             // 获取所有key中元素的并集
+
+------------------------------------------------
+Hash 
+
+
+
+
+
+

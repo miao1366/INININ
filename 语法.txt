@@ -542,13 +542,102 @@ int main() {
     c中 int 能直接转换成枚举值
     c++ 中 int 不能直接转换成枚举值，需要强制转换
 
-119 
+119 #include <new>  
+    std::nothrow 在内存不足时，new (std::nothrow)并不抛出异常，而是将指针置NULL。
+    Task * ptask = new (std::nothrow) Task;  
+    if (!ptask)  {  
+        std::cerr<<"allocation failure!";  
+        std::exit(1);  
+    }
+
+    #include <new>                              // std::nothrow
+
+120. MVC模式 
+    MVC的全名是Model View Controller，是模型(model)－视图(view)－控制器(controller)的缩写，
+    是一种软件设计典范。它是用一种业务逻辑、数据与界面显示分离的方法来组织代码，将众多的业务逻辑聚集到一个部件里面，
+    在需要改进和个性化定制界面及用户交互的同时，不需要重新编写业务逻辑，达到减少编码的时间
+
+121. value_type  每个STL中的类都有value_type这种东西，通俗的说value_type 就是stl容器盛装的数据的数据类型
 	
-	
-	
-	
-	
-	
+122. 标准库类型(library type)ptrdiff_t 与 size_t 类型一样,ptrdiff_t 也是一种与机器相关的类型,在 cstddef 头文件中定义。
+     size_t 是unsigned 类型,而 ptrdiff_t 则是 signed 整型
+     ptrdiff_t与difference_type区别，前面的是c++定义的标准，后面则是STL定义的
+
+    int *a=new int(1);
+    int *b=new int(2);
+    ptrdiff_t result=a-b;
+    cout<<a<<ends<<b<<ends<<result<<endl; //
+    000F8F08
+    000F8F38
+    -12
+    可以看出，2个指针相减等于（地址相减的值)/指针所指向的数据类型
+    
+123. ISO-8859-1收录的字符除ASCII收录的字符外，还包括西欧语言、希腊语、泰语、阿拉伯语、希伯来语对应的文字符号。欧元符号出现的比较晚，
+     没有被收录在ISO-8859-1当中。 因为ISO-8859-1编码范围使用了单字节内的所有空间，在支持ISO-8859-1的系统中传输和存储其他任何编码的字节流
+     都不会被抛弃。换言之，把其他任何编码的字节流当作ISO-8859-1编码看待都没有问题。这是个很重要的特性，MySQL数据库默认编码是Latin1就是利
+     用了这个特性。ASCII编码是一个7位的容器，ISO-8859-1编码是一个8位的容器
+
+124. 宽字符wchar_t  占用两个字节  const char * str = L"hello world"
+
+125. 匿名结构体， 匿名联合 brpc->safe_sprintf.h
+    union {
+    struct {
+      int64_t       i;
+      unsigned char width;
+    };
+    const char* str;
+    const void* ptr;
+  };
+
+126. std::numeric_limits<T>::max()，min()及lowest()
+
+127 ArraySizeHelper     :::brpc->macros.h
+    namespace butil {
+    template <typename T, size_t N>
+    char (&ArraySizeHelper(T (&array)[N]))[N];
+    }
+
+128. sizeof是C/C++语言中的keyword，不是函数。对其参数里的表达式是不会在执行期去执行的，而只是在编译期去推算整个表达式的最后的类型信息。
+　　比如： int a = 1; sizeof(a++); cout << a;   // a还是1. 不会是2；
+
+129. 
+    返回值为数组指针T (*)[N] ::: T (* Foo( param_list ) )[N];
+    返回值为数组引用T (&)[N] ::: T (& Foo( param_list ) )[N];
+
+130. template< typename T, size_t N>
+     void Fun( T (&)[N] );
+     这个模板里既有类型T，又有数值N；模板推导时，是根据Fun的实参来推导得到的。比如：
+     int a[5];
+     Fun(a); // 编译器经过推导就知道，T=int，N=5。注意这里的N能得到5，是因为Fun的参数声明决定的。
+     这里Fun的参数是：数组引用
+
+131. template <typename T, size_t N>
+     char (&ArraySizeHelper(T (&array)[N]))[N];
+    
+132. 数组的引用,  (注意c++没有引用的数组)
+     T (&)[N] (注意：有个括号)。比如：
+　　 int a[5] = {0};
+　　 int (&ra)[5] = a;  //这里ra就是一个对数组a的引用，其这个数组的大小也是5
+
+133. sizeof(一个指针)和sizeof(一个数组)有很大区别
+　　int a[5];
+　　int *p = a;
+　　int (*pa)[5] = &a;
+　　// p和pa都是指针，但是指针的类型不同：p的类型是int*；pa的类型是int(*)[5]。
+　　sizeof(p)        // = 4;
+　　sizeof(a)        // = 20 = 5*sizeof(int)
+　　sizeof(*p)       // = sizeof(int) = 4;
+　　sizeof(pa)       // = 4;
+　　sizeof(*pa)      // = sizeof(a) = 20;
+
+
+
+
+
+
+
+
+
 	
 	
 	

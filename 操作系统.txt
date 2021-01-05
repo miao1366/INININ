@@ -1,0 +1,29 @@
+1.cache  http://www.ssdfans.com/?p=105592
+         https://www.cnblogs.com/snow826520/p/8574824.html
+    Cache大多是SRAM（静态RAM），而内存大多是DRAM（动态随即存储）或者DDR(双倍动态随机存储)，
+    Cache由三级组成，一级（L1）最快，但是容量最小；三级（LLC，Last Level Cache）最慢，但是容量最大。
+    在多核CPU中每个核拥有独立的L1和L2两级cache,L1 Cache一般把指令和数据分布存放，数据Cache用来存储数据，
+    而指令Cache用于存放指令，为了保证所有的核看到正确的内存数据，一个核在写入L1 cache后，
+    CPU会执行Cache一致性算法（Cache一致性算法在本文不涉及）把对应的cacheline 
+    (cache line是cache与内存数据交换的最小单位，如图3所示)同步到其他核，这个过程并不很快，是微秒级的，
+    相比之下写入L1 cache只需要若干纳秒。当很多线程在频繁修改某个字段时，
+    这个字段所在的cache line被不停地同步到不同的核上，就像在核间弹来弹去，这个现象就叫做cache bouncing。
+    三级 Cache 由所有的核所共有,由于共享的存在，有的处理器可能会极大地占用三级Cache，导致其他处理器只能占用极小的容量，
+    从而导致Cache不命中，性能下降
+
+    为了以较低的成本大幅提高性能，现代CPU都有cache。cpu cache已经发展到了三级缓存结构，
+    基本上现在买的个人电脑都是L3结构。其中L1和L2cache为每个核独有，L3则所有核共享
+
+2. 平台宏  brpc->build_config.h
+
+// This file adds defines about the platform we're currently building on.
+//  Operating System:
+//    OS_WIN / OS_MACOSX / OS_LINUX / OS_POSIX (MACOSX or LINUX) /
+//    OS_NACL (NACL_SFI or NACL_NONSFI) / OS_NACL_SFI / OS_NACL_NONSFI
+//  Compiler:
+//    COMPILER_MSVC / COMPILER_GCC
+//  Processor:
+//    ARCH_CPU_X86 / ARCH_CPU_X86_64 / ARCH_CPU_X86_FAMILY (X86 or X86_64)
+//    ARCH_CPU_32_BITS / ARCH_CPU_64_BITS
+
+3. 动态库导出宏  brpc->base_export.h
