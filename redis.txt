@@ -36,114 +36,6 @@ NoSQL  Not Only SQL
 
 mysql单表数据超过300万条，就要建立索引了。
 
-大数据：一般的数据库无法分析处理了
-压力一定会越来越大，适者生存！ 一定要逼着自己学习，这是在这个社会生存的唯一法则
-大数据时代的3v:
-1.海量  volume
-2.多样  variety
-3.实时  velocity
-
-大数据时代的3高：
-1. 高并发
-2. 高可扩 (随时水平拆分)
-3. 高性能 (保证用户体验)
-
-redis 每秒读写次数
-
-
-mysql单表数据超过300万条，就要建立索引了。
-
-图片
-分布式文件系统    FastDFS
-淘宝自己的        TFS
-google的         GFS
-Hadoop           HDFS
-阿里云的          OSS
-
-NoSQL的四大分类
-KV键值对
-   新浪  Redis
-   美团  Redis + Tair
-   阿里 百度: Redis + memecache
-
-文档型数据库(bjson)
-    MongoDB
-    ConthDB
-
-列存储数据库
-    HBase
-    分布式文件系统
-图关系数据库
-
-
-
-IOE
-IBM的小型机
-Oracle数据库
-EMC存储设备
-
-
-Redis是什么?
-remote dictionary server    远程字典服务
-
-redis 读的次数是110000次/s  写的次数是80000/s 
-
-Redis能干嘛?
-1. 内存存储、持久化
-2. 效率高，可以用于高速缓存
-3. 发布订阅系统
-4. 地图信息分析
-5. 计时器、计数器(浏览量)
-
-特性
-1. 多样的数据类型
-2. 持久化
-3. 集群
-4. 事务
-
-redis  默认端口是6379
-mysql  3306
-
-redis  默认16个数据库， 默认使用第一个数据库
-select  index  // 选择数据库
-dbsize         //  当前库的大小
-key *           // 查看所有的key
-flushdb        //清空当前的库
-flushall       //清空所有的库
-
-
-redis 是单线程的，是很快的，Redis的瓶颈是根据机器的内存和网络带宽
-redis 是将所有的数据全部放在内存中的
-
-exists         //判断键是否存在
-
-expire  key  second   //设置键过期时间  
-
-ttl  key  //查看key剩余过期时间
-
-move  key  db  //将键移动到指定数据库
-
-type    //查看键类型
-
-ping   //测试是否连接到服务
-
-append  key  value  // 键增加内容
-
-strlen  key  //查看value长度
-
-所有的list命令都是用l开头的
-
-LPUSH  key value;  //头部插入值
-
-RPUSH  key value;  //尾部插入值
-
-LRANGE  key  0 -1  // 显示所有的值
-
-Lpop  key 
-
-rpop  key
-
-lindex  key index  //通过下标获取值
 
 append key value    //往key中增加字符 key不存在时，新建key
 
@@ -247,6 +139,88 @@ SUNION key [key ...]             // 获取所有key中元素的并集
 
 ------------------------------------------------
 Hash 
+Map集合， key-map. 这个值是一个map集合
+
+HSET key field value
+HGET key field
+HMSET key field value [field value ...]
+HMGET key field [field ...]
+HGETALL key
+HDEL key field [field ...]
+HLEN key
+HEXISTS key field
+HKEYS key
+HVALS key
+HINCRBY key field increment
+HSETNX key field value         //不存在创建
+
+===========================================
+Zset 有序集合
+ZADD key [NX|XX] [CH] [INCR] score member [score member ...]
+127.0.0.1:6379> zadd myset 1 one
+(integer) 1
+127.0.0.1:6379> zadd myset 2 two 3 three
+(integer) 2
+127.0.0.1:6379> zrange myseet 0 -1
+(empty list or set)
+127.0.0.1:6379> zrange myset 0 -1
+1) "one"
+2) "two"
+3) "three"
+
+ZRANGEBYSCORE key min max [WITHSCORES] [LIMIT offset count]
+127.0.0.1:6379> ZRANGEBYSCORE myset -inf +inf
+1) "one"
+2) "two"
+3) "three"
+127.0.0.1:6379> 
+ZRANGEBYSCORE myset -inf +inf withscores
+-inf    最小值
++inf    最大值
+
+ZREM  key member [member ...]
+ZCARD key
+ZREVRANGE key start stop [WITHSCORES]
+zcount key min max
+
+==================================================
+geospatial  地理位置
+GEOADD
+GEODIST
+GEOHASH
+GEOPOS
+GEORADIUS
+GEORADIUSBYMEMBER
+
+127.0.0.1:6379> geoadd china:city 116.40 39.9 beijing
+(integer) 1
+127.0.0.1:6379> geoadd china:city 121.47 31.23 shanghai
+(integer) 1
+127.0.0.1:6379> geoadd china:city 106.47 29.23 chongqin
+(integer) 1
+127.0.0.1:6379> geoadd china:city 114.05 22.23 shenzhen
+(integer) 1
+127.0.0.1:6379> geoadd china:city 120.16 30.24 hanzhou
+(integer) 1
+127.0.0.1:6379> GEOPOS china:city beijing
+1) 1) "116.39999896287918091"
+   2) "39.90000009167092543"
+
+127.0.0.1:6379> GEOdist china:city beijing shenzhen km
+"1977.8694"
+
+127.0.0.1:6379> GEORADIUS china:city 110 30 1000 km
+1) "chongqin"
+2) "shenzhen"
+3) "hanzhou"
+
+
+
+
+
+
+
+
 
 
 
