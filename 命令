@@ -488,3 +488,27 @@ l      //多线程，克隆线程（使用 CLONE_THREAD, 类似 NPTL pthreads）
     TTY    //该进程在那个终端上运行，若与终端无关，则显示? 若为pts/0等，则表示由网络连接主机进程。 
     CMD    //命令的名称和参数
 
+55 
+查看物理CPU个数，可以看到cpu编号，同一个编号当然是同一个cpu
+grep 'physical id' /proc/cpuinfo 
+
+查看core的个数
+grep 'core id' /proc/cpuinfo | sort -u |wc -l
+
+查看总线程数量
+grep 'processor' /proc/cpuinfo | sort -u | wc -l
+
+查看cpu信息
+lscpu
+
+56 
+pstree -p ${pid}    //查看一个进程下的所有线程
+
+57 java获取线程状态
+
+使用Thread类的getState()方法可以获得线程的状态，该方法的返回值是Thread.state,他是线程状态的枚举。枚举常量表如下：
+Thread.state的枚举常量说明
+枚举常量	    含义	        枚举常量	         含义
+NEW	        新建状态	        TIMED_WAITING	 休眠状态
+RUNNABLE	运行(可运行)状态	 WAITING	      等待状态
+BLOCKED	    阻塞状态	        TERMINATED	     终止状态

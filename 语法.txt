@@ -679,7 +679,8 @@ POINTER        32       32       64       64       64
 ssize_t和size_t分别是signsize_t和unsigned signed size of computer word size。它们也是表示计算机的字长，在32位机器上是int型，在64位机器上long型，从某种意义上来说它们等同于intptr_t和 uintptr_t。
 
 
-
+136.  delete 
+      C++11 中，可在想要 “禁止使用” 的特殊成员函数声明后加 “= delete”，而需要保留的加 "= default" 或者不采取操作
 
 
 

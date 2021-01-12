@@ -573,16 +573,26 @@ type __sync_val_compare_and_swap (type *ptr, type oldval, type newval, ...);
 99 void *memset (void *__s, int __c, size_t __n)
 
 100  timerfd是Linux为用户程序提供的一个定时器接口。这个接口基于文件描述符，通过文件描述符的可读事件进行超时通知，所以能够被用于select/poll的应用场景
+     编译时加编译选项 -lrt      ???
+     timerfd是每个进程唯一的吗  ???
 
 	 int timerfd_create(int clockid, int flags); 
 		timerfd_create（）函数创建一个定时器对象，同时返回一个与之关联的文件描述符。
 		clockid：clockid标识指定的时钟计数器，可选值（CLOCK_REALTIME、CLOCK_MONOTONIC。。。）
 		CLOCK_REALTIME:系统实时时间,随系统实时时间改变而改变,即从UTC1970-1-1 0:0:0开始计时,中间时刻如果系统时间被用户改成其他,则对应的时间相应改变
 		CLOCK_MONOTONIC:从系统启动这一刻起开始计时,不受系统时间被用户改变的影响
-		flags：参数flags（TFD_NONBLOCK(非阻塞模式)/TFD_CLOEXEC（表示当程序执行exec函数时本fd将被系统自动关闭,表示不传递）	 
+		flags：参数flags（TFD_NONBLOCK(非阻塞模式)/TFD_CLOEXEC（表示当程序执行exec函数时本fd将被系统自动关闭,表示不传递）	
+        
+        O_CLOEXEC : 在进程执行exec系统调用时关闭此打开的文件描述符。防止父进程泄露打开的文件给子进程，即便子进程没有相应权限 
 		
 	 
      int timerfd_settime(int fd, int flags, const struct itimerspec *new_value, struct itimerspec *old_value);
+        
+        struct itimerspec {
+            struct timespec it_interval;
+            struct timespec it_value;
+        };
+        
 	 	struct timespec {
       		time_t tv_sec;                /* Seconds */
       		long   tv_nsec;               /* Nanoseconds */
@@ -611,7 +621,11 @@ type __sync_val_compare_and_swap (type *ptr, type oldval, type newval, ...);
       curr_value.it_interval 定时器间隔时间
 	  
 	  read函数可以读timerfd，读的内容为uint_64，表示超时次数
-	  
+	
+timefd_*系列函数优点:
+ 1. 这一组函数不涉及到信号，安全好用
+ 2. 这一组函数通过操作时间相关的文件描述符实现功能，可以和其它的文件相关操作融为一体
+ 3. timerf_create(2)函数把时间变成了一个描述符，该文件描述符在定时器超时的那一刻变得可读，这样就方便融入select(2)或poll(2)中去
 	 
 	 
 101   int pthread_atfork(void (*prepare)(void), void (*parent)(void), void (*child)(void));

@@ -214,9 +214,64 @@ GEORADIUSBYMEMBER
 2) "shenzhen"
 3) "hanzhou"
 
+GEORADIUSBYMEMBER china:city beijing 1000 km
+1) "beijing"
+
+GEOHASH //将经纬度转换为11位的hash
+127.0.0.1:6379> GEOHASH china:city beijing hanzhou
+1) "wx4fbxxfke0"
+2) "wtmkn31bfb0"
+
+geo底层是zset 
+127.0.0.1:6379> ZRANGE china:city 0 -1
+1) "chongqin"
+2) "shenzhen"
+3) "hanzhou"
+4) "shanghai"
+5) "beijing"
+
+===========================================
+hyperloglog    基数统计的算法
+优点:占用的内存是固定的
+0.81%的错误率
+127.0.0.1:6379> PFADD mykey a b c d e
+(integer) 1
+127.0.0.1:6379> pfcount mykey
+(integer) 5
+
+// pfmerge 合并组合
+127.0.0.1:6379> pfmerge mykey3 mykey mykey2
+OK
+127.0.0.1:6379> 
+127.0.0.1:6379> PFCOUNT mykey3
+(integer) 5
+
+============================================
+bitmaps  位图  位存储
+127.0.0.1:6379> SETBIT day 0 1
+(integer) 0
+127.0.0.1:6379> SETBIT day 1 1
+(integer) 0
+127.0.0.1:6379> SETBIT day 2 1
+(integer) 0
+127.0.0.1:6379> getbit day 1
+(integer) 1
+127.0.0.1:6379> BITCOUNT day
+(integer) 3
 
 
+事务
+要么同时成功，要么同时失败-->原子性
+Redis单条命令保证原子性的，但是事务不保证原子性
 
+Redis事务本质:一组命令的集合，一个事务中的所有命令都会被序列化，在事务执行的过程中，
+             会按照顺序执行
+一次性 、顺序性、排他性。
+
+redis的事务：
+    1. 开启事务
+    2. 命令入队
+    3. 执行事务
 
 
 

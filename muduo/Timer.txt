@@ -1,0 +1,56 @@
+1. Timestamp -->记录的是微秒
+
+2. //定时器超时读取文件 
+uint64_t exp = 0;
+read(fd, &exp, sizeof(uint64_t)); 
+当timerfd为阻塞方式时，read函数将被阻塞，直到定时器超时
+
+// 可以用read函数读取计时器的超时次数，改值是一个8字节无符号的长整型
+// https://www.cnblogs.com/wenqiang/p/6698371.html
+
+3.
+不需要线程池。线程池的应用场景是线程数量不断增减的情况，因此需要用一个池来不断维护申请与释放。
+现在主流做法是按cpu核心数量开线程数量，线程数量恒定不变，等于epoll数量。这种情况下，由于线程数量固定，线程池毫无优势
+
+4. 
+运行在Linux系统上网络应用程序，为了利用多核的优势，一般使用以下比较典型的多进程/多线程服务器模型：
+  1.单线程listen/accept，多个工作线程接收任务分发，虽CPU的工作负载不再是问题，但会存在：
+      a. 单线程listener，在处理高速率海量连接时，一样会成为瓶颈
+      b. CPU缓存行丢失套接字结构(socket structure)现象严重
+  2.所有工作线程都accept()在同一个服务器套接字上呢，一样存在问题：
+      a. 多线程访问server socket锁竞争严重
+      b. 高负载下，线程之间处理不均衡，有时高达3:1不均衡比例
+      c. 导致CPU缓存行跳跃(cache line bouncing)
+      d. 在繁忙CPU上存在较大延迟
+上面模型虽然可以做到线程和CPU核绑定，但都会存在：
+
+单一listener工作线程在高速的连接接入处理时会成为瓶颈
+缓存行跳跃
+很难做到CPU之间的负载均衡
+随着核数的扩展，性能并没有随着提升
+
+https://blog.csdn.net/chen_fly2011/article/details/56480925
+
+5. 三次握手之后，tcp连接会加入到accept队列。accept()会从队列中取一个连接返回，若队列为空，则阻塞
+    int accept(int socket, struct sockaddr *restrict address,
+        socklen_t *restrict address_len)
+    第一个参数为服务器的socket描述字，第二个参数为指向struct sockaddr *的指针，用于返回客户端的协议地址，
+    第三个参数为协议地址的长度。如果accpet成功，那么其返回值是由内核自动生成的一个全新的描述字，
+    代表与返回客户的TCP连接
+  服务端一般步骤
+    socket()    -->创建套接字
+    bind()      -->绑定
+    listen()    -->监听
+    accept()    -->阻塞等待客户端连接
+
+6. 对于“大量的网络短连接”的场景，现在正确的做法是 SO_REUSEPORT
+   一般来说，一个端口释放后会等待两分钟之后才能再被使用，SO_REUSEADDR是让端口释放后立即就可以被再次使用
+   目的：当服务端出现timewait状态的链接时，确保server能够重启成功
+   
+7. 
+   SO_REUSEPORT：
+   SO_REUSEPORT使用场景：linux kernel 3.9 引入了最新的SO_REUSEPORT选项，使得多进程或者多线程创建多个绑定同
+   一个ip:port的监听socket，提高服务器的接收链接的并发能力,程序的扩展性更好；此时需要设置SO_REUSEPORT
+   （注意所有进程都要设置才生效）
+
+   
