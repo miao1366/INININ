@@ -48,6 +48,8 @@ ptrdiff_t   size_t   wchar_t   	NULL   	offsetof(type, member-designator)
 
 17 #include <limits>
 
+18 #include <endian.h>
+
 
 
 

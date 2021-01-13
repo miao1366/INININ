@@ -1,5 +1,62 @@
-class copyable {
- protected:
-  copyable() = default;
-  ~copyable() = default;
-};
+1. class copyable {
+    protected:
+    copyable() = default;
+    ~copyable() = default;
+  };
+
+2.  std::vector<double> values(20);
+    这个容器开始时有 20 个元素，它们的默认初始值都为 0。生成容器时，同时指定元素个数，就能够减少空间额外分配的次数，这是一个很好的习惯
+    可是这时候size()是多少啊?
+
+3.   if (writableBytes() + prependableBytes() < len + kCheapPrepend) {
+        // FIXME: move readable data
+        buffer_.resize(writerIndex_+len);
+    }  //这块看不太懂
+
+4. 
+
+诊断-忽略:(关闭警告)
+#pragma  GCC diagnostic ignored  "-Wunused"
+#pragma  GCC diagnostic ignored  "-Wunused-parameter"
+
+诊断-警告:(开启警告)
+#pragma  GCC diagnostic warning  "-Wunused"
+#pragma  GCC diagnostic warning  "-Wunused-parameter"
+
+诊断-错误:(开启警告-升级为错误)
+#pragma  GCC diagnostic error  "-Wunused"
+#pragma  GCC diagnostic error  "-Wunused-parameter"
+
+5. readv/writev    (分散读/集中写)
+    这两个函数类似于read和write，不过readv和writev允许单个系统调用读入到或写出自一个或多个缓冲区。
+    这些操作分别称为分散读（scatter read）和集中写（gather write），因为来自读操作的输入数据被分散到多个应用缓冲区中，
+    而来自应用缓冲区的输出数据则被集中提供给单个写操作。
+
+6. 
+#define GUARDED_BY(x) \
+THREAD_ANNOTATION_ATTRIBUTE__(guarded_by(x))
+#define PT_GUARDED_BY(x) \
+THREAD_ANNOTATION_ATTRIBUTE__(pt_guarded_by(x))
+#define ACQUIRED_BEFORE(...) \
+THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
+
+7.  循环缓冲区
+    boost::circular_buffer<T>  queue_ GUARDED_BY(mutex_);
+
+8.  双端队列    https://blog.csdn.net/qq_32378713/article/details/79415764
+    的数据被表示为一个分段数组，容器中的元素分段存放在一个个大小固定的数组中，此外容器还需要维护一个存放这些数组首地址的索引数组
+    由于分段数组的大小是固定的，并且它们的首地址被连续存放在索引数组中，因此可以对其进行随机访问，但效率比vector低很多
+
+9.  
+    bool CurrentThread::isMainThread() 
+
+10. 给线程起名字 
+    ::prctl(PR_SET_NAME, muduo::CurrentThread::t_threadName);
+
+11. size_t fread_unlocked(void *ptr, size_t size, size_t n, FILE *stream)   //https://blog.csdn.net/qu1993/article/details/109382285
+    fwrite的线程不安全版本, 效率比fwrite()高
+
+12. void setbuffer(FILE * stream,char * buf,size_t size);  将缓冲区设置为本地的buffer_   
+    https://blog.csdn.net/qu1993/article/details/109383256
+
+13 static_assert    //静态检查
