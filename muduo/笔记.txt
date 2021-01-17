@@ -4,6 +4,16 @@
     ~copyable() = default;
   };
 
+  class noncopyable {
+    public:
+        noncopyable(const noncopyable&) = delete;
+        void operator=(const noncopyable&) = delete;
+    protected:
+        noncopyable() = default;
+        ~noncopyable() = default;
+  };
+
+
 2.  std::vector<double> values(20);
     这个容器开始时有 20 个元素，它们的默认初始值都为 0。生成容器时，同时指定元素个数，就能够减少空间额外分配的次数，这是一个很好的习惯
     可是这时候size()是多少啊?
@@ -47,8 +57,7 @@ THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
     的数据被表示为一个分段数组，容器中的元素分段存放在一个个大小固定的数组中，此外容器还需要维护一个存放这些数组首地址的索引数组
     由于分段数组的大小是固定的，并且它们的首地址被连续存放在索引数组中，因此可以对其进行随机访问，但效率比vector低很多
 
-9.  
-    bool CurrentThread::isMainThread() 
+9.  bool CurrentThread::isMainThread() 
 
 10. 给线程起名字 
     ::prctl(PR_SET_NAME, muduo::CurrentThread::t_threadName);
@@ -60,3 +69,94 @@ THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
     https://blog.csdn.net/qu1993/article/details/109383256
 
 13 static_assert    //静态检查
+
+14 ssize_t pread(int fd, void *buf, size_t count, off_t offset);
+   再一个文件的某个任意位置出开始读数据, pread()不更新文件指针
+
+15  int strerror_r(int errnum, char *buf, size_t n);
+    把错误描述放在用户自定义的buffer中
+
+16  getenv()
+    获取环境变量
+
+17  std::reverse() 元素反转
+
+18  uintptr_t
+
+19 digits10           https://blog.csdn.net/yhc166188/article/details/90287807
+                      https://zhuanlan.zhihu.com/p/27872593
+   返回目标类型在十进制下可以表示的最大位数
+   std::numeric_limits<double>::digits10
+
+20 无符号数 / 有符号数
+   无符号数最高位不代表正负。
+   有符号数最高位0代表正数，1代表负数
+   拿四位有符号数举例
+   1111   代表负数 值为 -8 + 4 + 2 + 1 = -1
+   0111   代表正数 值为 4 + 2 + 1 = 7
+
+21 原码 反码 补码
+   正数的反码是其本身   ||   正数的补码就是其本身
+   负数的反码是在其原码的基础上, 符号位不变，其余各个位取反   ||   负数的补码是在其原码的基础上, 符号位不变, 其余各位取反, 最后+1. (即在反码的基础上+1)
+   
+   [+1] = [00000001]原 = [00000001]反 = [00000001]补
+   [-1] = [10000001]原 = [11111110]反 = [11111111]补
+   补码是为了解决+0, -0问题
+
+22 pthread_join()    //可以接收已结束线程
+
+23 int timerfd_create (__clockid_t __clock_id, int __flags)
+   Read成功返回时，buf里存储的是一个8字节的无符号整数，该整数表示从上次被捕获到超时信号到现在超时的次数。
+   比如：it_value，it_interval分别设置为2,1， 程序运行开启定时器之后马上睡眠8秒，这是read的buf得到的值应该为7
+
+24 int eventfd(unsigned int initval, int flags)
+    initval：创建eventfd时它所对应的64位计数器的初始值；
+    flags：eventfd文件描述符的标志，可由三种选项组成：EFD_CLOEXEC、EFD_NONBLOCK和EFD_SEMAPHORE。
+    EFD_CLOEXEC表示返回的eventfd文件描述符在fork后exec其他程序时会自动关闭这个文件描述符；
+    EFD_NONBLOCK设置返回的eventfd非阻塞；
+    EFD_SEMAPHORE表示将eventfd作为一个信号量来使用
+
+    read -> 从上面描述中可以知道以下几点：
+      1.read函数会从eventfd对应的64位计数器中读取一个8字节的整型变量；
+      2.read函数设置的接收buf的大小不能低于8个字节，否则read函数会出错，errno为EINVAL;
+      3.read函数返回的值是按小端字节序的；
+      4.如果eventfd设置了EFD_SEMAPHORE，那么每次read就会返回1，并且让eventfd对应的计数器减一；如果eventfd没有设置EFD_SEMAPHORE，
+        那么每次read就会直接返回计数器中的数值，read之后计数器就会置0。不管是哪一种，当计数器为0时，如果继续read，那么read就会阻塞
+        （如果eventfd没有设置EFD_NONBLOCK）或者返回EAGAIN错误（如果eventfd设置了EFD_NONBLOCK）
+
+    write -> 从上面描述中可以知道：
+      1.在没有设置EFD_SEMAPHORE的情况下，write函数会将发送buf中的数据写入到eventfd对应的计数器中，最大只能写入0xffffffffffffffff，否则返回EINVAL错误；
+      2.在设置了EFD_SEMAPHORE的情况下，write函数相当于是向计数器中进行“添加”，比如说计数器中的值原本是2，如果write了一个3，那么计数器中的值就变成了5。
+        如果某一次write后，计数器中的值超过了0xfffffffffffffffe（64位最大值-1），那么write就会阻塞直到另一个进程/线程从eventfd中进行了read
+        （如果write没有设置EFD_NONBLOCK），或者返回EAGAIN错误（如果write设置了EFD_NONBLOCK）
+
+25 int wait(int * status)
+   等待子进程退出。NULL的意思是退出状态不关注。如果要获取退出状态应该写成wait(&status);
+   函数功能: 父进程一旦调用wait函数就立即阻塞自己，由wait分析是否当前进程的某个子进程已经退出，如果让它找到了这样一个已经变成zombie的子进程，
+            wait就会收集这个子进程的信息，并把它彻底销毁后返回，如果没有找到，就一直阻塞，直至找到一个结束的子进程或接收到了一个指定的信号为止
+
+26 boost::any
+   typedef std::list<boost::any> list_any;
+   list_any la;
+   la.push_back(10); // 存放整数
+   la.push_back(std::string("glemontree"));
+
+27 timerfd_settime()
+
+28  std::pair()
+    pair是将2个数据组合成一个数据，当需要这样的需求时就可以使用pair
+    
+29  channel_test.cc 
+
+30  int inet_pton(int family, const char *strptr, void *addrptr);     //将点分十进制的ip地址转化为用于网络传输的数值格式
+    返回值：若成功则为1，若输入不是有效的表达式则为0，若出错则为-1
+
+31  服务端一般步骤
+    socket()    -->创建套接字
+    bind()      -->绑定
+    listen()    -->监听
+    accept()    -->阻塞等待客户端连接
+
+    客户端一般步骤
+    socket()    -->创建套接字
+    connect()   -->连接服务器

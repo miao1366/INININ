@@ -84,8 +84,12 @@ std::move的优点
 18. 纯虚类是因为class不产生虚表，只能在派生类中实现虚表
 
 19. std::unique_ptr<>
-  “unique”一词有着“唯一的，独一无二”的意思，这主要体现在所有权上，某个 raw 指针同时只能被一个 unique_ptr 指针绑定，我们不能拷贝 unique_ptr 对象，只能转移。
-  
+    “unique”一词有着“唯一的，独一无二”的意思，这主要体现在所有权上，某个 raw 指针同时只能被一个 unique_ptr 指针绑定，我们不能拷贝 unique_ptr 对象，只能转移。
+    1. std::unique_ptr<int> up;//可以指向int的unique_ptr，不过是空的
+       up.reset(new int(12))
+
+    2. std::unique_ptr<int> up(new int(12));
+
 20 explicit 
 
 21.函数模板实例化：

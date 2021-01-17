@@ -52,5 +52,6 @@ https://blog.csdn.net/chen_fly2011/article/details/56480925
    SO_REUSEPORT使用场景：linux kernel 3.9 引入了最新的SO_REUSEPORT选项，使得多进程或者多线程创建多个绑定同
    一个ip:port的监听socket，提高服务器的接收链接的并发能力,程序的扩展性更好；此时需要设置SO_REUSEPORT
    （注意所有进程都要设置才生效）
+   
 
    

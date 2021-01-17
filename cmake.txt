@@ -169,10 +169,36 @@ lz 是link libz
    PROJECT_BINARY_DIR，是执行cmake命令时所在的目录，通常是build一类的用户自行创建的目录。
    Caffe_SOURCE_DIR，此时同PROJECT_SOURCE_DIR
    Caffe_BINARY_DIR，此时同PROJECT_BINARY_DIR
-   
 
+36 cmake   path   //解析path目录下的cmakefile文件
 
+37 
+   CMAKE_EXPORT_COMPILE_COMMANDS选项
+   默认不开启，开启的两种方法：
+   在CMakeLists.txt中添加 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+   在命令行中添加-DCMAKE_EXPORT_COMPILE_COMMANDS=on
+   开启后，其生成的文件compile_commands.json，包含所有编译单元所执行的指令
 
+38 enable_testing()
+
+39 enable_testing 打开当前及以下目录中的测试功能。
+   enable_testing()
+   为当前及其下级目录打开测试功能。也可参见add_test命令。注意，ctest需要在构建跟目录下找到一个测试文件。因此，这个命令应该在源文件目录的根目录下。
+
+40 add_test 以指定的参数为工程添加一个测试。
+   add_test(testname Exename arg1 arg2 ... )
+　　如果已经运行过了ENABLE_TESTING命令，这个命令将为当前路径添加一个测试目标。如果ENABLE_TESTING还没有运行过，该命令啥事都不做。测试是由测试子系统运行的，
+   它会以指定的参数执行Exename文件。Exename或者是由该工程构建的可执行文件，也可以是系统上自带的任意可执行文件（比如tclsh）。该测试会在CMakeList.txt文件的当前工作路径下运行，
+   这个路径与二进制树上的路相对应
+
+41 STREQUAL 用于比较字符串，相同返回 true
+
+42 CMAKE_PROJECT_NAME: 当前工程的名字
+
+43  option(address "This is a option for address" ON)
+    此时表示，如果用户没有定义过address,那我address的默认值就是ON,
+    如果用户在命令行显示改变过address的值比如为OFF,那么在脚本中address的值就是OFF
+44
 	
 	
 	
