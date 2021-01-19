@@ -8,6 +8,9 @@
 6、对等模式 ——————(Peer-to-Peer pattern)
 7、事件总线模式 ————(Event-Bus pattern)
 8、模型/视图/控制器模式 -(Moder-View-Controller pattern)
+    1）最上面的一层，是直接面向最终用户的"视图层"（View）。它是提供给用户的操作界面，是程序的外壳。
+    2）最底下的一层，是核心的"数据层"（Model），也就是程序需要操作的数据或信息。    
+    3）中间的一层，就是"控制层"（Controller），它负责根据用户从"视图层"输入的指令，选取"数据层"中的数据，然后对其进行相应的操作，产生最终结果。
 9、黑板模式 ——————(Blackboard pattern)
 10、解析器模式 ————-(Interperter pattern)
 

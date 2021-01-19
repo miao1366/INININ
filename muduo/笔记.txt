@@ -160,3 +160,86 @@ THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
     客户端一般步骤
     socket()    -->创建套接字
     connect()   -->连接服务器
+
+32  用一个背景线程负责收集日志消息并写入日志文件，其它业务线程只管往这个“日志线程”发送日志消息，这称为"异步日志"。在多线程服务程序中，异步日志（也可叫“非阻塞日志”）是必需的。
+    假如在网络IO线程或业务线程中直接写日志，写操作偶尔可能阻塞一会儿，业务中的响应请求可能会超时，或者耽误发送心跳包，在分布式系统中可能造成多米骨牌效应，
+    例如误报死锁引发自动failover等。因此，在其它业务线程中应该彻底避免磁盘IO，阻塞会影响服务程序的性能。
+    缓冲区技术，在服务端编程中经常用到的。muduo日志库是用双缓冲技术。
+    很多项目服务端最开始的性能瓶颈不出现在语言也不出现在框架，通常是出现在数据库上，具体表现为数据库慢查询、死锁、数据库连接数占满等。当遇到数据库读写频繁的业务，缓存是必不可少的了。
+    但是缓存该怎么做才能使利用率更高，减少或避免脏读呢？
+
+    从需求、现有的硬件等限制，学习如何设计并实现一个合格的日志库？
+ (1)需求分为功能需求、性能需求。
+    功能需求主要考虑: 接口设计是否合理、易用？需要支持哪些功能？muduo日志库的设计原则是：尽量提供最精简的日志设施，不必要的就不提供。封闭的接口尽量便于程序员阅读、查错。
+    性能需求考虑单位时间内可写入的最大日志量，且要求它不会阻塞正常的业务处理流程。muduo的设计原则：性能只需要“足够好”，即能达到现代硬盘的最大写入带宽即可。且在实现时，
+    要考虑减少多线程的锁争用，尽量不阻塞正常的业务处理逻辑。
+ (2)如何做异常处理、性能调优？
+ (3)日志库的实现逻辑基本大同小异，逻辑基本是：在各个业务线程中拼装日志串，然后将日志串存入一个Buffer（访问时需要加锁），另外有一个日志线程不停地从Buffer中取数据，然后将它输出到日志文件中。实现的时候会考虑：
+     *Buffer如何设计？什么时候唤醒日志线程从Buffer中取数据？
+     *如何减少 业务线程、日志线程 访问Buffer时的锁竞争？
+     *日志串如何组装，才能使它组装速度足够快、且要兼顾接口设计的易用性？
+     *要考虑线程间的竞争、写入速度等各种情况，保证不会丢失每条日志串。
+     *什么时候切换写到另一个日志文件？什么时候flush到日志文件？
+     *若日志串写入过多，日志线程来不及消费，怎么办？
+    muduo日志库的性能很高，大概可以达到每秒200多万条，非常快。代码中做了很多性能调优，比如实现了一个memory output stream(内存输出流)，来加快各种类型转换成字符串。
+    利用线程私有变量缓存了一些变量值来加快日志串的组装。用双缓冲技术来减少线程之间的锁竞争、最大化一次性输出日志的吞吐量。阅读时注意每个优化细节，然后在平时做性能调优时 模仿它。
+    使得前端的业务线程与后端的日志线程能够并发，并且，写日志不太频繁，提高效率.
+    
+    https://blog.csdn.net/q5707802/article/details/79277665
+
+33  char *strerror(int errnum);
+    int strerror_r(int errnum, char *buf, size_t n);
+    对于函数strerror_r，第一个参数errnum是错误代码，第二个参数buf是用户提供的存储错误描述的缓存，第三个参数n是缓存的大小。
+    strerror()不是线程安全的，strerror_r()是线程安全的。
+
+34  一个配置得当的Nginx服务器单机可以承受住 50k-80k 左右每秒的请求
+
+35  lower_bound( begin,end,num)：从数组的begin位置到end-1位置二分查找第一个大于或等于num的数字，找到返回该数字的地址，不存在则返回end。
+                通过返回的地址减去起始地址begin,得到找到数字在数组中的下标。
+    upper_bound( begin,end,num)：从数组的begin位置到end-1位置二分查找第一个大于num的数字，找到返回该数字的地址，不存在则返回end。
+                通过返回的地址减去起始地址begin,得到找到数字在数组中的下标
+    
+36  std::set insert()
+    //普通引用方式传参
+    pair<iterator,bool> insert (const value_type& val);
+    //右值引用方式传参
+     pair<iterator,bool> insert (value_type&& val);
+    当向 set 容器添加元素成功时，该迭代器指向 set 容器新添加的元素，bool 类型的值为 true；
+    如果添加失败，即证明原 set 容器中已存有相同的元素，此时返回的迭代器就指向容器中相同的此元素，同时 bool 类型的值为 false
+
+37  std::pair 是可以比较大小的
+
+    有这样的全局函数
+    template<class _Ty1,
+	class _Ty2> inline
+	bool operator<(const pair<_Ty1, _Ty2>& _Left,
+		const pair<_Ty1, _Ty2>& _Right)
+	{	// test if _Left < _Right for pairs
+	return (_Left.first < _Right.first ||
+		!(_Right.first < _Left.first) && _Left.second < _Right.second);
+    }
+    pair 如何比较相等？
+    cppreference上的解释是"In imprecise terms, two objects a and b are considered equivalent if neither compares less than the other: !comp(a, b) && !comp(b, a)."。
+    用不精确的术语来说，如果两个对象a和b都不小于另一个，则被认为是相等的
+
+38  back_inserter：创建一个使用push_back的迭代器
+    inserter：此函数接受第二个参数，这个参数必须是一个指向给定容器的迭代器。元素将被插入到给定迭代器所表示的元素之前。
+    front_inserter：创建一个使用push_front的迭代器（元素总是插入到容器第一个元素之前）
+    list<int> lst = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    list<int> lst2 ={10}, lst3={10},lst4={10};
+    copy(lst.cbegin(), lst.cend(), back_inserter(lst2));
+    //lst2包含10,1,2,3,4,5,6,7,8,9
+    copy(lst.cbegin(), lst.cend(), inserter(lst3, lst3.begin()));
+    //lst3包含1,2,3,4,5,6,7,8,9,10
+    copy(lst.cbegin(), lst.cend(), front_inserter(lst4));
+    //lst4包含9,8,7,6,5,4,3,2,1,10
+39 set中存储的是pair类型，那么默认先按照pair的第一个元素排序，如果相同，再按照第二个元素排序
+
+399  学到了什么？
+    1. 会写一个高效的异步日志
+    2. 定时器队列
+    3. 事件通知
+    4. 
+
+
+

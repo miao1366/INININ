@@ -1213,7 +1213,63 @@ struct timespec {
       该请求不具有约束力，容器可以自由地去执行其他的优化方案（capacity可以大于size）。//我查了一下网上说是该方法由编译器决定是否真正释放多余的内存，
       该方法值是提出请求，是否要实现由编译器说了算
 
+173 int _access(char* path,int mode)
+    头文件<io.h>
+    功能：确定文件或文件夹的访问权限。如果指定的存取方式有效，则函数返回0，否则函数返回-1。
+    参数path 是访问文件所在的路径名，mode是访问判断模式，
+    具体含义如下：
+    　　R_OK 只判断是否有读权限
+    　　W_OK 只判断是否有写权限
+    　　X_OK 判断是否有执行权限
+    　　F_OK 只判断是否存在
 
+174 int tcgetattr(int fd, struct termios *termios_p);    //用于获取与终端相关的参数，提供异步通讯接口      0：成功  -1：错误，
+    struct termios *termios_p：返回值保留在termios结构体中：
+           tcflag_t c_iflag;      /* input modes */             输入模式标识
+           tcflag_t c_oflag;      /* output modes */            输出
+           tcflag_t c_cflag;      /* control modes */           控制
+           tcflag_t c_lflag;      /* local modes */             本地
+           cc_t     c_cc[NCCS];   /* special characters */      控制字符，保存中断驱动程序中的特殊字符
+    
+    https://blog.csdn.net/dongshibo12/article/details/76209112
+
+175 https://blog.csdn.net/qishi_blog/article/details/9238673
+    波特率的设置通常使用cfsetospeed和cfsetispeed函数来完成。获取波特率信息是通过cfgetispeed和cfgetospeed函数来完成的
+    int cfsetospeed(struct termios *termptr, speed_t speed);        如果成功返回0,否则返回-1
+       struct termios *termptr - 指向termios结构的指针
+       speed_t speed - 需要设置的输出波特率
+    int cfsetispeed(struct termios *termptr, speed_t speed);        如果成功返回0,否则返回-1
+        struct termios *termptr - 指向termios结构的指针
+        speed_t speed - 需要设置的输入波特率
+
+176 int tcflush(int fd, int queue_selector);
+    fd                // 终端I/O打开的句柄 
+    queue_selector    // 控制tcflush的操作，取值为下面三个常数中的一个：
+        TCIFLUSH  // 清除正收到的数据，且不会读取出来。
+        TCOFLUSH  // 清除正写入的数据，且不会发送至终端。
+        TCIOFLUSH // 清除所有正在发生的I/O数据。
+    返回值说明：
+    0     // 成功
+    -1    // 失败，并且为 errno 置值来指示错误
+
+177   int tcsetattr(int fd, int optional_actions, const struct termios *termios_p); 函数用于设置终端的相关参数
+      optional_actions可以取如下的值。
+      TCSANOW：不等数据传输完毕就立即改变属性。
+      TCSADRAIN：等待所有数据传输结束才改变属性。
+      TCSAFLUSH：清空输入输出缓冲区才改变属性。
+
+178  char *strsep(char **stringp, const char *delim);
+    
+   char str[] = "root:/root:/bin/bash";
+　　char *buf;
+　　char *token;
+　　buf = str;
+　　while((token = strsep(&buf, ":")) != NULL){
+　　printf("%s/n", token);
+　　}
+    输出  root
+         /root
+         /bin/bash
 
 
 
