@@ -235,6 +235,9 @@ THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
     //lst4包含9,8,7,6,5,4,3,2,1,10
 39 set中存储的是pair类型，那么默认先按照pair的第一个元素排序，如果相同，再按照第二个元素排序
 
+40. float double  浮点数比较大小
+
+
 399  学到了什么？
     1. 会写一个高效的异步日志
     2. 定时器队列

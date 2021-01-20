@@ -1,0 +1,50 @@
+1. // mcpack 文件解释  应该是百度内部的对象格式
+http://www.doc88.com/p-3167132011758.html
+
+2. https://blog.csdn.net/wxj1992?t=1
+
+3. 哈希算法    SuperFastHash 
+   http://3dlijia.blog.sohu.com/39072932.html
+
+4. demangle / mangle
+
+5. KR_headers      ->dtoa.cc
+
+6. Valgrind概述
+   Valgrind是构建动态分析工具的工具框架。它配有一组工具，每个工具都执行某种调试，
+   分析或类似任务，可以帮助您改进程序
+
+7. Snappy 是一个 C++ 的用来压缩和解压缩的开发包。其目标不是最大限度压缩或者兼容其他压缩格式，
+   而是旨在提供高速压缩速度和合理的压缩率。Snappy 比 zlib 更快，
+   但文件相对要大 20% 到 100%。在 64位模式的 Core i7 处理器上，可达每秒 250~500兆的压缩速度。
+
+8. RapidJSON是腾讯开源的一个高效的C++ JSON解析器及生成器，它是只有头文件的C++库
+
+9. Murmurhash 哈希算法
+   MurmurHash 是一种非加密型哈希函数，适用于一般的哈希检索操作。 由Austin Appleby在2008年发明， 并出现了多个变种，
+   都已经发布到了公有领域(public domain)。与其它流行的哈希函数相比，对于规律性较强的key，MurmurHash的随机分布特征表现更良好。—摘自wiki
+   Redis在实现字典时用到了两种不同的哈希算法，MurmurHash便是其中一种（另一种是djb），在Redis中应用十分广泛，包括数据库、集群、哈希键、阻塞操作等功能都用到了
+   这个算法。发明算法的作者被邀到google工作，该算法最新版本是MurmurHash3，基于MurmurHash2改进了一些小瑕疵，使得速度更快，实现了32位（低延时）、128位HashKey，
+   尤其对大块的数据，具有较高的平衡性与低碰撞率
+
+10. MODP_B64  base64
+
+11 chrome 使用的开源项目介绍 
+   http://www.360doc.com/content/12/0106/09/2660674_177606417.shtml
+
+12 fp是netlib的一部分，主要用于浮点数运算，数的二进制与十进制的转换以及字符串和浮点数之间
+   的转换等
+
+13. dynamic annotations
+    这个库主要用来检测死锁的。这个库的另外一个作用是来让代码检测工具（例如valgrind）智能点，
+    并少报一些警告。例如下面是chrome里面实现多线程安全singleton模式的一段代码
+
+14. icu
+    国际化（I18N）的处理。ICU是最大的一块，有12MB左右，如果只需要支持几种特定的语言
+
+15. talloc 内存池
+
+16. v8里面的算法    (https://www.cnblogs.com/miloyip/p/4610111.html  浮点数转为字符串)
+                   https://github.com/miloyip/dtoa-benchmark
+
+17.  
