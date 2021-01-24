@@ -532,3 +532,8 @@ BLOCKED	    阻塞状态	        TERMINATED	     终止状态
 
 62 mmap
 
+63    修改时区    tzselect
+   1.  选择 4 asia  -> 9 china  -> 1 beijing  -> 1 yes
+   2.  cp /usr/share/zoneinfo/Asia/Shanghai  /etc/localtime
+   3.  date -R //显示时间和时区
+   https://blog.csdn.net/zhengchaooo/article/details/79500032

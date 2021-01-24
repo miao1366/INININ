@@ -14,4 +14,19 @@
 
 8. gcc -ggdb -DSIZE=3  main.c
 
+https://www.jianshu.com/p/e5967e46797b
+9.  -Wall	允许发出gcc提供的所有有用的报警信息
+10. -Wextra	对所有合法但值得怀疑的表达式发出警告
+11. -Werror	把告警信息当做错误信息对待
 
+12. -g	产生带有调试信息的目标代码
+13. -ggdb	生成gdb专 用的调试信息，会有一些gdb专用的扩展
+
+14. -O0	不优化。这是缺省值
+15. -O1	尝试优化编译时间和可执行文件大小。
+16. -O2	尝试几乎全部的优化功能，但不会进行“空间换时间”的优化方法。
+17. -O3	再打开一些优化选项：-finline-functions， -funswitch-loops 和 -fgcse-after-reload 。
+18. -O	等同与-O1
+19. -Os	对生成文件大小进行优化。打开 -O2 开的全部选项，除了会那些增加文件大小的。
+
+gcc -Wall -Wextra -Werror

@@ -17,3 +17,32 @@
 7. 由于gcc在编译过程中默认使用-O2优化选项，希望进行单步跟踪调试时，应使用-O0选项
 
 8. 对于C++来说，每一个cpp文件就是一个编译单元。从之前的编译过程的演示可以看出，各个编译单元之间是互相不可知的
+
+9. __attribute__
+C 的一大特色就是__attribute__ 机制。__attribute__ 可以设置函数属性（Function Attribute）、变量属性（Variable Attribute）和类型属性（Type Attribute）
+
+__attribute__((unused))               可能不会用到，消除编译警告
+__attribute__((aligned(num)))         告诉gcc, 为变量分配内存时，要分配在对其的内存地址上.一般的计算机内存是以字节(byte = 8bit)为最小单元。
+                                      内存地址相当于从0开始的字节偏移数。如果一个内存地址是N的倍数，我们就说它是N字节对齐
+
+__attribute__((always_inline))        编译器只有在指定-O2的时候，才会将inline函数进行内联展开，如果不指定-O2的时候，还是会给inline函数生成单独的函数段；
+                                      如果想要编译器不管在任何时候就强制内联的话，需要在函数申明的时候指定__attribute__((always_inline))
+__attribute__((noinline))             声明为非内联函数
+
+__attribute__((deprecated))          开发一些库的时候，API的接口可能会过时，为了提醒开发者这个函数已经过时。可以在函数声明时加上attribute((deprecated))属性，
+                                     如此，只要函数被使用，在编译是都会产生警告，警告信息中包含过时接口的名称及代码中的引用位置
+
+__attribute__((weak))                 弱符号,如果其他地方找不到链接符号，使用本地若符合链接                       
+
+__attribute__((format(printf, a, b)))  给被声明的函数加上类似printf或者scanf的特征，它可以使编译器检查函数声明和函数实际调用参数之间的格式化字符串是否匹配。
+                                       format属性告诉编译器，按照printf, scanf等标准C函数参数格式规则对该函数的参数进行检查
+
+(__builtin_expect((bool)(expr), true))  作用是"允许程序员将最有可能执行的分支告诉编译器"。这个指令的写法为：__builtin_expect(EXP, N)。意思是：EXP==N的概率很大
+
+
+10 __declspec
+  用于指定所给定类型的实例的与Microsoft相关的存储方式    
+
+11 UNLIKELY, LIKELY 
+   #define LIKELY(x) __builtin_expect(!!(x),1)
+   #define UNLIKELY(x) __builtin_expect(!!(x),0)
