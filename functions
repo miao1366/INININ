@@ -137,6 +137,12 @@ to_string(x)
     cout << "digits10(float): " << numeric_limits<float>::digits10 << endl; 6
 	
 49  digits  返回的是float不损失精度的整数位:24 
+    std::numeric_limits::digits函数用于查找数据类型可以表示而不损失精度的基数位数   //可以看下浮点数内存分布
+    
+    numeric_limits<int>::digits           //31
+    numeric_limits<float>::digits         //24
+    numeric_limits<double>::digits        //53
+    numeric_limits<long double>::digits   //64
 
 50. abort()和exit()
    共同点: 都是用来终止程序
@@ -1271,8 +1277,16 @@ struct timespec {
          /root
          /bin/bash
 
-
-
+179   double ldexp(double x, int exponent) 返回 x 乘以 2 的 exponent 次幂。 
+      double sinh(double x)
+         返回 x 的双曲正弦。
+        9	double tanh(double x)
+         返回 x 的双曲正切。
+      10	double exp(double x)
+         返回 e 的 x 次幂的值。
+     11	double frexp(double x, int *exponent)
+      把浮点数 x 分解成尾数和指数。返回值是尾数，并将指数存入 exponent 中。所得的值是 x = mantissa * 2 ^ exponent。
+      12	double ldexp(double x, int exponent)
 
 
 
