@@ -693,7 +693,12 @@ ssize_t和size_t分别是signsize_t和unsigned signed size of computer word size
       有的时候我们还会遇到这种情况，我们希望从表达式中推断出要定义变量的类型，但却不想用表达式的值去初始化变量。
       还有可能是函数的返回类型为某表达式的的值类型。在这些时候auto显得就无力了，所以C++11又引入了第二种类型说明符decltype，
       它的作用是选择并返回操作数的数据类型。在此过程中，编译器只是分析表达式并得到它的类型，却不进行实际的计算表达式的值
- 
+
+139   模板元编程 <模板特化??>
+      模版元编程完全不同于普通的运行期程序，它很独特，因为模版元程序的执行完全是在编译期，并且模版元程序操纵的数据不能是运行时变量，
+      只能是编译期常量，不可修改，另外它用到的语法元素也是相当有限，不能使用运行期的一些语法，比如if-else，for等语句都不能用。
+      因此，模版元编程需要很多技巧，常常需要类型重定义、枚举常量、继承、模板偏特化等方法来配合，因此编写模版元编程比较复杂也比较困难
+
 139  std::numeric_limits<T>::radix
      std::numeric_limits<T>::radix 的值是用于表示该类型的数字系统的底。对于所有二进制数值类型为 2 ，
      但它可以，譬如对 IEEE 754 十进制浮点类型或第三方二进制编码十进制整数为 10 。此常量对所有特化有意义。
@@ -706,6 +711,19 @@ ssize_t和size_t分别是signsize_t和unsigned signed size of computer word size
 142  顶层const：不可以改变指向，但是可以改变指向的内容的值。 非顶层cosnt：可以改变指向，但是不可以改变指向的内容
 
 143  __attribute__((warn_unused_result))    判断函数返回值
+
+145  //传入的参数是数组的引用，返回值也是数组的引用
+    string (&fun(string (&s)[10]))[10]{
+        return s;
+    }
+146  template<int N>
+     void fun(int(&a)[N]);
+     如果只要传固定大小的数组，可以把template去掉，N改成大小
+
+     /////  int (&fun(int (&i)[10])) [10];
+
+147  tid是线程在内核态的id，而pthread_selft是线程在用户态的id（posix pthread id)
+
 
 
 

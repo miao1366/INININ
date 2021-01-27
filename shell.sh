@@ -484,7 +484,23 @@ c 字符设备
     ${#file} 可得到27 ，因为/dir1/dir2/dir3/my.file.txt 是27个字节
 
 
+101  shift
+     shift命令用于对参数的移动(左移)，通常用于在不知道传入参数个数的情况下依次遍历每个参数然后进行相应处理
 
+102  set --   //重定向输入命令参数
+     https://blog.csdn.net/weixin_34415923/article/details/89834583?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromBaidu-1.not_use_machine_learn_pai&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromBaidu-1.not_use_machine_learn_pai
+
+103  eval eval会对后面的命令进行两遍扫描，如果第一遍扫描后，命令是个普通命令，则执行此命令；如果命令中含有变量的间接引用，则保证间接引用的语义。
+     也就是说，eval命令将会首先扫描命令行进行所有的置换，然后再执行该命令
+
+104  =与==在[ ]中表示判断(字符串串比较)时是等价的
+    s1="foo"
+    s2="foo"
+    [$s1=$2 ]
+    [$s1==$2]
+
+105  2>/dev/null 代表忽略掉错误提示信息。
+     
 
 
 

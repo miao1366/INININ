@@ -50,6 +50,8 @@ ptrdiff_t   size_t   wchar_t   	NULL   	offsetof(type, member-designator)
 
 18 #include <endian.h>
 
+19 #include <errno.h>    //不是<error.h>  错误描述文件
+
 
 
 

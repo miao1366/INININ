@@ -537,3 +537,67 @@ BLOCKED	    阻塞状态	        TERMINATED	     终止状态
    2.  cp /usr/share/zoneinfo/Asia/Shanghai  /etc/localtime
    3.  date -R //显示时间和时区
    https://blog.csdn.net/zhengchaooo/article/details/79500032
+
+64  uname -s    //Linux
+
+65  dirname    dirname命令去除文件名中的非目录部分，仅显示与目录有关的内容
+    dirname    //        --> /
+    dirname    /a/b/     --> /a
+
+66  basename   获取末尾的文件名或路径名
+    basename  /etc/passwd   --> passwd
+    basename  /etc/         --> etc
+
+67  # mkdir -f #不成功，因为-f会被mkdir当作选项来解析，这时就可以使用
+    # mkdir -- -f 这样-f就不会被作为选项。
+
+68  getopt 
+    getopt -o v: --long headers:,libs:,cc:,cxx:,with-glog,with-thrift,with-mesalink,nodebugsymbols -n config_brpc -- --headers=/usr/include --libs=/usr/lib
+    
+    -a, --alternative            允许长选项以 - 开始
+    -h, --help                   这个简短的用法指南
+    -l, --longoptions <长选项>  要识别的长选项
+    -n, --name <程序名>         将错误报告给的程序名
+    -o, --options <选项字符串>  要识别的短选项
+    -q, --quiet                  禁止 getopt(3) 的错误报告
+    -Q, --quiet-output           无正常输出
+    -s, --shell <shell>          设置 shell 引用规则
+    -T, --test                   测试 getopt(1) 版本
+    -u, --unquoted               不引用输出
+    -V, --version                输出版本信息
+
+69  head   tail
+   head命令与tail命令用法相似，head命令用于查看文档的开始指定数量的字符块，默认显示文档的前 10 行，如果给定的文件不止一个，则在显示的每个文件前面加一个文件名标题
+   -c,       --bytes=[-]K           k,显示文档开始的前k个字节，-k,不显示文档结尾的最后 k 个字节
+   -n,       --lines=[-]K           k,显示文档开始的前k行，-k,不显示文档结尾的最后 k 行
+   -q,       --quiet  --silent      不显示包含给定文件名的文件头
+   -v,       --verbose 　　          总是显示包含给定文件名的文件头
+   --help                           显示此帮助信息并退出
+   --version                        显示版本信息并退出
+
+70  find 
+    -not            #非，取反
+    -user           #文件所有人
+    -group          #文件所有组
+    -a              #并且关系
+    -o              #或者关系
+    find /usr/lib/ -name libprotobuf.a -o name libprotobuf.so
+    
+    -type   #文件类型
+    主要的文件类型：
+    f        #普通文件
+    d        #目录
+    b        #块设备
+    s        #套接字
+    c        #字符设备
+    l        #链接
+    p        #管道
+---
+    -P      不跟踪符号链接(默认行为)
+    -L      当 find 检查或打印有关文件的信息时, 所使用的信息应取自链接指向的文件的属性, 而不是链接本身
+    -H      和 -L 参数刚好相反,  当 find 检查或打印有关文件的信息时, 所使用的信息应取自符号链接的属性
+
+71    查看进程里的线程
+    top  -Hp     11675
+    ps   -T -p   11675
+

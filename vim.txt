@@ -1,1 +1,4 @@
 1. crtl + z  隐藏界面， fg切回到vim界面
+2. set nu    //显示行号
+   set number 在编辑文件时显示行号 
+   set nonumber 不显示行号 
