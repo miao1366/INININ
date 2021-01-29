@@ -23,6 +23,11 @@ sudo setcap cap_net_raw,cap_net_admin+eip /usr/bin/dumpcap
 1. tcp.port == 8080
 2. http
 3. ip.src==192.168.0.243 and ip.dst==192.168.0.243
+4. ip.src == 85.119.83.194||ip.dst==85.119.83.194
+
+TSval是本端填写的时间戳，TSecr是回显给对端的时间戳。两端必须都分别在SYN包和SYN|ACK包中开启时间戳选项，时间戳功能才能生效
+win 指滑动窗口大小（接收??发送??缓存的窗口大小）
  
+ {"errorCode":0,"errorMessage":"successful","results":[{"dbName":"default_recog","dbType":0,"imageCount":2116},{"dbName":"default_locus","dbType":3,"imageCount":24779}]}
 
 

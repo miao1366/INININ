@@ -724,9 +724,15 @@ ssize_t和size_t分别是signsize_t和unsigned signed size of computer word size
 
 147  tid是线程在内核态的id，而pthread_selft是线程在用户态的id（posix pthread id)
 
+148  std::string::npos
+     static const size_t npos = -1
+
+149  C++二进制文件读取ios::binary
+     在C++读取文件时，如果打开方式不显示加上ios::binary标记的话，默认文本模式的。当使用read函数读取一定量的字符时，
+     如果这些字符里包含非Ascii码（> 127），读取就会失败。此外，还有和平台相关的换行符带来的问题
 
 
-
+150 
 
 
 

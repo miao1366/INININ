@@ -39,6 +39,26 @@ Content-Type:text/html
 
 Http Referer会告诉服务器我是从哪个页面链接过来的，服务器基此可以获得一些信息用于处理
 
+3. 请求 
+通过TCP套接字，客户端向Web服务器发送一个文本的请求报文，一个请求报文由请求行、请求头部、空行和请求数据4部分组成。
+
+4. 接收
+服务器将资源复本写到TCP套接字，由客户端读取。一个响应由状态行、响应头部、空行和响应数据4部分组成。
+
+5.  包头结束标志————连续出现的两个回车换行
+
+6.  一次请求过程数据
+POST /face/getdb HTTP/1.1
+Content-Type: application/json
+Postman-Token: 6862c3ab-17f3-4004-a906-b8a7b1f45742
+Content-Length: 2
+
+{}HTTP/1.1 200 OK
+Content-Length: 168
+Content-Type: text/plain; charset=utf-8
+
+{"errorCode":0,"errorMessage":"successful","results":[{"dbName":"default_recog","dbType":0,"imageCount":2116},{"dbName":"default_locus","dbType":3,"imageCount":25054}]}
+
 
 
 

@@ -115,6 +115,11 @@ to_string(x)
 	
 39. size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream); 
     size_t fread_unlocked(void *ptr, size_t size, size_t n, FILE *stream); fwrite_unlocked是fwrite的线程不安全版本，因为不加锁
+      1) buffer是一个指针。对fwrite来说是要写入数据的地址。
+      2) size是要写入内容的单字节数。
+      3) count是要 进行写入size字节的数据项的个数。
+      4) stream为目标文件指针
+      5) 返回实际写入的数据项个数count
 	
 40. int ferror(FILE *stream);  ferror 函数返回为真时就表示有错误发生
 
@@ -412,6 +417,7 @@ int **h_addr_lisst 表示的是主机的ip地址，注意，这个是以网络�
 	需要对epoll_create的create作一个说明，这里的1024并非是epoll只能监听1024个fd，而是初始分配的内存大小为1024，当要epoll实例监听的fd超过1024以后，
 	会重新分配内存以容纳更多的fd。新版本的linux中，epoll已经在内核中，自己管理初始的fd列表大小，这个值已经没有意义，但是仍然必须填>0的值，
 	目的是兼容老版本的操作系统内核
+    默认情况下，epoll采用 LT模式工作，这时可以处理阻塞和非阻塞套接字，而上表中的 EPOLLET表示可以将一个事件改为 ET模式。ET模式的效率要比 LT模式高，它只支持非阻塞套接字
 	
 81 vector初始化
 (1): vector<int> ilist1;
@@ -458,7 +464,7 @@ ilist3初始化为两个迭代器指定范围中元素的拷贝，范围中的�
    EPOLLOUT：表示对应的文件描述符可以写；
    EPOLLPRI：表示对应的文件描述符有紧急的数据可读（这里应该表示有带外数据到来）；
    EPOLLERR：表示对应的文件描述符发生错误；
-   EPOLLHUP：表示对应的文件描述符被挂断；
+   EPOLLHUP：表示对应的文件描述符被挂断； 表示读写都关闭;
    EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的。
    EPOLLONESHOT：只监听一次事件，当监听完这次事件之后，如果还需要继续监听这个socket的话，需要再次把这个socket加入到EPOLL队列里
    
@@ -1288,11 +1294,26 @@ struct timespec {
       把浮点数 x 分解成尾数和指数。返回值是尾数，并将指数存入 exponent 中。所得的值是 x = mantissa * 2 ^ exponent。
       12	double ldexp(double x, int exponent)
 
+180 int unlink(const char *pathname);
+    unlink()函数功能即为删除文件。执行unlink()函数会删除所给参数指定的文件
+    执行unlink()函数并不一定会真正的删除文件，它先会检查文件系统中此文件的连接数是否为1，如果不是1说明此文件还有其他链接对象，
+    因此只对此文件的连接数进行减1操作。若连接数为1，并且在此时没有任何进程打开该文件，此内容才会真正地被删除掉。
+    在有进程打开此文件的情况下，则暂时不会删除，直到所有打开该文件的进程都结束时文件就会被删除
 
+181 size_t regerror(int errcode, const regex_t *preg, char *errbuf,size_t errbuf_size);
+    当执行regcomp 或者regexec 产生错误的时候，就可以调用这个函数而返回一个包含错误信息的字符串
 
+182 string::find()
+    size_t find (const string& str, size_t pos = 0) const noexcept;
+    size_t find (const char* s, size_t pos = 0) const;
+    size_t find (const char* s, size_t pos, size_type n) const;
+    size_t find (char c, size_t pos = 0) const noexcept;
+    返回值都是查找到的字符所做的位置
 
+183  boost::asio::deadline_timer    定时器
+     https://www.cnblogs.com/xuaidongstdudyrecording/p/6077639.html
 
-
+184  boost::asio::io_service
 
 
 
