@@ -1315,7 +1315,19 @@ struct timespec {
 
 184  boost::asio::io_service
 
+185  int connect(int sockfd, const struct sockaddr* server_addr, socklen_t addrlen)
+     返回：0──成功， -1──失败。
 
+186  post = malloc(re_len);
+     if(post == NULL){
+         return -1;
+     }
+     sprintf(post, "POST %s HTTP/1.0\r\n", page);
+     sprintf(post, "%sHost: %s:%d\r\n",post, host, port);
+     sprintf(post, "%s%s", post, HttpsPostHeaders);
+     sprintf(post, "%sContent-Length: %d\r\n\r\n", post, len);
+     sprintf(post, "%s%s", post, content); 		// 此处需要修改, 当业务需要上传非字符串数据的时候, 会造成数据传输丢失或失败
+     printf("post::  \n%s\n", post);
 
 
 

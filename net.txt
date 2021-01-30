@@ -58,7 +58,7 @@ struct sockaddr_in
  uint16 sin_family;          /* Address family AF_INET */ 
  uint16 sin_port;            /* Port number.  */
  uint32 sin_addr;     /* Internet address.  */
- unsigned char sin_zero[8];  /* Pad to size of `struct sockaddr'.  */
+ unsigned char sin_zero[8];  /* Pad to size of struct sockaddr'.  */
 };
 
 /* Ditto, for IPv6.  */
@@ -226,7 +226,7 @@ TIME_WAIT状态有两个存在的理由：
   如何处理那？
 1、调高进程的文件描述符数目。治标不治本，因为只要有足够多的客户端，就一定能把一个服务进程的文件描述符用户
 2、死等。鸵鸟算法（传说中鸵鸟看到危险就把头埋在地底下。当你对某一件事情没有一个很好的解决方法时，那就忽略它，就像鸵鸟面对危险时会把它深埋在沙砾中，装作看不到。
-   这样的算法称为“鸵鸟算法“。鸵鸟算法，是平衡性能和复杂性而选择的一种方法。）
+   这样的算法称为 "鸵鸟算法"。鸵鸟算法，是平衡性能和复杂性而选择的一种方法。）
 3、退出程序。似乎小题大做，为这种暂时的错误而中断现有的服务似乎不值得
 4、关闭监听listenning fd。那么什么时候重新打开那
 5、改用edge trigger。如果漏掉了一次accept（2），程序再也不会收到连接

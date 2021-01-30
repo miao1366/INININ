@@ -59,10 +59,24 @@ Content-Type: text/plain; charset=utf-8
 
 {"errorCode":0,"errorMessage":"successful","results":[{"dbName":"default_recog","dbType":0,"imageCount":2116},{"dbName":"default_locus","dbType":3,"imageCount":25054}]}
 
+   
+7.  http:://www.baidu.com/
+    原始统一资源定位符队列    www.baidu.com
 
-
-
-
+8.  端口号小于256的一般为常用端口号。其中常用的保留TCP端口号有
+    443 端口一般用于https
+    80  端口一般用于http
+    HTTP     80、
+    FTP      20/21、
+    ssh      22
+    Telnet   23、
+    SMTP     25、
+    DNS      53 
+    常用的保留UDP端口号有
+    DNS      53、
+    BootP    67（server）/ 68（client）、
+    TFTP     69
+    SNMP     161
 
 
 
