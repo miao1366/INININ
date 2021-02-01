@@ -604,5 +604,4 @@ BLOCKED	    阻塞状态	        TERMINATED	     终止状态
 72   strace    可用来跟踪用户空间进程的系统调用和信号的
      https://www.cnblogs.com/machangwei-8/p/10388883.html
 
-
-
+73   apt-cache search zlib

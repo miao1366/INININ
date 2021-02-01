@@ -802,9 +802,10 @@ int sigdelset(sigset_t *set, int signo);  //将set信号集中的signo信号移�
 
 int sigismember(const sigset_t *set, int signo);  //判断signo信号是否在set信号集中
 	
-124 int sigaction(int signum,const struct sigaction *act ,struct sigaction *oldact) sigaction函数用来查询和设置信号处理方式，它是用来替换早期的signal函数
-                        signum     可以指定SIGKILL和SIGSTOP以外的所有信号
-						signum参数指出要捕获的信号类型，act参数指定新的信号处理方式，oldact参数输出先前信号的处理方式（如果不为NULL的话）
+124 int sigaction(int signum,const struct sigaction *act ,struct sigaction *oldact) 
+        sigaction函数用来查询和设置信号处理方式，它是用来替换早期的signal函数
+            signum     可以指定SIGKILL和SIGSTOP以外的所有信号
+            signum参数指出要捕获的信号类型，act参数指定新的信号处理方式，oldact参数输出先前信号的处理方式（如果不为NULL的话）
 struct sigaction
 {
 void (*sa_handler) (int);
@@ -1328,6 +1329,8 @@ struct timespec {
      sprintf(post, "%sContent-Length: %d\r\n\r\n", post, len);
      sprintf(post, "%s%s", post, content); 		// 此处需要修改, 当业务需要上传非字符串数据的时候, 会造成数据传输丢失或失败
      printf("post::  \n%s\n", post);
+
+
 
 
 

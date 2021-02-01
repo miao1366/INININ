@@ -100,7 +100,7 @@ Git 查看远端仓库地址  git remote -v
 
 31 git status  下出现 delete 文件 可以用 git add 添加到缓冲区下
 
-
+32 git Submodule  //子项目
 
 
 

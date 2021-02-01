@@ -19,6 +19,7 @@ http://www.doc88.com/p-3167132011758.html
    但文件相对要大 20% 到 100%。在 64位模式的 Core i7 处理器上，可达每秒 250~500兆的压缩速度。
 
 8. RapidJSON是腾讯开源的一个高效的C++ JSON解析器及生成器，它是只有头文件的C++库
+   Milo Yip（叶劲峰）
 
 9. Murmurhash 哈希算法
    MurmurHash 是一种非加密型哈希函数，适用于一般的哈希检索操作。 由Austin Appleby在2008年发明， 并出现了多个变种，
@@ -44,7 +45,78 @@ http://www.doc88.com/p-3167132011758.html
 
 15. talloc 内存池
 
-16. v8里面的算法    (https://www.cnblogs.com/miloyip/p/4610111.html  浮点数转为字符串)
-                   https://github.com/miloyip/dtoa-benchmark
+16 有两种方法创建互斥锁，静态方式和动态方式。
+  静态方式:
+      pthread_mutex_t mutex=PTHREAD_MUTEX_INITIALIZER;
+      在LinuxThreads实现中，pthread_mutex_t是一个结构，而PTHREAD_MUTEX_INITIALIZER则是一个结构常量。
+  动态方式:
+      是采用pthread_mutex_init()函数来初始化互斥锁
 
-17.  COMPILE_ASSERT
+17 BAIDU_REGISTER_ERRNO  同一个errno不能注册成功。
+
+18 strerror()不是线程安全的，strerror_r()是线程安全的。
+   在单线程的程序中，errno是全局变量。然后，在多线程程序中，errno会按照每个线程来储存，因此具有线程安全性
+   "Unknown error nnn"  error number is unknown;
+
+19 BAIDU_SCOPED_LOCK    //用到了类型推到    std::lock_guard 可以是返回值?
+
+20 std::random_shuffle    //打乱顺序
+
+21 BaiduErrnoHelper
+
+22 模板特化
+    template<class t1, class t2>
+        std::string* MakeCheckOpString(const t1& v1, const t2& v2, const char* names) {
+        std::ostringstream ss;
+        ss << names << " (" << v1 << " vs " << v2 << "). ";
+        std::string* msg = new std::string(ss.str());
+        return msg;
+    }
+    template std::string* MakeCheckOpString<int, int>(
+        const int&, const int&, const char* names);
+    template std::string* MakeCheckOpString<unsigned long, unsigned long>(
+        const unsigned long&, const unsigned long&, const char* names);
+    template std::string* MakeCheckOpString<unsigned long, unsigned int>(
+        const unsigned long&, const unsigned int&, const char* names);
+    template std::string* MakeCheckOpString<unsigned int, unsigned long>(
+        const unsigned int&, const unsigned long&, const char* names);
+    template std::string* MakeCheckOpString<std::string, std::string>(
+        const std::string&, const std::string&, const char* name);
+    
+        template <typename Mutex>
+        struct MutexConstructor {
+            bool operator()(Mutex*) const { return true; }
+        };
+
+        template <>
+        struct MutexConstructor<pthread_mutex_t> {
+            bool operator()(pthread_mutex_t* mutex) const { 
+                const int rc = pthread_mutex_init(mutex, NULL);
+                return rc == 0;
+            }
+        };
+
+23   ArraySizeHelper
+        namespace butil {
+            template <typename T, size_t N>
+            char (&ArraySizeHelper(T (&array)[N]))[N];
+            }
+
+24  template <typename T, T v>
+        struct integral_constant {
+            static const T value = v;
+            typedef T value_type;
+            typedef integral_constant<T, v> type;
+        };
+    template <typename T, T v> const T integral_constant<T, v>::value;
+    typedef integral_constant<bool, true> true_type;
+    typedef integral_constant<bool, false> false_type;
+
+25  BAIDU_UNLIKELY
+
+26 uint32_t ones32(uint32_t x)  //x的二进制格式中有多少个1
+   uint32_t log2(uint32_t x)    //x的log2值
+   ones32(33)   -> 2
+   log2(33)     -> 6
+
+27 

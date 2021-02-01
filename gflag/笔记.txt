@@ -1,0 +1,15 @@
+1.  
+DEFINE_string(confPath, "test.conf", "program configure file.");
+DEFINE_int32(port, 1111, "program listen port");
+DEFINE_bool(debug, true, "run debug mode");
+
+2.  gflags::ParseCommandLineFlags(&argc, &argv, true);
+    其中的第三个参数为true时，表示将命令行参数中成功解析的标记从命令行列表中移除；为false时，
+    表示不将其移除，依旧//将其保留在argv数组中；其中标记指的是在gflags程序中定义的参数，
+    并在命令行中传入新的参数的变量
+
+3.  DEFINE_bool(big_menu, true, "Include 'advanced' options in the menu listing");
+    DEFINE_string(languages, "english,french,german", "comma-separated list of languages to offer in the 'lang' menu"); 
+    如果在另外一个文件中如果想要使用上述定义的big_menu，只需要在该文件的头部进行如下声明
+    DECLARE_bool(big_menu);
+

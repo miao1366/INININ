@@ -1,0 +1,6 @@
+1. https://blog.csdn.net/qq_30866297/article/details/51470991
+    int BN_dec2bn(BIGNUM **a, const char *str);	
+    赋10进制值str到*a中，返回成功与否	BN_dec2bn (&a, "1999");
+
+2. https://blog.csdn.net/dianyun7150/article/details/101213486
+    DH_set0_pqg();
