@@ -6,3 +6,6 @@
 6. 多隆         ...                             阿里
 7. 贾扬清       ...                             google/阿里
 8. 李颖欣       srpc/workflow  (woman)          搜狗
+
+9. fabrice bellard            最快速的计算圆周率的算法  创建FFmpeg项目
+10. 龙泉寺扫地僧                miniblink

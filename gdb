@@ -59,7 +59,8 @@ info registers <regname >  查看所指定的寄存器的情况
 (gdb) up：进入上层栈帧。
 (gdb) down：进入下层栈帧。
 
-
+7.    https://blog.csdn.net/jctian000/article/details/80695747
+      thread apply all bt
 
 
 

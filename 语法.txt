@@ -731,8 +731,50 @@ ssize_t和size_t分别是signsize_t和unsigned signed size of computer word size
      在C++读取文件时，如果打开方式不显示加上ios::binary标记的话，默认文本模式的。当使用read函数读取一定量的字符时，
      如果这些字符里包含非Ascii码（> 127），读取就会失败。此外，还有和平台相关的换行符带来的问题
 
+150 宏的定义是编译器先展开宏再编译的，也就是说，编译器会事先把出现宏的地方全部替换掉，所以定义他们的先后顺序就无关紧要了
 
-150 
+151 
+    OO ：Object Oriented ，支持多态这一强大的设计机制，需要付出的代价便是额外的间接性（virtual机制）。
+    OB ：Object Based ，非多态的数据封装模型，就是ADT（Abstract Data Type）的概念，
+        和OO相比拥有更快的速度而且空间更紧凑（因为不需要virtual）
+
+152  assert在程序的release版本中仍然有效（不要与VC中的ASSERT混淆），要使assert失效，
+     只有在包含assert头文件（assert.h）的语句前定义NDEBUG宏或在编译器参数中添加-DNDEBUG参数
+
+153  inline
+inline void FuncA(_T para) {
+   FuncB(para, para+1);
+}
+
+void FuncB(_T paraA, _T paraB) {
+
+}
+
+至于 整个FuncB也会被展开塞进代码里？
+这是函数FuncB 会不会内联的问题，和函数FuncA 没有任何关系
+可以内联的话 FuncB 被内联进 FuncA
+编译器对内联成功的代码，自然不会还原成函数调用了
+FuncB不可以内联，那么 FuncA 就被内联成对FuncB函数调用
+FuncB可以内联 那么内联 FuncA 就被已经内联到FunA的内部FuncB内内联后的代码取代了,
+也就是 FuncB，FuncA 都内联了
+注意到FuncB 没有inline
+所以不是一定会内联的，所以就看编译器心情了（设定了），
+即便很容易内联，因为没有指定，所以就不确定了
+
+154  多级指针const
+    void func(const int ** arg) {
+    }
+int main(int argc, char **argv) {
+    int **p;
+    func(p);
+    return 0;
+}
+// gcc 编译报错
+const int ** p1;  // int元素不可修改
+int * const * p2; // int *一级指针不可修改
+int ** const p3;  // int **二级指针不可修改
+
+155  ## 是简单的连接符，#@用来给参数加单引号，#用来给参数加双引号即转成字符串
 
 
 

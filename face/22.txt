@@ -721,6 +721,7 @@ static 关键字的使用?  (作用域， 生命周期) https://blog.csdn.net/we
 两次重复的变量定义链接器就不知道该已那个地址作为变量的内存，所以报错。
 
 https://blog.csdn.net/huanghui167/article/details/41346663
+https://blog.csdn.net/Lee_Shuai/article/details/53228779
 
 inline关键字？
 0. inline函数 要在调用点展开

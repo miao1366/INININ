@@ -68,7 +68,7 @@
 
 29 多线程中全局标识变量 最好用 volatile 
 
+30 backslash and newline separated by space 原来是因为\  后面多了一个空格 检查写的代码中将\后面的空格去掉就可以了.
 
-
-
+31 http 报头多加了空格
 

@@ -486,17 +486,22 @@ mapTest.erase(iter++);
  84 int pthread_setspecific(pthread_key_t key, const void *value);
    void *pthread_getspecific(pthread_key_t key);
    int pthread_key_create(pthread_key_t *key, void (*destructor)(void*));
-   下面说一下线程中特有的线程存储， Thread Specific Data 。线程存储有什么用了？他是什么意思了？大家都知道，在多线程程序中，所有线程共享程序中的变量。
+   下面说一下线程中特有的线程存储， Thread Specific Data 。线程存储有什么用了？他是什么意思了？大家都知道，
+   在多线程程序中，所有线程共享程序中的变量。
    现在有一全局变量，所有线程都可以使用它，改变它的值。而如果每个线程希望能单独拥有它，那么就需要使用线程存储了。
    表面上看起来这是一个全局变量，所有线程都可以使用它，而它的值在每一个线程中又是单独存储的。这就是线程存储的意义
    
 1  创建一个类型为pthread_key_t类型的变量。
-2  调用 pthread_key_create(pthread_key_t *key, void (*destructor)(void*))来创建该变量。该函数有两个参数，第一个参数就是上面声明的pthread_key_t变量，第二个参数是一个清理函数，
-   用来在线程释放该线程存储的时候被调用。该函数指针可以设成 NULL，这样系统将调用默认的清理函数。该函数成功返回0.其他任何返回值都表示出现了错误。
+2  调用 pthread_key_create(pthread_key_t *key, void (*destructor)(void*))来创建该变量。
+   该函数有两个参数，第一个参数就是上面声明的pthread_key_t变量，第二个参数是一个清理函数，
+   用来在线程释放该线程存储的时候被调用。该函数指针可以设成 NULL，这样系统将调用默认的清理函数。
+   该函数成功返回0.其他任何返回值都表示出现了错误。
    
-   pthread_key_create 只需要调用一次 表面上key看起来这是一个全局变量，所有线程都可以使用它，而它的值在每一个线程中又是单独存储的
+   pthread_key_create 只需要调用一次 表面上key看起来这是一个全局变量，所有线程都可以使用它，
+   而它的值在每一个线程中又是单独存储的
    
-3  当线程中需要存储特殊值的时候，可以调用 pthread_setspcific() 。该函数有两个参数，第一个为前面声明的pthread_key_t变量，第二个为void*变量，这样你可以存储任何类型的值。
+3  当线程中需要存储特殊值的时候，可以调用 pthread_setspecific() 。该函数有两个参数，第一个为前面声明的pthread_key_t变量，
+    第二个为void*变量，这样你可以存储任何类型的值。
 4   如果需要取出所存储的值，调用pthread_getspecific()。该函数的参数为前面提到的pthread_key_t变量，该函数返回void *类型的值。下面是前面提到的函数的原型：
 
 85 int pthread_key_delete(pthread_key_t key);用来删除一个键，删除后，键所占用的内存将被释放。注销一个TSD，这个函数并不检查当前是否有线程正使用该TSD，
@@ -1330,9 +1335,22 @@ struct timespec {
      sprintf(post, "%s%s", post, content); 		// 此处需要修改, 当业务需要上传非字符串数据的时候, 会造成数据传输丢失或失败
      printf("post::  \n%s\n", post);
 
+187 ssize_t send(int sockfd, const void *buf, size_t len, int flags);
+该函数的第一个参数指定发送端套接字描述符；
+第二个参数指明一个存放应用程序要发送数据的缓冲区；
+第三个参数指明实际要发送的数据的字节数；
+第四个参数一般置0。
 
-
-
+188 int pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize);
+        pthread_create 创建线程时，若不指定分配堆栈大小，系统会分配默认值，查看默认值方法如下：
+# ulimit -s
+8192
+上述表示为8M；单位为KB
+stacksize    堆栈大小  单位 字节char
+一般来说 默认堆栈大小为 8388608; 堆栈最小为 16384 。 单位为字节。
+堆栈最小值定义为 PTHREAD_STACK_MIN ，包含#include <limits.h>后可以通过打印其值查看。
+对于默认值可以通过pthread_attr_getstacksize (&attr, &stack_size); 打印stack_size来查看。
+尤其在嵌入式中内存不是很大，若采用默认值的话，会导致出现问题，若内存不足，则 pthread_create 会返回 12，定义如下
 
 
 

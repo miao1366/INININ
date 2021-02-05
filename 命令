@@ -605,3 +605,22 @@ BLOCKED	    阻塞状态	        TERMINATED	     终止状态
      https://www.cnblogs.com/machangwei-8/p/10388883.html
 
 73   apt-cache search zlib
+
+74. strace   ltrace    
+    strace —— Trace system calls and signals。 跟踪进程的系统调用或信号产生的情况。
+    ltrace —— A library call tracer。 跟踪进程调用库函数的情况
+    https://blog.csdn.net/uisoul/article/details/83143290
+
+75. sudo /usr/sbin/tcpdump -v  -i eth0:2  host 192.168.5.242 and 192.168.5.196 
+
+      tcpdump 的抓包保存到文件的命令参数是-w xxx.cap
+      抓eth1的包 
+      tcpdump -i eth1 -w /tmp/xxx.cap 
+      抓 192.168.1.123的包 
+      tcpdump -i eth1 host 192.168.1.123 -w /tmp/xxx.cap 
+      抓192.168.1.123的80端口的包 
+      tcpdump -i eth1 host 192.168.1.123 and port 80 -w /tmp/xxx.cap 
+      抓192.168.1.123的icmp的包 
+      tcpdump -i eth1 host 192.168.1.123 and icmp -w /tmp/xxx.cap 
+      抓192.168.1.123的80端口和110和25以外的其他端口的包 
+      tcpdump -i eth1 host 192.168.1.123 and ! port 80 and ! port 25 and ! port 110 -w /tmp/xxx.cap 

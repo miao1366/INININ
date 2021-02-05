@@ -1,4 +1,58 @@
 1. crtl + z  隐藏界面， fg切回到vim界面
 2. set nu    //显示行号
-   set number 在编辑文件时显示行号 
-   set nonumber 不显示行号 
+   set number     在编辑文件时显示行号 
+   set nonumber   不显示行号 
+3. 撤销: u
+取消撤销: ctrl + r
+
+4. Vim 的全局配置一般在/etc/vim/vimrc或者/etc/vimrc，对所有用户生效。
+   用户个人的配置在~/.vimrc。
+
+5. http://www.ruanyifeng.com/blog/2018/09/vimrc.html
+
+6. vi    Visual Editor
+   vim   Vi Improvment
+
+vim有三种模式   insert  normal  visual 
+
+7. crtl+[    等同于esc
+   i  insert
+   a  append
+   o  new line
+   w  后跳过一个单词          word  
+   W  后跳过一个单词包括单引号  word's
+   b  前跳过一个单词          word  
+   B  前跳过一个单词包括单引号  word's 
+   }  跳到下一段段首
+   {  跳到前一段段首
+   gg 文件开头
+   G  文件末尾
+   0  跳到行首
+   $  跳到行末
+   当同一行因字数太多换行时，jk不能上下移动， 可以 gj  gk 
+   /  查找关键字  
+   n  下一个关键字
+   N  上一个关键字
+   ？ 查找关键字   然后n 上一个关键字  N 下一个关键字 
+   *  查找当前游标所在的单词  #(查找当前游标所在的单词， 行为和？类似)
+   f  在本行中查找下一个输入的字符
+   F  在本行中查找前一个输入的字符
+   zz 把当前行置中
+   zb 把当前行置下
+   zt 把当前行置上
+
+   visual 模式下  V选取整行
+   V 也可以不在visual模式下选取整行  
+   y 复制选择内容
+   p 粘贴  5p  粘贴五次  P 游标前面粘贴文本
+   yy 复制游标一整行
+   y0 复制内容到行首
+   y$ 复制内容到行尾
+   yG 复制内容到最后一行
+   ygg 复制内容到文件开头  
+   crtl + r  // 和u相反
+   "ay  把选择内容复制到A暂存器
+   "ap  把a暂存区的内容粘贴过来
+   :reg    查看所有暂存区内容
+   vim 有48个暂存区， a-z可以供我们使用
+  
