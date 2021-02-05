@@ -1,0 +1,9 @@
+1. crtl + w 关闭当前页面
+1. crtl + t 新建页面
+
+1. crtl + tab   页面向后切换
+1. crtl + PgUp  页面向前切换
+1. crtl + PgDn  页面向后切换
+
+1. crtl + n 新建窗口
+1. crtl + shift + n 新建隐身窗口

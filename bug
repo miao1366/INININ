@@ -72,3 +72,6 @@
 
 31 http 报头多加了空格
 
+32 小心basename() dirname()
+
+
