@@ -27,3 +27,64 @@
 //    ARCH_CPU_32_BITS / ARCH_CPU_64_BITS
 
 3. 动态库导出宏  brpc->base_export.h
+
+4. i386 和 x86-64 的主要区别是：
+        1、i386是32位微处理器的统称；x86-64（ 又称x64，即英文词64-bit extended，64位拓展 的简写）是x86架构的64位拓展，向后兼容于16位及32位的x86架构。
+        2、发行公司上，i386是英特尔（Intel）公司发行，x86-64是由AMD设计。
+        3、发布时间上，i386最初发布于1985年10月17日，x86-64是在1999年设计问世。
+        4、x86-64向后兼容于16位及32位的x86架构，而i386不能兼容x64
+
+5. x86-64（ 又称x64，即英文词64-bit extended，64位拓展 的简写）是x86架构的64位拓展，向后兼容于16位及32位的x86架构。
+   x64于1999年由AMD设计，AMD首次公开64位集以扩展给x86，称为“AMD64”。其后也为英特尔所采用，现时英特尔称之为“Intel 64”，
+   在之前曾使用过“Clackamas Technology” (CT)、“IA-32e”及“EM64T”。苹果公司和RPM包管理员以“x86-64”或“x86_64”称呼此64位架构。
+   甲骨文公司及Microsoft称之为“x64”。BSD家族及其他Linux发行版则使用“x64-64”，32位版本则称为“i386”（或 i486/586/686），
+   Arch Linux用x86_64称呼此64位架构
+
+6. IA-64
+   IA-64是Intel的x86-64最早是AMD做的（后来Intel也跟进了这条线）本质的区别就是IA-64是不兼容原本的32位指令集的。
+   而x86-64会兼容32位指令集。这也就导致了IA-64的受众群体非常小、用户的更新成本极高。所以一直都没有得到广泛使用
+
+7. PowerPC
+   PowerPC系列则是IBM处理器的架构，RISC，一般用商用小型机，或者是一些专用领域。PS3里面使用的Cell BE就是基于PowerPC架构的处理器
+   PowerPC（英语：Performance Optimization With Enhanced RISC – Performance Computing，有时简称PPC）是一种精简指令集（RISC）架构的中央处理器（CPU），
+   其基本的设计源自IBM的POWER（Performance Optimized With Enhanced RISC；《IBM Connect电子报》2007年8月号译为“增强RISC性能优化”）架构。
+   POWER是1991年，Apple、IBM、Motorola组成的AIM联盟所发展出的微处理器架构。PowerPC是整个AIM联盟平台的一部分，并且是到目前为止唯一的一部分。
+   但苹果电脑自2005年起，将旗下电脑产品转用Intel CPU
+
+8. S390X
+   s390x 是 IBM System z 系列 (zSeries)大型机 (mainframe) 硬件平台，是银行或者大型企业或者科研单位用的，大部分用户接触不到
+
+9. arm中的armeb 和 armel
+   ARMEB = ARM EABI Big-endian ,也有称为ARMEB     #大端字节序 
+   ARMEL = ARM EABI Little-endian,也有称为ARMLE    #小端字节序
+
+10. ARM处理器简介及RISC特点
+    1、ARM处理器简介：
+      ARM（Advanced RISC Machines）是一个32位RISC（精简指令集）处理器架构，ARM处理器则是ARM架构下
+      的微处理器。ARM处理器广泛的使用在许多嵌入式系统。ARM处理器的特点有指令长度固定，执行效率高，低成本等。
+   ２、RISC设计主要特点：     
+     （１）指令集——RISC减少了指令集的种类，通常一个周期一条指令，采用固定长度的指令格式，编译器或程序员通过几条指令完成一个复杂的操作。而CISC指令集的指令长度通常不固定；
+     （２）流水线——RISC采用单周期指令，且指令长度固定，便于流水线操作执行；
+     （３）寄存器——RISC的处理器拥有更多的通用寄存器，寄存器操作较多。例如ARM处理器具有37个寄存器；
+     （４）Load/Store结构——使用加载/存储指令批量从内存中读写数据，提高数据的传输效率；
+     （５）寻址方式简化，指令长度固定，指令格式和寻址方式种类减少
+    
+11.  __arm__   应该是代表arm处理器
+
+12. ARMv8
+    ARMv8是ARM版本升级以来最大的一次改变，ARMv8的架构继承以往ARMv7与之前处理器技术的基础，除了现有的16/32bit的Thumb2指令支持外，
+    也向前兼容现有的A32(ARM 32bit)指令集，扩充了基于64bit的AArch64架构，除了新增A64(ARM 64bit)指令集外，
+    也扩充了现有的A32(ARM 32bit)和T32(Thumb2 32bit）指令集
+    
+    ARMv8拥有两种执行模式（two execution modes）：
+    AArch64 ：64-bit registers and memory accesses, new instruction set；
+    AArch32 ： backwards compatible with ARMv7-A；
+
+13. 
+    x86_64 我们常说的主流的64位架构，代表厂家有Intel、AMD
+    aarch64 就是arm架构的64位系统，基于armv8指令集的64位架构，应该是后续ARM主流商用服务器的标准
+    armhfp 主要是对armv7hl兼容，支持基于arm的一系列单板计算机和嵌入式设备
+    i386 就是已经即将被淘汰的x86的以奔腾系列位代表的32位架构
+    power9 对应IBM的power9架构cpu
+    ppc64  IBM power系列架构，目标架构为64位PowerPC和Power Architecture处理器，并对此优化的应用程序的标识符，编译源代码时经常使用
+    ppc64el 纯小端模式，POWER8作为首要目标，OpenPower基金会基础的技术，试图使基于x86的Linux软件的移植工作以最小的工作量进行

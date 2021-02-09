@@ -66,5 +66,51 @@ vim有三种模式   insert  normal  visual
    dgg  删除当前行到文件开头
    c    删除选中内容并进入insert模式
    C    删除当前游标至末尾内容并进入insert模式
-
-
+   r    替换当前游标所在的字符
+   >>   句首向后移动 shiftwidth距离，后面可以跟上数字  3>>
+   <<   句首向前移动 shiftwidth距离，后面可以跟上数字  3<<
+   shift >   选中内容向后移动shiftwidth距离
+   =    自动排版缩进所选行
+   crtl + [  等同于esc
+   :e  开启新的档案
+   :tabe  开启新的页签
+   :tabe  文件   新的页签打开文件
+   gt  向后切换页签
+   gT  向前切换页签
+   :new   上下分割屏幕
+   crtl+w w 或者 crtl+w crtl+w    上下切换屏幕
+   crtl+w+j 向下切换屏幕
+   crtl+w+k 向上切换屏幕
+  
+   :vnew    左右切割屏幕
+   crtl+w w 或者 crtl+w crtl+w    左右切换屏幕
+   crtl+w+h 向左切换屏幕
+   crtl+w+l 向右切换屏幕
+   vim -o 文件一 文件二 ... 以上下分屏的方式打开多个文件
+   vim -O 文件一 文件二 ... 以左右分屏的方式打开多个文件
+   vim -p 文件一 文件二 ... 以页签的方式打开多个文件
+   
+   buffer window tab
+   qa    退出所有窗口
+   :ls   查看当前打开了那些文档
+   buffer 当前打开缓存了那些文档
+   :b3     打开当前buffer中3号文档
+   crtl+^  切换到上一个buffer
+   :b 字符  在当前所有的buffer中根据字符模糊匹配文件
+   :bn 或者 bnext  切换到下一个buffer中
+   :bp 或者 bprevious  切换到上一个buffer中
+   :bl 或者 blast  切换到最后一个buffer
+   :bf 或者 bfirst  切换到第一个buffer
+   :bdelete 或者 bd 关闭当前buffer
+   :tab ba    以页签的形式打开所有的buffer
+   :V         visual Line模式
+   crtl+v     visual Block模式
+   VB模式下 I多行编辑
+   :vw    选中当前游标中的单词
+   :viw    完整选中当前游标中的单词    diw
+   :vaw    选中当前游标中的单词,可能会有多余的字符   a arround  i insert
+   :vi"    选取" "里的所有内容
+   :va"    选取" "里的所有内容，包括" "
+   :vit    选择title里的东西
+   :v}     选择内容到段尾
+   :v{     选择内容到段首

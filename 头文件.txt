@@ -52,6 +52,8 @@ ptrdiff_t   size_t   wchar_t   	NULL   	offsetof(type, member-designator)
 
 19 #include <errno.h>    //不是<error.h>  错误描述文件
 
+20 头文件 <sys/un.h>    struct sockaddr_un server_sockaddr;    struct sockaddr_un cli_sockaddr ;
+
 
 
 
