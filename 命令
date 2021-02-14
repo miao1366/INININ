@@ -627,3 +627,7 @@ BLOCKED	    阻塞状态	        TERMINATED	     终止状态
 
 76    df -h查看系统中文件的使用情况
       du -sh *查看当前目录下各个文件及目录占用空间大小
+
+77  ln -s  ./.vim/.vimrc  .
+
+

@@ -351,7 +351,17 @@ struct has_no_destroy
    [函数对象参数] (操作符重载函数参数) mutable 或 exception 声明 -> 返回值类型 {函数体}
    1. [] (int x, int y) -> int { int z = x + y; return z; }
    2. [] 
-	
+
+    1.[var]表示值传递方式捕捉变量var；
+    2.[=]表示值传递方式捕捉所有父作用域的变量（包括this）；
+    3.[&var]表示引用传递捕捉变量var；
+    4.[&]表示引用传递方式捕捉所有父作用域的变量（包括this）；
+    5.[this]表示值传递方式捕捉当前的this指针
+
+    1.[=,&a,&b]表示以引用传递的方式捕捉变量a和b，以值传递方式捕捉其它所有变量;
+    2.[&,a,this]表示以值传递的方式捕捉变量a和this，引用传递方式捕捉其它所有变量
+    3.mutable：mutable修饰符。默认情况下，Lambda函数总是一个const函数，mutable可以取消其常量性。在使用该修饰符时，参数列表不可省略（即使参数为空）
+
 76 乱序执行(乱序执行译作异步执行更贴切)，是指在cpu中运行的指令并不按照代码中的顺序执行，而是按照一定的策略打乱顺序执行，也许后面的指令先执行，
    当然，得保证指令之间不具备相关性
    
@@ -789,3 +799,33 @@ int ** const p3;  // int **二级指针不可修改
 
 159  memset() 和 {0} 的区别
      {0} 可能有移植性问题，虽然绝大多数编译器看到{0} 都是将数组全部初始化为0， 但是不保证所有编译器都是这样实现的
+
+160  constexpr
+        const并未区分出编译期常量和运行期常量
+        constexpr限定在了编译期常量
+        
+        C++11中的constexpr指定的函数返回值和参数必须要保证是字面值，而且必须有且只有一行return代码，
+        这给函数的设计者带来了更多的限制，比如通常只能通过return 三目运算符+递归来计算返回的字面值。
+        而C++14中只要保证返回值和参数是字面值就行了，函数体中可以加入更多的语句，方便了更灵活的计算
+        链接：https://www.jianshu.com/p/34a2a79ea947
+
+161  模板会进行类型推倒
+        class A {
+            public:
+                template<typename T, class CB>
+                static void func(const std::string &name, T *first, T *last, CB callback) {
+                    std::cout << "hello world" << std::endl;
+                    callback();
+                    return ;
+                }
+        };
+    
+        int main() {   
+            int arr[10] = {0};
+            A::func("hello", arr, arr + 10, [](void){
+                std::cout << "hello world" << std::endl;
+            });
+            return 0;
+        }
+
+162  std::function对象最大的用处就是在实现函数回调，使用者需要注意，它不能被用来检查相等或者不相等，但是可以与NULL或者nullptr进行比较

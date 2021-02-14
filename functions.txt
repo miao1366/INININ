@@ -205,7 +205,7 @@ to_string(x)
     
 	
     printf("配置的处理器数量为 :%ld\n", sysconf(_SC_NPROCESSORS_CONF));                //1
-    printf("当前在线(可用)的处理器数量为 :%ld\n", sysconf(_SC_NPROCESSORS_ONLN));       //1
+    printf("当前在线(可用)的处理器数量为 :%ld\n"  ", sysconf(_SC_NPROCESSORS_ONLN));       //1
     printf ("页大小: %ld\n", sysconf(_SC_PAGESIZE));                                //4096
     printf ("页数: %ld\n", sysconf(_SC_PHYS_PAGES));                                //248933  
     printf ("可用页面的数量: %ld\n", sysconf(_SC_AVPHYS_PAGES));                      //17336
@@ -1390,5 +1390,23 @@ stacksize    堆栈大小  单位 字节char
             用户程序提供一个struct aiocb的数组，每个元素表示一次AIO的请求操作。需要设置struct aiocb
             中的aio_lio_opcode数据成员的值，有LIO_READ，LIO_WRITE和LIO_NOP。
             nent表示数组中元素的个数。最后一个参数是对AIO操作完成后的通知机制的设置
-    
-    
+
+194  int syscall(int number, ...);
+    syscall() 执行一个系统调用，根据指定的参数number和所有系统调用的汇编语言接口来确定调用哪个系统调用。
+    系统调用所使用的符号常量可以在头文件<sys/syscll.h>里面找到
+
+195  
+int io_setup(int maxevents, io_context_t *ctxp);
+创建一个异步IO上下文（io_context_t是一个句柄）
+
+int io_destroy(io_context_t ctx);
+销毁一个异步IO上下文（如果有正在进行的异步IO，取消并等待它们完成）
+
+long io_submit(aio_context_t ctx_id, long nr, struct iocb **iocbpp);
+提交异步IO请求
+
+long io_cancel(aio_context_t ctx_id, struct iocb *iocb, struct io_event *result);
+取消一个异步IO请求
+
+long io_getevents(aio_context_t ctx_id, long min_nr, long nr, struct io_event *events, struct timespec *timeout);
+等待并获取异步IO请求的事件（也就是异步请求的处理结果）

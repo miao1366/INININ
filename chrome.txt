@@ -1,9 +1,15 @@
 1. crtl + w 关闭当前页面
-1. crtl + t 新建页面
 
-1. crtl + tab   页面向后切换
-1. crtl + PgUp  页面向前切换
-1. crtl + PgDn  页面向后切换
+2. crtl + t 新建页面
 
-1. crtl + n 新建窗口
-1. crtl + shift + n 新建隐身窗口
+3. crtl + tab   页面向后切换
+
+4. crtl + PgUp  页面向前切换
+
+5. crtl + PgDn  页面向后切换2
+
+6. crtl + n 新建窗口
+
+7. crtl + shift + n 新建隐身窗口
+
+8. crtl + e    光标移入搜索框

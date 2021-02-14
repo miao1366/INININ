@@ -5,6 +5,9 @@
 3. 撤销: u
 取消撤销: ctrl + r
 
+crtl+s  屏幕保护，按键不会有响应
+crtl+q  去除屏幕保护
+
 4. Vim 的全局配置一般在/etc/vim/vimrc或者/etc/vimrc，对所有用户生效。
    用户个人的配置在~/.vimrc。
 
@@ -107,10 +110,204 @@ vim有三种模式   insert  normal  visual
    crtl+v     visual Block模式
    VB模式下 I多行编辑
    :vw    选中当前游标中的单词
-   :viw    完整选中当前游标中的单词    diw
+   :viw    完整选中当前游标中的单词
    :vaw    选中当前游标中的单词,可能会有多余的字符   a arround  i insert
-   :vi"    选取" "里的所有内容
+   :vi"    选取" "里的所有内容          vi(
    :va"    选取" "里的所有内容，包括" "
-   :vit    选择title里的东西
+   :vit    选择tag里的东西
+   :vat    选择tag里的东西,包括tag
+   :dit    删除tag里的东西
    :v}     选择内容到段尾
    :v{     选择内容到段首
+   :ciw    更改完整选中当前游标中的单词  cit 
+   :diw    删除完整选中的当前游标中的单词
+   :c{     游标到段首内容去除，并进入insert模式
+
+    名词    动词    范围    量词
+    名词
+        w = word  s = sentence  p = paragraph  t = tag
+        单引号、双引号、 小括号、 中括号、 大括号
+        sentence   句子
+        paragraph  段落
+    动词
+       y = yank  p = paste  d = delete  c = change
+    范围
+       i = inner  a = a or around 
+    量词  就是数字
+    
+    :vis  选中一句话
+    :cis  删除游标所在的一段话并进入insert模式
+    :vip  选中一个段落
+    :cip  删除游标所在的一段段落并进入insert模式
+    :dip  删除游标所在的一段段落
+    :yip  yank游标所在的一段段落
+    :yit  yank tag里面的内容
+    :v3w  选取3个单词
+    :d3w  删除三个单词
+    :3yy  复制三行
+    :2p   粘贴2次
+    0 回到行首包括空行 
+    ^回到行首，跳过空格
+    10G    跳到第十行
+    set number 或者 set nu 显示行号
+    crtl+f 向下一页
+    crtl+b 向上一页
+    zf    选中内容缩成一行  zd 或者 l 撤回
+    zfip  段落缩成一行
+    r     替换游标所在字符
+    ~     大小写替换
+    .     重复上一个步骤流
+    J     把下一行提上来    3J
+    insert 模式下 crtl + w 删除前面一整个单词
+    insert 模式下 crtl + u 删除前面字符直到行首
+    
+    crtl + w  终端下使用效果一致
+    crtl + u  终端下使用效果一致
+    :!    执行命令并回到终端
+    :r !  把执行命令的结果粘贴到游标处
+    :h    帮助指令
+    "     ~/.vimrc vim配置文件里的 注释 "
+    set  clipboard=unnamed    和剪贴板互通
+    hlsearch                  搜索高亮
+    cursorline                游标下加下划线
+    noswapfile                不需要临时文档
+    source                    加载配置文件
+    sotftabstop=2             2个空白代替tab
+    shiftwidth=2              > 或者 < 移动距离
+    sotftabstop
+    expandtab   
+    retab                    如果设置了expandtab， retab会把tab键设置为空格键
+    showtabline  
+                0            不会出现页签
+                1            打开超过一个页签时，会出现页签
+                2            不管打开几个文本，都会出现页签
+    splitbelow               new 打开的页签会在下方，而不是上方
+    splitright               new 打开的页签会在右边，而不是左边
+    ignorecase               搜索时忽略大小写
+    incsearch                查找时时时在当前文本中匹配字符
+    syntax on
+    colorscheme  darkblue    字体颜色主题
+    filetype on              换行时行首自动缩进
+    filetype indent on       换行时...
+    filetype plugin on       换行时...
+    
+    map  
+    nmap    normal 模式下映射键盘    nunmap  mapclear
+    vmap    visual 模式下映射键盘    vunmap  mapclear
+    imap    insert  模式下映射键盘   iunmap  mapclear
+    
+    key-notation   查看非字母键盘对应的键盘符号设定
+
+    Nop    省略键盘  
+    set    nocompatible    设定与旧版的vi不相容
+    :set    显示你自己设置的选项
+    :set all 查看所有的设置项
+    :crtl+d  列出可选项  类似tab键
+    
+    try
+    catch
+    endtry
+
+    set ruler     显示行号 列号  文件%位置
+    wrap          折行
+    linebreak     折行时不从word内部开始
+    noshowmode    不显示工作模式
+    showcmd       显示输入命令
+    scrolloff  3  屏幕顶端或底端还有三行时就读取内容.
+    smartcase     大小写匹配   
+    list          显示空白符
+
+    autocmd       事件触发后执行命令
+    autocmd WinEnter * setlocal cursorline    //进入窗口后游标所在行下面显示下划线标记
+    autocmd WinLeave * setlocal nocursor      //离开窗口后游标所在行下面不显示下划线标记
+    autocmd BufWritePre * :%s/\s+$//e         //清除掉行末尾空白符号
+    
+    :h autocmd-events    查看手册查看所有事件
+
+    if executable("ruby")
+        autocmd BufRead, BufNewFile *.rb   noremap<F5> :% w !ruby -w<enter>   //每次打开一个rb文件时，映射F5键盘，执行ruby命令
+    else
+        echo "you need to install Ruby first"
+    
+    ～/.vim    目录    配置文件目录     
+    filetype
+    把配置文档放在多个目录下
+    
+    vim airline
+
+    1. 定制化vim
+       a. 定制化 sudo curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+       b. mv  ~/.vimrc ~/.vim/   cd ~/         ls ~/.vim/.vimrc .
+       c. PlugInstall 
+
+    :NERDTreeToggle    打开文件夹树
+    nnoremap <silent> <F2> :NERDTreeToggle<Enter>   //NERDTreeToggle命令隐射为F2   silent    不显示命名
+    
+    m 修改/增加 文件
+    C 进入子文件夹
+    u 进入上一层文件夹
+    PlugInstall  安装插件   
+    VimAwesome    vim网站
+
+    // 文件树窗口是最后一个窗口时，退出。
+    autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+
+    ctrlpvim/ctrlp.vim
+    ctrl+p 快速查找文件
+    ctrl+d 这匹配文件名，不匹配文件路径
+    let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn)$'
+    let g:ctrlp_custom_ignore = {
+      \ 'dir':  '\v[\/]\.(git|hg|svn)$',
+      \ 'file': '\v\.(exe|so|dll)$',
+      \ 'link': 'some_bad_symbolic_links',
+      \ }
+    忽略查找某些文件
+
+    mattn/emmet-vim
+    crtl+y+, 按照展开
+
+    tpope/vim-surround
+    S"      选中单词添加双引号
+    ysiw"   游标所在单词添加双引号
+    ds"     去掉两侧双引号
+    cs" '   两侧双引号改为单引号
+    cs" <div>   两侧双引号改为<div>
+    cs" <span>   两侧双引号改为<span>
+
+    ctrl+p    快速查找文件
+    emmet    快速生成语句 css html 
+    surround 快速添加" ' { [  "
+    o    新添加下一行
+    O    新添加上一行
+    a    行末尾添加
+    cw   删除光标后面字符
+    g_   本行最后一个不是blank字符的位置
+    p    光标的下一行进行粘贴
+    P    光标的上一行进行粘贴
+    saveas    另存为
+    fa    下一个字符a的位置   3fa
+    Fa    上一个字符a的位置   3Fa
+    ta    字符a的前一个字符
+
+    crtl+v  $  a  // 所选择的行末尾添加内容
+    split      同一个文件上下分屏
+    vsplit     同一个文件左右分屏
+    crtl+w+-   上下移动分屏
+    crtl+shift+=  扩大屏幕包括字体
+    crtl+-        缩小屏幕包括字体
+
+
+    vim-airline            状态栏
+    vim-startify           最近打开文件
+    easymotion/vim-easymotion    快速查找 移动
+    majutsushi/tagbar
+    vim-interestingwords     
+    Yggdroot/indentLine    缩进线
+    vim-hybrid             配色方案
+    colorscheme  hybrid    hybrid配色方案
+    crtl+w+p 
+    ss    快速查找和定位
+    LSP 协议
+
+
+

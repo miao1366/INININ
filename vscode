@@ -23,4 +23,15 @@ modified:   src/face_manager/for_senscape/face_manager_for_senscape.cc
 
 alt + 数字    切换分屏
 alt + shift + 5 终端新建分屏
+alt + enter   搜索結果窗口展開
+alt + c       搜索結果忽略大小寫切換
+alt + w       搜索結果是否連續切換
 
+
+shift + enter    上一个查找结果
+        enter    下一个查找结果
+
+crtl+shift+f     全局查找快捷键
+crtl+alt+e       文件树框
+crtl+=           字体，窗口放大
+crtl+-           字体，窗口缩小
