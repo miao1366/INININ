@@ -35,3 +35,6 @@ crtl+shift+f     全局查找快捷键
 crtl+alt+e       文件树框
 crtl+=           字体，窗口放大
 crtl+-           字体，窗口缩小
+
+
+code ./    打开当前

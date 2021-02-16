@@ -630,4 +630,21 @@ BLOCKED	    阻塞状态	        TERMINATED	     终止状态
 
 77  ln -s  ./.vim/.vimrc  .
 
+78  pushd : push (in) directory,将目录压栈,最后一个压入的目录位于栈顶;
+    popd : pop (out) directory,将目录栈逐个弹出
+    pushd不带参数，就会在栈顶的两个目录之间切换．如果需要调整到其他目录，可以使用+n参数．具体每个栈内目录编号，通过dirs -v查看
+    cd -
+
+    cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/  ../..
+
+79  which  查看某个可执行文件的位置
+
+80. ` `  执行命令后的内容
+
+81  pkg-config能够程序依赖的头文件和库文件的位置指出来，给编译器使用
+    pkg-config同其他命令一样，有很多选项，不过我们一般只会用到--libs和--cflags
+
+82  export http_proxy="http://192.168.0.58:1087"
+    export https_proxy="http://192.168.0.58:1087"
+    ssh senscape@192.168.0.58
 
