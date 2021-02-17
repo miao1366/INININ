@@ -198,14 +198,44 @@ lz 是link libz
 43  option(address "This is a option for address" ON)
     此时表示，如果用户没有定义过address,那我address的默认值就是ON,
     如果用户在命令行显示改变过address的值比如为OFF,那么在脚本中address的值就是OFF
-44
+
+44  RelwithDebInfo
+    非常类似于Release模式.它生成完全优化的代码,但也构建程序数据库,并插入调试行信息,以便调试人员有机会随时猜测代码中的位置
 	
-	
-	
-	
-	
-	
-	
+45  Cygwin Windows下的Linux开发环境
+    是许多自由软件的集合，最初由Cygnus Solutions开发，用于各种版本的Microsoft Windows上，运行UNIX类系统。
+    Cygwin的主要目的是通过重新编译，将POSIX系统（例如Linux、BSD，以及其他Unix系统）上的软件移植到Windows上
+
+46  MinGW，
+    是Minimalist GNUfor Windows的缩写。它是一个可自由使用和自由发布的Windows特定头文件和使用GNU工具集导入库的集合，
+    允许你在GNU/Linux和Windows平台生成本地的Windows程序而不需要第三方C运行时（C Runtime）库。MinGW 是一组包含文件和端口库，
+    其功能是允许控制台模式的程序使用微软的标准C运行时（C Runtime）库
+
+47  GNUInstallDirs
+    https://cmake.org/cmake/help/v3.19/module/GNUInstallDirs.html
+    Define GNU standard installation directories
+    Provides install directory variables as defined by the GNU Coding Standards.
+
+48  CACHE
+SET(var1 13)
+变量 var1 被设置成 13
+如果 var1 在cache中已经存在，该命令不会overwrite cache中的值
+SET(var1 13 ... CACHE ...)
+如果cache存在该变量，使用cache中变量
+如果cache中不存在，将该值写入cache
+SET(var1 13 ... CACHE ... FORCE)
+不论cache中是否存在，始终使用该值
+要习惯用帮助
+
+ cmake --help-command SET
+find_xxx
+为了避免每次运行都要进行头文件和库文件的探测，以及考虑到允许用户通过ccmake设置头文件路径和库文件的重要性，这些东西必须进行cache。
+
+find_path 和 find_library 会自动cache他们的变量，如果变量已经存在且是一个有效值（即不是 -NOTFOUND 或 undefined）,他们将什么都不做。
+另一方面，模块查找时输出的变量（_FOUND,_INCLUDE_DIRS,_LIBRARIES）不应该被cache
+
+49 CMAKE_LIBRARY_OUTPUT_DIRECTORY  设置生成的so动态库最后输出的路径
+   CMAKE_ARCHIVE_OUTPUT_DIRECTORY  静态库输出路径
 	
 	
 	
