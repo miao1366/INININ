@@ -127,7 +127,7 @@ cmake内置变量是区分大小写的，或者干脆就说，cmake的所有变�
 21  PROJECT_SOURCE_DIR  是指包含最近的project()命令的CMakeLists.txt的文件夹
 
 22  message()函数     message :为用户显示一条消息。
-
+    message([STATUS|WARRING|AUTHOR_WARNING|FATAL_ERROR|SEND_ERROR] "message")
 23 -Wall 打开gcc的所有警告
 
 24 -Werror，它要求gcc将所有的警告当成错误进行处理
@@ -237,83 +237,212 @@ find_path 和 find_library 会自动cache他们的变量，如果变量已经存
 49 CMAKE_LIBRARY_OUTPUT_DIRECTORY  设置生成的so动态库最后输出的路径
    CMAKE_ARCHIVE_OUTPUT_DIRECTORY  静态库输出路径
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+50  CMakeLists.txt 的语法比较简单，由命令、注释和空格组成，其中命令是不区分大小写的。指令是大小写无关的,参数和变量是大小写相关的。
+    但推荐全部使用大写指令。符号 # 后面的内容被认为是注释。命令由命令名称、小括号和参数组成，参数之间使用空格进行间隔
+    
+51
+    cmake中一些预定义变量
+    PROJECT_SOURCE_DIR 工程的根目录
+    PROJECT_BINARY_DIR 运行cmake命令的目录,通常是${PROJECT_SOURCE_DIR}/build
+    CMAKE_INCLUDE_PATH 环境变量,非cmake变量
+    CMAKE_LIBRARY_PATH 环境变量
+    CMAKE_CURRENT_SOURCE_DIR 当前处理的CMakeLists.txt所在的路径
+    CMAKE_CURRENT_BINARY_DIR target编译目录
+    使用ADD_SURDIRECTORY(src bin)可以更改此变量的值
+    SET(EXECUTABLE_OUTPUT_PATH <新路径>)并不会对此变量有影响,只是改变了最终目标文件的存储路径
+    CMAKE_CURRENT_LIST_FILE 输出调用这个变量的CMakeLists.txt的完整路径
+    CMAKE_CURRENT_LIST_LINE 输出这个变量所在的行
+    CMAKE_MODULE_PATH 定义自己的cmake模块所在的路径
+    SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake),然后可以用INCLUDE命令来调用自己的模块
+    EXECUTABLE_OUTPUT_PATH 重新定义目标二进制可执行文件的存放位置
+    LIBRARY_OUTPUT_PATH 重新定义目标链接库文件的存放位置
+    PROJECT_NAME 返回通过PROJECT指令定义的项目名称
+    CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 用来控制IF ELSE语句的书写方式
+    
+52
+    设置输出目录
+    一. SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../bin)  
+    上面的语句能设置可执行文件的输出目录
+    在Win + VS环境下,会自动在你所设置的目录后面扩展一层 目录,所以最终生成的Debug版本程序会在 ${PROJECT_SOURCE_DIR}/../bin/Debug 目录下,Release版本程序会在 ${PROJECT_SOURCE_DIR}/../bin/Release 目录下.
+    在Linux + GCC环境下,无论是Debug还是Release,生成的可执行程序会直接放在你所设置的目录下,不会有差异.
+    二. SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../lib)
+    上面的语句能设置库文件的输出目录
+    在Win + VS环境下,会自动在你所设置的目录后面扩展一层 目录,所以最终生成的Debug版本库会在 ${PROJECT_SOURCE_DIR}/../lib/Debug 目录下,Release版本库会在 ${PROJECT_SOURCE_DIR}/../lib/Release 目录下.
+    在Linux + GCC环境下,无论是Debug还是Release,生成的库文件会直接放在你所设置的目录下,不会有差异.
+    三. set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_SOURCE_DIR}/../bin) set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_SOURCE_DIR}/../bin)
+    上面两条语句分别设置了Debug版本和Release版本可执行文件的输出目录,
+    一旦设置上面的属性,在任何环境下生成的可执行文件都将直接放在你所设置的目录.
+    四. set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${PROJECT_SOURCE_DIR}/../lib) set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${PROJECT_SOURCE_DIR}/../lib)
+    上面两条语句分别设置了Debug版本和Release版本库文件的输出目录,
+    一旦设置上面的属性,在任何环境下生成的库文件都将直接放在你所设置的目录.
+    五. set(CMAKE_DEBUG_POSTFIX "_d") set(CMAKE_RELEASE_POSTFIX "_r")
+    上面两条语句分别设置了Debug版本和Release版本下库文件的后缀名.
+    六. set_target_properties(${TARGET_NAME} PROPERTIES DEBUG_POSTFIX "_d") set_target_properties(${TARGET_NAME} PROPERTIES RELEASE_POSTFIX "_r")
+    上面两条语句分别设置了Debug版本和Release版本下可执行文件的后缀名
+
+53  CMAKE_COMMAND    就是cmake 命令本身
+
+54  add_custom_command 
+  A. 
+    add_custom_command(OUTPUT output1 [output2 ...]
+    COMMAND command1 [ARGS] [args1...]
+    [COMMAND command2 [ARGS] [args2...] ...]
+    [MAIN_DEPENDENCY depend]
+    [DEPENDS [depends...]]
+    [BYPRODUCTS [files...]]
+    [IMPLICIT_DEPENDS <lang1> depend1
+                     [<lang2> depend2] ...]
+    [WORKING_DIRECTORY dir]
+    [COMMENT comment]
+    [DEPFILE depfile]
+    [JOB_POOL job_pool]
+    [VERBATIM] [APPEND] [USES_TERMINAL]
+    [COMMAND_EXPAND_LISTS])
+
+    OUTPUT：目标文件名称，代表下方的命令；
+    COMMAND：需要执行的命令；
+    DEPENDS：执行命令时需要的依赖
+例子：
+    cmake_minimum_required(VERSION 3.5)
+    project(test)
+    add_executable(${PROJECT_NAME} main.c)
+    add_custom_command(OUTPUT printout 
+                       COMMAND ${CMAKE_COMMAND} -E echo compile finish
+                       VERBATIM
+                      )
+    add_custom_target(finish
+                      DEPENDS printout
+                      )
+   第 7 行的add_custom_command生成一个名叫 printout 的“文件”（该文件不可见），其代表下方的 COMMAND 命令；
+   第 12 行的add_custom_target"生成"目标文件 finish ，其依赖上方的 printout
+
+ b. 在生成目标文件（add_executable() 或 add_library()）时自动执行 add_custom_command 指定的命令
+    add_custom_command(TARGET <target>
+            PRE_BUILD | PRE_LINK | POST_BUILD
+            COMMAND command1 [ARGS] [args1...]
+            [COMMAND command2 [ARGS] [args2...] ...]
+            [BYPRODUCTS [files...]]
+            [WORKING_DIRECTORY dir]
+            [COMMENT comment]
+            [VERBATIM] [USES_TERMINAL]
+            [COMMAND_EXPAND_LISTS])
+            
+    TARGET：由 add_executable 或 add_library 生成的目标文件名称；
+    PRE_BUILD | PRE_LINK | POST_BUILD：分别表示编译之前执行命令，链接之前执行命令，生成目标文件后执行命令；        
+    COMMAND：需要执行的命令；        
+    例子：        
+    cmake_minimum_required(VERSION 3.5)  ​
+    project(test)
+    add_executable(${PROJECT_NAME} main.c)
+    add_custom_command(TARGET ${PROJECT_NAME} 
+                       POST_BUILD 
+                       COMMAND ${CMAKE_COMMAND} -E echo compile finish
+                       VERBATIM
+                      )
+    该工程会生成可执行程序：test。生成 test 后，会在终端输出 compile finish
+
+55  add_custom_target()
+    cmake 本身支持两种目标文件：可执行程序（由 add_executable() 生成）和库文件（由 add_library() 生成）。
+    使用 add_custom_target 可添加自定义目标文件，用于执行某些指令。
+语法：官方说明
+add_custom_target(Name [ALL] [command1 [args1...]]
+                   [COMMAND command2 [args2...] ...]
+                   [DEPENDS depend depend depend ... ]
+                   [BYPRODUCTS [files...]]
+                   [WORKING_DIRECTORY dir]
+                   [COMMENT comment]
+                   [JOB_POOL job_pool]
+                   [VERBATIM] [USES_TERMINAL]
+                   [COMMAND_EXPAND_LISTS]
+                   [SOURCES src1 [src2...]])
+Name：目标文件名称；
+ALL：在使用 add_executable 或 add_library 生成目标文件时，默认不会“生成”该命令的目标文件，需要使用命令 
+cmake --target <Name> “生成”。但是如果指定了该参数，那么在生成上述目标文件时也会“生成”add_custom_target指定的目标文件；
+COMMAND：需要执行的命令；
+DEPENDS：执行命令时需要的依赖；
+例子：
+ cmake_minimum_required(VERSION 3.5)
+ project(test)
+ add_executable(${PROJECT_NAME} main.c)
+ add_custom_target(finish 
+                   COMMAND ${CMAKE_COMMAND} -E echo compile finish
+                   )
+注意：
+该命令可单独使用，也可与 add_custom_command 一起使用；
+该命令生成的目标文件不同于 cmake 本身生成的目标文件。该命令生成的目标文件是不可见的，也就是说在执行完编译命令后，
+在编译目录中并不能看到该命令生成的目标文件。实际上，该目标文件是一个代号，代表某些（个）命令。在“生成”该目标文件时，只是执行了其代表的命令。
+
+56  make_directory    cmake中的一条命令，用于生成目录
+    copy_if_different
+
+57  CMAKE_SKIP_RPATH,CMAKE_SKIP_BUILD_RPATH,CMKAE_INSTALL_RPATH
+        set(CMAKE_SKIP_RPATH TRUE) 
+        CMAKE_SKIP_RPATH,简单的来说，就是强制CMake不在构建期间和安装install期间给你加上它所认为的RPATH
+        第二个和第三个变量也比较简单，就是分别在构建期间和安装期间不允许CMake给你加入相关RPATH
+    
+    如果你想要追加RPATH,只需要对这三个变量设置成FALSE就可以了
+
+58  如果设置了COMMENT选项，后跟的参数会在构建时、以构建信息的形式、在命令执行之前显示出来
+
+59  cmake 中有两个相似的关键字, macro 和 function 这两个都是创建一段有名字的代码稍后可以调用, 还可以传参数
+macro 形式如下:
+macro(<name> [arg1 [arg2 [arg3 ...]]])
+  COMMAND1(ARGS ...)
+  COMMAND2(ARGS ...)
+  ...
+endmacro(<name>)
+
+function 形式如下:
+function(<name> [arg1 [arg2 [arg3 ...]]])
+  COMMAND1(ARGS ...)
+  COMMAND2(ARGS ...)
+  ...
+function(<name>)
+
+60  生成库
+add_library(<name> [STATIC | SHARED | MODULE]
+    [EXCLUDE_FROM_ALL]
+    source1 [source2 ...])
+        
+        SHARED,动态库
+        STATIC,静态库
+        MODULE,在使用 dyld 的系统有效,如果不支持 dyld,则被当作 SHARED 对待。
+add_library(OBJECT).能够将所有类编译为.o文件是一个有用的构造,但是不要将它们添加到库中.
+
+61  add_dependencies    依赖
+        假设我们需要生成一个可执行文件,该文件生成需要链接a.so b.so c.so d.so四个动态库
+        正常来讲,我们一把只需要以下两条指令即可:
+        ADD_EXECUTABLE(main main.cpp)
+        TARGET_LINK_LIBRARIES(main a.so b.so c.so d.so)
+        但是编译的时候报错,一些符号的定义找不到,而这些符号恰恰就在这几个库中,假设在a.so 和 b.so中,在上述两条指令之间加上一条指令即可编译通过:
+        ADD_DEPENDENCIES(main a.so b.so)
+        原因比较简单,生成main需要依赖a.so和b.so中的符号定义,然而a.so和b.so库的生成是在main编译生产之后的,
+        添加这条语句就是提醒编译器需要先生成main的依赖(a.so,b.so),然后再去生成main
+
+62  install(TARGETS targets... [EXPORT <export-name>]
+    [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
+      PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE]
+     [DESTINATION <dir>]
+     [PERMISSIONS permissions...]
+     [CONFIGURATIONS [Debug|Release|...]]
+     [COMPONENT <component>]
+     [NAMELINK_COMPONENT <component>]
+     [OPTIONAL] [EXCLUDE_FROM_ALL]
+     [NAMELINK_ONLY|NAMELINK_SKIP]
+    ] [...]
+    [INCLUDES DESTINATION [<dir> ...]]
+    )
+
+ARCHIVE	静态库                         ${CMAKE_INSTALL_LIBDIR}        lib
+LIBRARY	动态库                         ${CMAKE_INSTALL_LIBDIR}        lib
+RUNTIME	可执行二进制文件                 ${CMAKE_INSTALL_BINDIR}        bin
+PUBLIC_HEADER   与库关联的PUBLIC头文件   ${CMAKE_INSTALL_INCLUDEDIR}    include
+PRIVATE_HEADER  与库关联的PRIVATE头文件  ${CMAKE_INSTALL_INCLUDEDIR}    include
+
+65  GTest::GTest GTest::Main    -> gtest_main.lib ??
+
+66  EXCLUDE_FROM_ALL
+    cmake 的add_library,add_executable,add_subdirectory等命令都有一个EXCLUDE_FROM_ALL参数.
+    这个参数的作用根据cmake官网的解释就是如果某个target或subdirectory被设置为EXCLUDE_FROM_ALL属性,
+    那么这个target(或这个subdirectory中的所有target)就会被排除在all target列表之外，这样，
+    当执行默认的make(或nmake)时，这个target(或这个subdirectory中的所有target)就不会被编译

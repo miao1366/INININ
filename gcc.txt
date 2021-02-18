@@ -30,3 +30,4 @@ https://www.jianshu.com/p/e5967e46797b
 19. -Os	对生成文件大小进行优化。打开 -O2 开的全部选项，除了会那些增加文件大小的。
 
 gcc -Wall -Wextra -Werror
+
