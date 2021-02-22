@@ -72,12 +72,16 @@ int test_unlikely(int x){
      -Wl,--no-as-needed 选项不会做这样的检查，会把用户指定的链接库完全写入可执行文件中
 
 
+13  
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnarrowing"
+#pragma GCC diagnostic pop
 
 
-
-
-
-
+14 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+#pragma GCC diagnostic pop
 
 
 

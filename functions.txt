@@ -1410,3 +1410,16 @@ long io_cancel(aio_context_t ctx_id, struct iocb *iocb, struct io_event *result)
 
 long io_getevents(aio_context_t ctx_id, long min_nr, long nr, struct io_event *events, struct timespec *timeout);
 等待并获取异步IO请求的事件（也就是异步请求的处理结果）
+
+196  char *strdup(const char *s)
+
+char * __strdup(const char *s) {
+   size_t  len = strlen(s) +1;
+   void *new = malloc(len);
+   if (new == NULL)
+      return NULL;
+   return (char *)memecpy(new,s,len);
+}
+
+197 int isalpha(int c)    检查参数c是否为英文字母
+    相关函数 isalnum，islower，isupper

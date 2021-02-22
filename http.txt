@@ -82,157 +82,80 @@ Content-Type: text/plain; charset=utf-8
 客户端在请求一个文件的时候，发现自己缓存的文件有 Last Modified ，那么在请求中会包含 If Modified Since ，这个时间就是缓存文件的 Last Modified 。因此，如果请求中包含 If Modified Since，就说明已经有缓存在客户端。
 服务端只要判断这个时间和当前请求的文件的修改时间就可以确定是返回 304 还是 200 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+10. URI，统一资源标志符(Uniform Resource Identifier， URI)，表示的是web上每一种可用的资源，如 HTML文档、图像、视频片段、程序等都由一个URI进行标识的
+   URL是URI的一个子集。它是Uniform Resource Locator的缩写，译为“统一资源定位 符”。
+  
+   只要能唯一标识资源的就是URI，在URI的基础上给出其资源的访问方式的就是URL
+
+11.  scheme, userinfo, host, port, path, query, fragment
+    scheme  协议
+
+    foo :// username : password @example . com : 8042 / over / there / index . dtb;type = animal ? name = ferret # nose
+    /     ________________ / _________ /   __ / _________ /   ___ /   _ /   _________ /   _________ /   __ /
+  |             |                 |          |       |           |       |         |              |       |
+scheme     userinfo       hostname               port  path    filename extension parameter(s) query fragment
+  |      _______________________________ /
+  |                 authority
+  |    ________________________
+ /     /                         
+urn : example : animal : ferret : nose
+
+12. 请求方式
+   get head post put delete connect options trace
+1、OPTIONS
+返回服务器针对特定资源所支持的HTTP请求方法，也可以利用向web服务器发送‘*’的请求来测试服务器的功能性
+2、HEAD
+向服务器索与GET请求相一致的响应，只不过响应体将不会被返回。这一方法可以再不必传输整个响应内容的情况下，就可以获取包含在响应小消息头中的元信息。
+3、GET
+向特定的资源发出请求。注意：GET方法不应当被用于产生“副作用”的操作中，例如在Web Application中，其中一个原因是GET可能会被网络蜘蛛等随意访问。Loadrunner中对应get请求函数：web_link和web_url
+4、POST
+向指定资源提交数据进行处理请求（例如提交表单或者上传文件）。数据被包含在请求体中。POST请求可能会导致新的资源的建立和/或已有资源的修改。 Loadrunner中对应POST请求函数：web_submit_data,web_submit_form
+5、PUT
+向指定资源位置上传其最新内容
+6、DELETE
+请求服务器删除Request-URL所标识的资源
+7、TRACE
+回显服务器收到的请求，主要用于测试或诊断
+8、CONNECT
+HTTP/1.1协议中预留给能够将连接改为管道方式的代理服务器。
+注意：
+1）方法名称是区分大小写的，当某个请求所针对的资源不支持对应的请求方法的时候，服务器应当返回状态码405（Mothod Not Allowed）；当服务器不认识或者不支持对应的请求方法时，
+   应返回状态码501（Not Implemented）。
+2）HTTP服务器至少应该实现GET和HEAD/POST方法，其他方法都是可选的，此外除上述方法，特定的HTTP服务器支持扩展自定义的方法。
+
+13. 一次完整的请求数据
+
+GET HTTP/1.1 /
+Host: www.baidu.com
+Accept: */*
+User-Agent: Wget/1.14 (linux-gnu)
+Connection: close
+
+HTTP/1.1 200 OK
+Content-Length: 2381
+Content-Type: text/html
+Server: bfe
+Date: Sun, 21 Feb 2021 05:46:18 GMT
+Connection: close
+
+<!DOCTYPE html>
+<!--STATUS OK--><html> <head><meta http-equiv=content-type content=text/html;charset=utf-8><meta http-equiv=X-UA-Compatible content=IE=Edge>
+<meta content=always name=referrer><link rel=stylesheet type=text/css href=http://s1.bdstatic.com/r/www/cache/bdorz/baidu.min.css>
+<title>百度一下，你就知道</title></head> <body link=#0000cc> <div id=wrapper> <div id=head> <div class=head_wrapper> <div class=s_form> 
+<div class=s_form_wrapper> <div id=lg> <img hidefocus=true src=//www.baidu.com/img/bd_logo1.png width=270 height=129> </div> 
+<form id=form name=f action=//www.baidu.com/s class=fm> <input type=hidden name=bdorz_come value=1> <input type=hidden name=ie value=utf-8> 
+<input type=hidden name=f value=8> <input type=hidden name=rsv_bp value=1> <input type=hidden name=rsv_idx value=1> 
+<input type=hidden name=tn value=baidu><span class="bg s_ipt_wr"><input id=kw name=wd class=s_ipt value maxlength=255 autocomplete=off autofocus></span>
+<span class="bg s_btn_wr"><input type=submit id=su value=百度一下 class="bg s_btn"></span> </form> </div> </div> <div id=u1> 
+<a href=http://news.baidu.com name=tj_trnews class=mnav>新闻</a> <a href=http://www.hao123.com name=tj_trhao123 class=mnav>hao123</a> 
+<a href=http://map.baidu.com name=tj_trmap class=mnav>地图</a> <a href=http://v.baidu.com name=tj_trvideo class=mnav>视频</a> 
+<a href=http://tieba.baidu.com name=tj_trtieba class=mnav>贴吧</a> <noscript> 
+<a href=http://www.baidu.com/bdorz/login.gif?login&amp;tpl=mn&amp;u=http%3A%2F%2Fwww.baidu.com%2f%3fbdorz_come%3d1 name=tj_login class=lb>登录</a>
+ </noscript> <script>document.write('<a href="http://www.baidu.com/bdorz/login.gif?login&tpl=mn&u='+ encodeURIComponent(window.location.href+
+  (window.location.search === "" ? "?" : "&")+ "bdorz_come=1")+ '" name="tj_login" class="lb">登录</a>');</script> <a href=//www.baidu.com/more/ 
+  name=tj_briicon class=bri style="display: block;">更多产品</a> </div> </div> </div> <div id=ftCon> <div id=ftConw> <p id=lh> 
+  <a href=http://home.baidu.com>关于百度</a> <a href=http://ir.baidu.com>About Baidu</a> </p> <p id=cp>&copy;2017&nbsp;Baidu&nbsp;
+  <a href=http://www.baidu.com/duty/>使用百度前必读</a>&nbsp; <a href=http://jianyi.baidu.com/ class=cp-feedback>意见反馈</a>&nbsp;京ICP证030173号&nbsp; 
+  <img src=//www.baidu.com/img/gs.gif> </p> </div> </div> </div> </body> </html>
+
+14. 

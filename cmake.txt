@@ -446,3 +446,41 @@ PRIVATE_HEADER  与库关联的PRIVATE头文件  ${CMAKE_INSTALL_INCLUDEDIR}    
     这个参数的作用根据cmake官网的解释就是如果某个target或subdirectory被设置为EXCLUDE_FROM_ALL属性,
     那么这个target(或这个subdirectory中的所有target)就会被排除在all target列表之外，这样，
     当执行默认的make(或nmake)时，这个target(或这个subdirectory中的所有target)就不会被编译
+
+67  ADD_CUSTOM_COMMAND(
+    TARGET world_server
+    COMMAND cp ${CMAKE_SOURCE_DIR}/CMakeLists.txt  ${EXECUTABLE_OUTPUT_PATH}
+)
+上面这句所得到的效果是，当目标world_server 被新生成时，执行COMMAND 后面的命令。
+当然这上面的命令是linux下的，用于测试的。
+
+68  add_custom_target    增加make 命令选项
+    add_custom_target(CopyTask
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/config ${CMAKE_CURRENT_SOURCE_DIR}/etc
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/log.txt ${CMAKE_CURRENT_SOURCE_DIR}/etc
+    )
+    mkdir build && cd build
+    cmake ..
+    make CopyTask
+
+69  add_custom_command和add_executable在不同的CMakeLists.txt，那么add_executable那个CMakeLists.txt无法引用到add_custom_command，
+    也就是说，最好add_custom_command和add_executable在同一个CMakeLists.txt中
+
+70  get_filename_component 得到一个完整文件名中的特定部分。
+    get_filename_component(<VAR> FileName  PATH|ABSOLUTE|NAME|EXT|NAME_WE|REALPATH [CACHE])
+ 　　将变量<VAR>设置为路径(PATH)，文件名(NAME)，文件扩展名(EXT)，去掉扩展名的文件名(NAME_WE)，完整路径(ABSOLUTE)，
+    或者所有符号链接被解析出的完整路径(REALPATH)。注意，路径会被转换为Unix的反斜杠(/)，并且没有结尾的反斜杠。
+    该命令已经考虑了最长的文件扩展名。如果指定了CACHE选项，得到的变量会被加到cache
+
+71  SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}) 设置lib输出目录
+
+72 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ....)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ....)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ....)
+
+SET(LIBRARY_OUTPUT_PATH ...)
+会使路径变乱
+
+73
+

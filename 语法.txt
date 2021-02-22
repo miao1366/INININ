@@ -833,3 +833,92 @@ int ** const p3;  // int **二级指针不可修改
 163  成员变量在使用初始化列表初始化时，与构造函数中初始化成员列表的顺序无关，只与定义成员变量的顺序有关。
      因为成员变量的初始化次序是根据变量在内存中次序有关，而内存中的排列顺序早在编译期就根据变量的定义次序决定了
     
+# 164  C++中，如果要在一个类A的声明中用到另一个类B的指针或引用，需要包含类B的头文件，如果不想包含，可以使用向前声明。
+#     但是，如果是结构体（struct定义的），好像不支持向前声明，C++中类和结构体差别不大，只是默认权限不同
+#     （class默认为私有，struct默认为公有），所以如果想使用向前声明，请使用class定义类型。
+#     但是如果类A的声明中用到类B的对象，则必须包含类B的头文件，向前声明无效
+
+165  简单来说，前置声明最大的好处就是『节省编译时间』
+     需要的是前置声明xxxPrivate/xxxData/xxxImpl类，而不是前置声明xxx类
+
+166 C和C ++在表面上相似，但每个编译成一组非常不同的代码。当您使用C ++编译器包含头文件时，编译器需要C ++代码。但是，
+    如果它是一个C头，则编译器需要将头文件中包含的数据编译为某种格式--C ++'ABI'或'应用程序二进制接口'，因此链接器会扼杀。
+    这比将C ++数据传递给期望C数据的函数更可取。（为了深入了解真正的细节，C ++的ABI通常会“破坏”它们的函数/方法的名称，
+    所以在printf()不将原型标记为C函数的情况下进行调用_Zprintf，C ++实际上会生成代码调用，最后加上额外的废话。 ）
+    所以：extern "C" {...}当包括ac头时使用- 就这么简单。否则，您将在编译的代码中出现不匹配，并且链接器将会阻塞。
+    但是，对于大多数标头，您甚至不需要它，extern因为大多数系统C标头已经考虑到它们可能包含在C ++代码中并且
+    已经包含extern它们的代码
+
+167 初始化数组时可以用{0}， 结构体用{0}只是初始化了部分，是部分初始化， 可以用{} 初始化 ?? 好像也不太行
+
+168 std::future可以从异步任务中获取结果，一般与std::async配合使用，std::async用于创建异步任务，实际上就是创建一个线程执行相应任务。　　
+
+   std::async会首先创建线程执行is_prime(700020007)， 任务创建之后，std::async立即返回一个std::future对象。
+   主线程既可使用std::future::get获取结果，如果调用过程中，任务尚未完成，则主线程阻塞至任务完成。
+   主线程也可使用std::future::wait_for等待结果返回，wait_for可设置超时时间，如果在超时时间之内任务完成，则返回std::future_status::ready状态；
+   如果在超时时间之内任务尚未完成，则返回std::future_status::timeout状态。
+
+169      container_of
+         #define container_of(ptr, type, member) ({             /
+         const typeof( ((type *)0)->member ) *__mptr = (ptr);     /
+         (type *)( (char *)__mptr - offsetof(type,member) );})
+         
+        #define offsetof(TYPE, MEMBER) ((size_t)&((TYPE*)0)->MEMBER)
+        
+        struct test_struct {
+            int num;
+            char ch;
+            float fl;
+        };
+        
+        struct test_struct init_test_struct = { 99, 'C', 59.12 };
+        char *char_ptr = &init_test_struct.ch;
+        struct test_struct *test_struct = container_of(char_ptr, struct test_struct, ch);
+        printf(" test_struct->num = %d\n test_struct->ch = %c\n test_struct->fl = %f\n", 
+            test_struct->num, test_struct->ch, test_struct->fl);
+
+170  typeof  
+    下面这两个等效声明,用于声明int类弄的变量a
+    typeof(int) a;
+    typeof('b') a; //相当于获取'b'的类型,定义一个变量
+    int my_atoi(const char *str)
+    typeof( my_atoi(str2)) sum = 100;   //相当于等同去int sum;
+    如果将typeof用于表达式,则该表达式不会执行,只会得到表达式的类型
+
+171  std::promise
+#include <iostream>
+#include <future>
+#include <chrono>
+void Thread_Fun1(std::promise<int> &p) {
+	//为了突出效果，可以使线程休眠5s
+	std::this_thread::sleep_for(std::chrono::seconds(5));
+	int iVal = 233;
+	std::cout << "传入数据(int)：" << iVal << std::endl;
+	//传入数据iVal
+	p.set_value(iVal);
+}
+void Thread_Fun2(std::future<int> &f) {
+	//阻塞函数，直到收到相关联的std::promise对象传入的数据
+	auto iVal = f.get();		//iVal = 233
+	std::cout << "收到数据(int)：" << iVal << std::endl;
+}
+int main()
+{
+	//声明一个std::promise对象pr1，其保存的值类型为int
+	std::promise<int> pr1;
+	//声明一个std::future对象fu1，并通过std::promise的get_future()函数与pr1绑定
+	std::future<int> fu1 = pr1.get_future();
+	//创建一个线程t1，将函数Thread_Fun1及对象pr1放在线程里面执行
+	std::thread t1(Thread_Fun1, std::ref(pr1));
+	//创建一个线程t2，将函数Thread_Fun2及对象fu1放在线程里面执行
+	std::thread t2(Thread_Fun2, std::ref(fu1));
+	//阻塞至线程结束
+	t1.join();
+	t2.join();
+	return 1;
+}
+ 可以看到std::future对象fu1先是通过std::promise的函数get_future()与std::promise对象pr1相绑定，
+ pr1在线程t1中通过set_value()传入共享数据，fu1在线程t2中通过阻塞函数get()获取到传入的数据
+
+
+

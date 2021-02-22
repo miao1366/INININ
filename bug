@@ -74,4 +74,9 @@
 
 32 小心basename() dirname()
 
+33 /usr/bin/ld:cannot open output file:Is a directory  原因是当前目录下存在一个名为libevent的目录了，无法再生成名字为libevent的文件。
+
+34 undefined reference to   有多种原因，尝试下 extern
+
+35 一些编译告警、错误可能是字体格式 如utf-8 ascii 等造成的。
 
