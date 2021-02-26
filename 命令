@@ -630,7 +630,7 @@ BLOCKED	    阻塞状态	        TERMINATED	     终止状态
 
 77  ln -s  ./.vim/.vimrc  .
 
-78  pushd : push (in) directory,将目录压栈,最后一个压入的目录位于栈顶;
+78  pushd : push (in) directory,将目录压栈,最后一个压入的目录位于栈顶;    pushd +3
     popd : pop (out) directory,将目录栈逐个弹出
     pushd不带参数，就会在栈顶的两个目录之间切换．如果需要调整到其他目录，可以使用+n参数．具体每个栈内目录编号，通过dirs -v查看
     cd -
@@ -675,4 +675,15 @@ bs与offset值一致，skip与block值一致
 方法二 grep -a -B 30 -A 150 'function checkInt() ' /dev/sda1 > tmp.txt
 其中-a表示把分区看成文本形式(分区本身是二进制形式的)，-B 30 -A 150表示找到搜索的内容就打印前面30行和后面150行
 如果分区比较大可能需要一定的搜索时间，完成之后打开tmp.txt，你会发现在一堆乱码中镶嵌着你要恢复的本文
+
+86  sudo apt full-upgrade
+    sudo do-release-upgrade -m desktop 
+
+87  export    撤销用　unset 
+
+88  echo  $SHELL    查看当前终端运行的shell
+
+
+
+
 

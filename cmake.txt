@@ -482,5 +482,75 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ....)
 SET(LIBRARY_OUTPUT_PATH ...)
 会使路径变乱
 
-73
 
+73    
+option(TEST_DEBUG "option for debug" OFF)
+if (TEST_DEBUG) 
+	add_definitions(-DTEST_DEBUG)
+endif(TEST_DEBUG)
+add_definitions(-DRPC_ADDR_URI="unix:///tmp/location")
+
+74 
+file(WRITE filename "message towrite"... )
+WRITE 将一则信息写入文件’filename’中，如果该文件存在，它会覆盖它，如果不存在，它会创建该文件
+
+file(APPEND filename "message to write"... )
+APPEND 如同WRITE，区别在于它将信息内容追加到文件末尾
+
+file(READ filename variable [LIMIT numBytes] [OFFSEToffset] [HEX])
+READ 会读取文件的内容并将其存入到变量中。它会在给定的偏移量处开始读取最多numBytes个字节。如果指定了HEX参数，二进制数据将会被转换成十进制表示形式并存储到变量中
+
+file(<MD5|SHA1|SHA224|SHA256|SHA384|SHA512> filenamevariable)
+MD5, SHA1, SHA224, SHA256, SHA384, 和SHA512 会计算出文件内容对应的加密散列
+
+---------------------------------------------------------------------------------
+查找某些文件并构成一个文件列表变量                                                    | 
+file(GLOB LUA_FILE_LIST "scripts/*.lua")                                         |
+复制lua文件到构建目录的scripts/                                                     |
+file(COPY ${LUA_FILE_LIST} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/scripts")    |
+---------------------------------------------------------------------------------|
+
+75 find_package引入外部依赖包
+模块都会定义以下几个变量 -
+<LibaryName>_FOUND
+<LibaryName>_INCLUDE_DIR or <LibaryName>_INCLUDES <LibaryName>_LIBRARY or <LibaryName>_LIBRARIES
+你可以通过<LibaryName>_FOUND 来判断模块是否被找到，如果没有找到，按照工程的需要关闭 某些特性、给出提醒或者中止编译，上面的例子就是报出致命错误并终止构建。
+如果<LibaryName>_FOUND 为真，则将<LibaryName>_INCLUDE_DIR 加入
+
+以libcurl为例
+find_package(CURL)
+add_executable(curltest curltest.cc)
+if(CURL_FOUND)
+    target_include_directories(clib PRIVATE ${CURL_INCLUDE_DIR})
+    target_link_libraries(curltest ${CURL_LIBRARY})
+else(CURL_FOUND)
+    message(FATAL_ERROR ”CURL library not found”)
+endif(CURL_FOUND)
+
+76 CMAKE_PREFIX_PATH    CMAKE_MODULE_PATH
+    CMAKE_PREFIX_PATH是以分号分隔的列表，供find_package(), find_program(), find_library(), find_file()和find_path()使用，初始为空，由用户设定
+    CMAKE_MODULE_PATH是以分号分隔的列表，供include()或 find_package()使用。初始为空，由用户设定
+
+77  include 
+    include指令用来载入并运行来自于文件或模块的CMake代码
+    我们会复用一些cmake指令(比如将某些指令封装为函数)，将其写到某一个.cmake文件中，
+    然后在我们的CMakeLists.txt使用include命令把.cmake文件包含进来使用里面的函数等
+
+78  c++标准
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    设置c++11标准；
+    如果编译器不支持当前的c++标准，那么cmake会选择编译器支持的旧版本来编译程序。为了阻止这种情况的发生，我们设置CMAKE_CXX_STANDARD_REQUIRED 为ON。
+    最后一句设置是否启用编译器扩展
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_C_STANDARD 11)
+    set(CMAKE_C_EXTENSIONS ON)
+    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_EXTENSIONS ON)
+
+79  #未设置编译类型的时候，设置cmake使用RelWithDebInfo编译类型，RelWithDebInfo可以简单描述为包含调试信息的release版本。
+    if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    # 设置多种编译类型的选项
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"

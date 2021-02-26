@@ -359,19 +359,95 @@ TPGID 指前台进程组的 PGID
 3.如何解决
 修改Linux内核中的参数，使得新的TCP连接可以重用处于TIME_WAIT的连接
 
+4. AF_UNIX 地址系列（使用 AF_UNIX 或 AF_UNIX_CCSID 地址系列的套接字）可以是面向连接的（类型 SOCK_STREAM），
+   也可以是无连接的（类型 SOCK_DGRAM）。两种类型都很可靠，原因是没有连接两个进程的外部通信函数
 
+5. AF_UNSPEC
+ai_family参数指定调用者期待返回的套接口地址结构的类型。它的值包括三种：AF_INET，AF_INET6和AF_UNSPEC。
+如果指定AF_INET，那么函数九不能返回任何IPV6相关的地址信息；如果仅指定了AF_INET6，则就不能返回任何IPV4地址信息。
+AF_UNSPEC则意味着函数返回的是适用于指定主机名和服务名且适合任何协议族的地址。如果某个主机既有AAAA记录(IPV6)地址，
+同时又有A记录(IPV4)地址，那么AAAA记录将作为sockaddr_in6结构返回，而A记录则作为sockaddr_in结构返回
 
+6. AF_INET（又称 PF_INET）是 IPv4 网络协议的套接字类型，AF_INET6 则是 IPv6 的；而 AF_UNIX 则是 Unix 系统本地通信
 
+7. AF_UNIX由于其对系统cpu的较少消耗，不受限于网卡带宽，及高效的传递速率，本机通信则首选AF_UNIX域。
 
+8. https://blog.csdn.net/sandware/article/details/40923491
+   AF_INET不仅可以用作本机的跨进程通信，同样的可以用于不同机器之间的通信，其就是为了在不同机器之间进行网络互联传递数据而生。
+   而AF_UNIX则只能用于本机内进程之间的通信不用多说，AF_INET则用于跨机器之间的通信
 
+9. 首先说一下Unix域协议
+    Unix域协议并不是一个实际的协议族，它只是在同一台主机上进行客户-服务器通信时，使用与在不同主机上的客户和服务器间通信时相同的API(套接口或XTI)的一种方法。
+    当客户和服务器在同一台主机上时，Unix域协议是IPC通信方式的一种替代品。
+    Unix域提供了两种类型的套接口：字节流套接口(与TCP类似)和数据报套接口(与UDP类似)
+    
+    sockaddr_un
+    进程间通信的一种方式是使用UNIX套接字，人们在使用这种方式时往往用的不是网络套接字，而是一种称为本地套接字的方式。这样做可以避免为黑客留下后门。
+    创建
+    使用套接字函数socket创建，不过传递的参数与网络套接字不同。域参数应该是PF_LOCAL或者PF_UNIX，而不能用PF_INET之类。本地套接字的通讯类型应该是SOCK_STREAM或SOCK_DGRAM，协议为默认协议。例如：
+     int sockfd;
+     sockfd = socket(PF_LOCAL, SOCK_STREAM, 0);
+    绑定
+    创建了套接字后，还必须进行绑定才能使用。不同于网络套接字的绑定，本地套接字的绑定的是struct sockaddr_un结构。struct sockaddr_un结构有两个参数：sun_family、sun_path。sun_family只能是AF_LOCAL或AF_UNIX，而sun_path是本地文件的路径。通常将文件放在/tmp目录下。例如：
+     struct sockaddr_un sun;
+     sun.sun_family = AF_LOCAL;
+     strcpy(sun.sun_path, filepath);
+     bind(sockfd, (struct sockaddr*)&sun, sizeof(sun));    
+    监听
+    本地套接字的监听、接受连接操作与网络套接字类似。
+    连接
+    连接到一个正在监听的套接字之前，同样需要填充struct sockaddr_un结构，然后调用connect函数。
+    连接建立成功后，我们就可以像使用网络套接字一样进行发送和接受操作了。甚至还可以将连接设置为非阻塞模式，这里就不赘述了。
 
+    struct sockaddr {
+        unsigned  short  sa_family;     /* address family, AF_xxx */
+        char  sa_data[14];                 /* 14 bytes of protocol address */
+    };
+        sa_family是地址家族，一般都是“AF_xxx”的形式。好像通常大多用的是都是AF_INET。
+        sa_data是14字节协议地址。
+        此数据结构用做bind、connect、recvfrom、sendto等函数的参数，指明地址信息。
+        但一般编程中并不直接针对此数据结构操作，而是使用另一个与sockaddr等价的数据结构
 
+        struct  sockaddr_in {
+            short  int  sin_family;                      /* Address family */
+            unsigned  short  int  sin_port;       /* Port number */
+            struct  in_addr  sin_addr;              /* Internet address */
+            unsigned  char  sin_zero[8];         /* Same size as struct sockaddr */
+            };
+            struct  in_addr {
+            unsigned  long  s_addr;
+            };
+            
+            typedef struct in_addr {
+            union {
+                        struct{
+                                    unsigned char s_b1,
+                                    s_b2,
+                                    s_b3,
+                                    s_b4;
+                                    } S_un_b;
+                       struct {
+                                    unsigned short s_w1,
+                                    s_w2;
+                                    } S_un_w;
+                        unsigned long S_addr;
+                      } S_un;
+            } IN_ADDR;
+            
+            sin_family指代协议族，在socket编程中只能是AF_INET
+            sin_port存储端口号（使用网络字节顺序）
+            sin_addr存储IP地址，使用in_addr这个数据结构
+            sin_zero是为了让sockaddr与sockaddr_in两个数据结构保持大小相同而保留的空字节。
+            s_addr按照网络字节顺序存储IP地址
+            
+            sockaddr_in和sockaddr是并列的结构，指向sockaddr_in的结构体的指针也可以指向
+            sockadd的结构体，并代替它。也就是说，你可以使用sockaddr_in建立你所需要的信息,
+            在最后用进行类型转换就可以了bzero((char*)&mysock,sizeof(mysock));//初始化
 
+10 http://www.jsons.cn/urlencode           编码(encode)    http%3A%2F%2Fwww.jsons.cn%2Furlencode
+   http%3A%2F%2Fwww.jsons.cn%2Furlencode   解码(decode)    http://www.jsons.cn/urlencode
 
-
-
-
-
+   https%3a%2f%2fwww.baidu.com%2f%e7%99%be%e5%ba%a633%2fbaid   -->    https://www.baidu.com/百度33/baid
 
 
 

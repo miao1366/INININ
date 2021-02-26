@@ -1423,3 +1423,114 @@ char * __strdup(const char *s) {
 
 197 int isalpha(int c)    检查参数c是否为英文字母
     相关函数 isalnum，islower，isupper
+
+198 IPv4中使用 gethostbyname()函数完成主机名到地址解析，这个函数仅仅支持IPv4，且不允许调用者指定所需地址类型的任何信息，
+    返回的结构只包含了用于存储IPv4地址的空间。IPv6中引入了getaddrinfo()的新API，它是协议无关的，既可用于IPv4也可用于IPv6。
+    getaddrinfo函数能够处理名字到地址以及服务到端口这两种转换，返回的是一个addrinfo的结构（列表）指针而不是一个地址清单。
+    这些addrinfo结构随后可由套接口函数直接使用。如此以来，getaddrinfo函数把协议相关性安全隐藏在这个库函数内部。
+    应用程序只要处理由getaddrinfo函数填写的套接口地址结构 
+
+函数原型 int getaddrinfo( const char *hostname, const char *service, 
+                    const struct addrinfo *hints, struct addrinfo **result );
+参数说明
+    hostname:一个主机名或者地址串(IPv4的点分十进制串或者IPv6的16进制串)
+    service：服务名可以是十进制的端口号，也可以是已定义的服务名称，如ftp、http等
+    hints：可以是一个空指针，也可以是一个指向某个 addrinfo结构体的指针，调用者在这个结构中填入关于期望返回的信息类型的暗示。
+    举例来说：如果指定的服务既支持TCP也支持UDP，那么调用者可以把hints结构中的ai_socktype成员设置成
+    SOCK_DGRAM使得返回的仅仅是适用于数据报套接口的信息。
+    result：本函数通过result指针参数返回一个指向addrinfo结构体链表的指针。
+    返回值：0——成功，非0——出错
+
+    typedef struct addrinfo {
+        int        　　　　    　　ai_flags;//指示在getaddrinfo函数中使用的选项的标志。
+        int        　　　　   　　 ai_family;
+        int        　　　　    　　ai_socktype;
+        int        　　　　　 　　ai_protocol;
+        size_t       　　　　 　　ai_addrlen;
+        char       　　　　 　　*ai_canonname;
+        struct sockaddr    　　*ai_addr;
+        struct addrinfo     　　*ai_next;//指向链表中下一个结构的指针。此参数在链接列表的最后一个addrinfo结构中设置为NULL。
+    } ADDRINFOA, *PADDRINFOA;
+    struct sockaddr {
+        ushort  sa_family;
+        char    sa_data[14];
+    };
+    struct sockaddr_in {
+        short           sin_family; //指代协议族，在socket编程中只能是 AF_INET
+        u_short         sin_port;   //存储端口号（使用网络字节顺序）
+        struct in_addr  sin_addr;   //存储IP地址，使用in_addr这个数据结构
+        char            sin_zero[8];//为了让sockaddr与sockaddr_in两个数据结构保持大小相同而保留的空字节。
+    };
+
+ai_flags：
+Value Meaning
+AI_PASSIVE 套接字地址将用于调用bind 函数
+AI_CANONNAME 返回规范名称
+AI_NUMERICHOST 传递给getaddrinfo函数的nodename参数必须是数字字符串。
+AI_ALL If this bit is set, a request is made for IPv6 addresses and IPv4 addresses with AI_V4MAPPED.
+AI_ADDRCONFIG 只有配置了全局地址后，getaddrinfo才会解析。 IPv6和IPv4环回地址不被认为是有效的全局地址。
+AI_V4MAPPED 如果对IPv6地址的getaddrinfo请求失败，则对IPv4地址进行名称服务请求，这些地址将转换为IPv4映射IPv6地址格式。
+AI_NON_AUTHORITATIVE 地址信息可以来自非授权命名空间提供商
+AI_SECURE 地址信息来自安全信道。
+AI_RETURN_PREFERRED_NAMES 地址信息是用于用户的优选名称。
+AI_FQDN getaddrinfo将返回名称最终解析为的完全限定域名。 完全限定域名在ai_canonname成员中返回。
+这与AI_CANONNAME位标记不同，后者返回在DNS中注册的规范名称，该名称可能与平面名称解析为的完全限定域名不同。
+只能设置AI_FQDN和AI_CANONNAME位中的一个。 如果EAI_BADFLAGS同时存在这两个标志，getaddrinfo函数将失败。
+AI_FILESERVER 命名空间提供程序提示正在查询的主机名正在文件共享方案中使用。 命名空间提供程序可以忽略此提示。
+
+ai_family: The address family.
+
+AF_UNSPEC 地址系列未指定。
+AF_INET IPv4 address family.
+AF_NETBIOS NetBIOS地址系列。
+AF_INET6 IPv6 address family.
+AF_IRDA The Infrared Data Association address family.
+AF_BTH Bluetooth address family.
+
+ai_protocol: 协议类型。
+
+Value Meaning
+IPPROTO_TCP 传输控制协议（TCP）。 当ai_family成员为AF_INET或AF_INET6且ai_socktype成员为SOCK_STREAM时，这是一个可能的值
+IPPROTO_UDP 用户数据报协议（UDP）。 当ai_family成员为AF_INET或AF_INET6且类型参数为SOCK_DGRAM时，这是一个可能的值。
+IPPROTO_RM PGM协议用于可靠的组播。 当ai_family成员为AF_INET且ai_socktype成员为SOCK_RDM时，这是一个可能的值。 在为Windows Vista及更高版本发布的Windows SDK上，此值也称为IPPROTO_PGM。
+可能的选项特定于指定的地址系列和套接字类型。
+如果为ai_protocol指定了值0，则调用者不希望指定协议，服务提供者将选择要使用的ai_protocol。 对于IPv4和IPv6之外的协议，将ai_protocol设置为零。
+下表列出了ai_protocol成员的通用值，尽管其他许多值也是可能的。
+
+ai_socktype:　　套接字类型
+
+Value Meaning
+SOCK_STREAM 使用OOB数据传输机制提供顺序，可靠，双向，基于连接的字节流。使用Internet地址系列（AF_INET或AF_INET6）的传输控制协议（TCP）。如果ai_family成员是AF_IRDA，则SOCK_STREAM是唯一支持的套接字类型。
+SOCK_DGRAM 支持数据报，它是无连接的，不可靠的固定（通常小）最大长度的缓冲区。对Internet地址系列（AF_INET或AF_INET6）使用用户数据报协议（UDP）。
+SOCK_RAW 提供一个原始套接字，允许应用程序处理下一个上层协议头。要操作IPv4标头，必须在套接字上设置IP_HDRINCL套接字选项。要操作IPv6头，必须在套接字上设置IPV6_HDRINCL套接字选项。
+SOCK_RDM 提供可靠的消息数据报。这种类型的示例是在Windows中的实用通用多播（PGM）多播协议实现，通常被称为可靠多播节目。
+SOCK_SEQPACKET 基于数据报提供伪流包
+
+199  char *gai_strerror(int error);
+    getaddrinfo出错时返回非零值，gai_strerror根据返回的非零值返回指向对应的出错信息字符串的指针，其原型如下
+    
+    常量                     描述
+EAI_ADDRFAMILY	     不支持hostname的地址族
+EAI_AGAIN	         名字解析中的暂时失败
+EAI_BADFLAGS	     ai_flags的值无效
+EAI_FAIL	         名字解析中不可恢复的失败
+EAI_FAMILY	         不支持ai_family
+EAI_MEMORY	         内存分配失败
+EAI_NODATA	         没有与hostname相关联的地址
+EAI_NONAME	         hostname或service未提供，或者不可知
+EAI_SERVICE	         不支持ai_socktype类型的service
+EAI_SOCKTYPE	     不支持ai_socktype
+EAI_SYSTEM	         errno中有系统错误返回
+
+200  void freeaddrinfo (struct addrinfo*ai);
+     getaddrinfo返回的存储空间，包括addrinfo结构、ai_addr结构和ai_canonname字符串，都是用malloc动态获取的。这些空间可调用 freeaddrinfo释放。其原型如下
+
+201 int isupper ( int c );判断一个字符是否是大写字母
+    返回值为非零（真）表示c是大写字母，返回值为零（假）表示c不是大写字母。
+
+    int tolower(int c)  字母字符转换成小写
+    int touppre()函数是把字符串都转化为大写字母
+    
+    int isxdigit(int c) 检查参数c是否为16进制数字，真返回非零值，否则返回0。
+
+202  

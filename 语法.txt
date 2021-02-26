@@ -839,7 +839,7 @@ int ** const p3;  // int **二级指针不可修改
 #     但是如果类A的声明中用到类B的对象，则必须包含类B的头文件，向前声明无效
 
 165  简单来说，前置声明最大的好处就是『节省编译时间』
-     需要的是前置声明xxxPrivate/xxxData/xxxImpl类，而不是前置声明xxx类
+     需要的是前置声明xxxPrivate/xxxImpl类，而不是前置声明xxx类
 
 166 C和C ++在表面上相似，但每个编译成一组非常不同的代码。当您使用C ++编译器包含头文件时，编译器需要C ++代码。但是，
     如果它是一个C头，则编译器需要将头文件中包含的数据编译为某种格式--C ++'ABI'或'应用程序二进制接口'，因此链接器会扼杀。
@@ -919,6 +919,88 @@ int main()
 }
  可以看到std::future对象fu1先是通过std::promise的函数get_future()与std::promise对象pr1相绑定，
  pr1在线程t1中通过set_value()传入共享数据，fu1在线程t2中通过阻塞函数get()获取到传入的数据
+
+
+ 172  经常看到ContextImpl类继承了Context类。
+      ContextImpl Impl是代表什么含义，表示是Context的继承类才这样命名的吗？
+      这是 接口 和 实现类的方式
+      ContextImpl 就是接口的实现类，Context是一个抽象类
+    
+173  抽象类构造函数
+
+1.
+    虽然抽象类不能被实例化，但是抽象类的派生类将所有虚函数都实现的话，派生类可以实例化，此时派生类的实例化会用到系统默认给抽象类合成
+    的构造函数。因此，抽象类有构造函数，但是不能实例化
+2.
+    有用的话就需要。你不写编译器也会给你生成一个。抽象类的构造函数当然有用（如果其实你想问的是这个的话）。
+    一个是构造函数一定会被调用到（构造函数的调用是逐级的，不是只调用叶子类的构造函数。另一个，有时候抽象类的基类也可以是非抽象类。
+    这时候构造函数的作用之一就是从非抽象的派生类传递调用给非抽象（当然也有抽象的）的基类
+
+174 异常　throw
+        1. 指定异常
+        T   funNname（ parameterlist ） throw（ T1， T2，····，Tn）；
+        其中 T 是类型， parameterlist 是参数列表， 而类型 T1， T2，····，Tn 是函数会抛出的异常。
+
+        2. 不抛出异常
+        T   funNname（ parameterlist ） throw（ ）；
+    
+175 std::chrono::duration   std :: chrono :: duration基于秒
+    template<class _Rep, class _Period = ratio<1> > class duration
+    第一个参数_Rep代表用什么样的类型来保存这个时间长度，必须是内置数值型或者是功能上类似内置数值型的类型(这个没有试过，应该是提供内置类型的所有接口就可以)。
+    第二个参数_Period必须是std::ration模板类的一个实例，代表一个时间单位。_Period缺省值为std::ration<1>，
+    此时它的单位为秒。它只有一个成员变量，用于保存_Period的个数
+
+    duration<int, std::milli>代表以int保存的，单位为1/1000秒(毫秒)的时间长度。duration<int, std::milli> d(5)，则d代表5毫秒。
+    duration<short, std::ratio<1,50>>代表以short保存的，单位为1/50秒的时间长度。duration<short, std::ratio<1,50>> d(50)，则d代表1秒
+
+    chrono::duration<int,ratio<60>> two_minutes(2);
+    chrono::duration<int,ratio<1,1000>> two_milliseconds(2);
+    chrono::duration<int,ratio<60 * 60 * 24>> two_days(2);
+
+176 chrono中有三种时钟：system_clock，steady_clock和high_resolution_clock
+
+178 指针数组　new int *[4]
+
+179 C++语言本身或标准程序库所抛出的所有异常，都派生自基类exception。
+
+（1）语言本身所支持的异常
+
+bad_alloc：new操作失败会抛出。
+bad_cast：执行期间加在一个引用上面的动态性型别转换操作失败时抛出。
+bad_typeid：执行RTTI时，交给typeid的参数为零或空指针时抛出
+bad_exception：非预期的异常
+
+C++标准程序库发出的异常
+2）C++标准程序库发出的异常
+总是派生自logic_error。逻辑错误是由于程序内部逻辑而导致的错误。逻辑错误是可以避免的，且在程序开始执行之前，能够被检测到。
+错误分类解释及举例：
+domain_error：专业领域内的范畴 invalid_argument：无效参数，比如讲bitset以char而非0或1进行初始化 length_error：可能超越了最大极限，
+比如对着某个字符串附加太多字符。 out_of_range：参数不再预期范围内。例如在诸如array的容器或字符串string中采用一个错误索引。
+
+3）程序作用域之外发出的异常
+总是派生自runtime_error，用来指出“不在程序范围内，且不容易回避”的事件。此类错误只在程序执行时才是可检测的。C++标准库中的定义如下：
+range_error：内部计算时发生区间错误
+overflow_error：算数运算时发生上溢
+underflow_error：算数运算时发生下溢
+
+180 std::is_class是类模板。用于判断某个类型是否是一个类类型（联合不是类类型）
+    std::is_union是类模板。用于判断某个类型是否是一个联合类型。
+    
+    integral_constant是一个用于包装目的的类
+
+190  模板类友好类 template<class, class> friend class Reducer
+
+191  const_cast< >
+
+
+
+
+
+
+
+
+
+
 
 
 

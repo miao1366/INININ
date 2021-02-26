@@ -202,3 +202,99 @@ class ParsedURI
 }
 
 ==========================================================================================
+
+class WaitGroup
+
+WaitGroup(int n) : nleft(n)
+{
+    if (n <= 0)
+    {
+        this->nleft = -1;
+        return;
+    }
+    auto *pr = new WFPromise<void>();
+    this->task = WFTaskFactory::create_counter_task(1, __wait_group_callback);
+    this->future = pr->get_future();
+    this->task->user_data = pr;
+    this->task->start();
+}
+
+{
+    std::atomic<int> nleft;
+    WFCounterTask *task;
+    WFFuture<void> future;
+}
+
+
+===============================================================
+class WFCounterTask : public WFGenericTask                        WFTask.h
+WFCounterTask(unsigned int target_value,
+            std::function<void (WFCounterTask *)>&& cb) :
+            value(target_value + 1),
+            callback(std::move(cb))
+{
+
+}
+
+{
+    std::atomic<unsigned int> value;
+    std::function<void (WFCounterTask *)> callback;
+}
+
+class WFGenericTask : public SubTask                              WFTask.h
+    WFGenericTask()
+    {
+        this->user_data = NULL;
+        this->state = WFT_STATE_UNDEFINED;
+        this->error = 0;
+    }
+{
+    void *user_data;
+    int state;
+    int error;
+}
+
+class SubTask                                                    SubTask.h
+SubTask()
+{
+    this->parent = NULL;
+    this->entry = NULL;
+    this->pointer = NULL;
+}
+{
+    ParallelTask *parent;
+    SubTask **entry;
+    void *pointer;
+}
+
+
+class SeriesWork                                              Workflow.h
+SeriesWork(SubTask *first, series_callback_t&& cb) :
+	callback(std::move(cb))
+{
+    this->queue = new SubTask *[4];
+    this->queue_size = 4;
+    this->front = 0;
+    this->back = 0;
+    this->in_parallel = false;
+    this->canceled = false;
+    first->set_pointer(this);
+    this->first = first;
+    this->last = NULL;
+    this->context = NULL;
+}
+
+
+{
+    void *context;
+    series_callback_t callback;
+    SubTask *first;
+    SubTask *last;
+    SubTask **queue;
+    int queue_size;
+    int front;
+    int back;
+    bool in_parallel;
+    bool canceled;
+    std::mutex mutex;
+}
