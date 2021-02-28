@@ -62,16 +62,63 @@ info registers <regname >  查看所指定的寄存器的情况
 7.    https://blog.csdn.net/jctian000/article/details/80695747
       thread apply all bt
 
+8. 
+gdb attach {pid} #gdb 调试运行的进程
+info thread #进入以后使用，查看线程信息
+
+info threads 显示当前可调试的所有线程，每个线程会有一个GDB为其分配的ID，后面操作线程的时候会用到这个ID。 前面有*的是当前调试的线程。 
+thread ID 切换当前调试的线程为指定ID的线程。 
+break thread_test.c:123 thread all 在所有线程中相应的行上设置断点（watch也可以指定thread）
+thread apply ID1 ID2 command 让一个或者多个线程执行GDB命令command。 
+thread apply all command 让所有被调试线程执行GDB命令command
+
+
+tbreak 临时设置一次
+break，tbreak可以根据行号、函数、条件生成断点。tbreak设置方法与break相同，只不过tbreak只在断点停一次，过后会自动将断点删除
 
 
 
+tbreak 临时设置一次
 
+break，tbreak可以根据行号、函数、条件生成断点。tbreak设置方法与break相同，只不过tbreak只在断点停一次，过后会自动将断点删除
 
+ 
 
+附录：gdb  常用调试命令
+-------------------------------------------------
+(gdb) l ：（字母l）列出源码
+(gdb) b n :在第n行处设置断点
+(gdb) b func：在函数func()的入口处设置断点
+(gdb) 条件断点：条件可以是任何合法的c 表达式。 例如 b n if val1==val2 当已经设置了断点，可以用condition 
+      命令对断点号添加条件， 例: condition 2 val1==val2 , 注意，没有if 单词当对变量的改变更感兴趣时，可以用watch 命令
+(gdb) info break： 查看断点信息  （更多断点类，见下）
+(gdb) r：运行程序
+(gdb) n：单步执行
+(gdb) s：单步调试如果有函数调用，则进入函数；与命令n不同，n是不进入调用的函数的
+(gdb) c：继续运行
+(gdb) p 变量 ：打印变量的值     也能够修改变量的值（用 = 赋值） // 打印寄存器值。 p $eax
+(gdb) x /nfu <addr> 显示内存  // n为个数，f 为格式，u为每单元长度
+      命令:x /3uh 0x54320 表示,从内存地址0x54320读取内容,h表示以双字节为一个单位,3表示输出三个单位,u表示按十六进制显示。
 
+(gdb) bt：查看函数堆栈
+(gdb) finish：退出函数
+(gdb) display <var> 每次中断或单步都显示你关心的变量
+(gdb)undisplay <编号>
+(gdb) shell 命令行：执行shell命令行
+(gdb) set args 参数:指定运行时的参数
+(gdb) show args：查看设置好的参数
+(gdb)info program： 来查看程序的是否在运行，进程号，被暂停的原因。 // 打印寄存器数组， info reg,  简写 i reg； info threads(注意有s)
+(gdb)clear 行号n：清除第n行的断点
+(gdb)delete 断点号n：删除第n个断点
+(gdb)disable 断点号n：暂停第n个断点
+(gdb)enable 断点号n：开启第n个断点
 
-
-
+9  l                 显示10 行源码
+   l  6 20           表示查看6-20的源码
+   l  main           表示显示main函数周围10行源码
+   l 文件名：数字      表示查看tst.c文件第6行周围的10行代码
+   l 文件名：函数名     表示查看tst.c文件中main周围10行代码
+   l -命令            表示查看上一个l命令查看的代码之前的10行
 
 
 

@@ -444,15 +444,21 @@ AF_UNSPEC则意味着函数返回的是适用于指定主机名和服务名且�
             sockadd的结构体，并代替它。也就是说，你可以使用sockaddr_in建立你所需要的信息,
             在最后用进行类型转换就可以了bzero((char*)&mysock,sizeof(mysock));//初始化
 
-10 http://www.jsons.cn/urlencode           编码(encode)    http%3A%2F%2Fwww.jsons.cn%2Furlencode
+10 般来说，URL只能使用英文字母、阿拉伯数字和某些标点符号，不能使用其他文字和符号
+   http://www.jsons.cn/urlencode           编码(encode)    http%3A%2F%2Fwww.jsons.cn%2Furlencode
    http%3A%2F%2Fwww.jsons.cn%2Furlencode   解码(decode)    http://www.jsons.cn/urlencode
 
    https%3a%2f%2fwww.baidu.com%2f%e7%99%be%e5%ba%a633%2fbaid   -->    https://www.baidu.com/百度33/baid
 
+   foo://example.com:8042/over/there?name=ferret#nose
 
+   \_/ \______________/ \________/\_________/ \__/
 
+    |         |              |         |        |
 
+  scheme     authority                path      query   fragment
 
+  2-_.!~*\():/@?#&
 
 
 

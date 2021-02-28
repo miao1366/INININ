@@ -961,7 +961,7 @@ int sigismember(const sigset_t *set, int signo);  //判断signo信号是否在se
   1.概念：一种类型，能够保存多个信号
   2.类型：sigset_t
 
-136 int kill(pid_t pid, int sig);   用于向任何进程组或进程发送信号
+136 int kill(pid_t pid, int sig);   用于向任何进程组或进程发送信号 kill(getpid(),sig)
 pid：可能选择有以下四种
 1. pid大于零时，pid是信号欲送往的进程的标识。
 2. pid等于零时，信号将送往所有与调用kill()的那个进程属同一个使用组的进程。
@@ -1533,4 +1533,6 @@ EAI_SYSTEM	         errno中有系统错误返回
     
     int isxdigit(int c) 检查参数c是否为16进制数字，真返回非零值，否则返回0。
 
-202  
+202 int isspace(int c) 当c为空白符时，返回非零值，否则返回零。（空白符指空格、水平制表、垂直制表、换页、回车和换行符。
+    \r    回车，将当前位置移到本行开头
+    \n    换行，将当前位置移到下一行开头

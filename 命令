@@ -683,7 +683,59 @@ bs与offset值一致，skip与block值一致
 
 88  echo  $SHELL    查看当前终端运行的shell
 
+89  pstree -p {pid}
 
+90  timeout
+    运行指定的命令，如果在指定时间后仍在运行，则杀死该进程。用来控制程序运行的时间
+    timeout 10 command
+    如过command命令在10秒内结束，则平安结束，运行超过10秒，将被强行kill掉
 
+91  grep "miao" /var/log/auth.log
+    grep “Out of memory” /var/log/syslog
 
+92  可以使用 grep 来查找哪些用户失败登录的次数最多。这些都是潜在的攻击者正在尝试和访问失败的账户。这是一个在 ubuntu 系统上的例子
+$ grep "invalid user" /var/log/auth.log | cut -d ' ' -f 10 | sort | uniq -c | sort -nr
+23 oracle
+18 postgres
+17 nagios
+10 zabbix
+6 test
 
+93  grep -a "Accepted publickey" /var/log/auth.log | cut -d ' ' -f 9 | sort | uniq -c | sort -nr #查看通过秘钥登录的用户及登录次数
+
+94  dmesg
+    命令用于打印Linux系统开机启动信息，kernel会将开机信息存储在ring buffer中。您若是开机时来不及查看信息，可利用dmesg来查看
+    （print or control the kernel ring buffer）。开机信息亦保存在/var/log/dmesg的文件里
+
+95  从2012年开始，大部分linux发行版本开始从传统的systemv初始化系统移植到一个叫做systemd的全新系统。
+    systemd用来启动系统并管理进程。systemd包含了一个叫做journalctl的辅助组件，其主要作用是管理系统的事件日志记录
+
+96  ulimit -c查看是否开启。如果输出为0，则没有开启，需要执行ulimit -c unlimited 开启core dump功能
+    ulimit -c unlimited   //unlimited 代表不限制core文件大小， 可以指定core文件大小 ulimit -c 1024  
+
+    core文件生成路径: 输入可执行文件运行命令的同一路径下
+    gdb peer_tracker.wd  core.3189 （peer_tracker.wd为执行的文件）
+
+97  dmesg命令行实用程序用于在Linux和其他类似Unix的操作系统中打印和控制内核环形缓冲区。对于检查内核启动消息和调试与硬件相关的问题很有用
+    dmesg -c        在显示的同时，clean掉dmesg缓存中信息
+    dmesg -d        显示dmesg中两条打印信息的时间间隔
+    dmesg | tail    显示dmesg最近一次的输出
+
+98  insmod指Linux有许多功能是通过模块的方式，在需要时才载入kernel。如此可使kernel较为精简，进而提高效率，以及保有较大的弹性。
+    这类可载入的模块，通常是设备驱动程序。
+        -f    不检查kernel版本与模块编译时的kernel版本是否一致，强制将模块载入。
+        -k    将模块设置为自动卸除。
+        -m    输出模块的载入信息。
+        -o    <模块名称> 　指定模块的名称，可使用模块文件的文件名。
+        -p    测试模块是否能正确地载入kernel。
+        -s    将所有信息记录在系统记录文件中。
+        -v    执行时显示详细的信息。
+        -x    不要汇出模块的外部符号。
+        -X    汇出模块所有的外部符号，此为预设值。
+
+    lsmod                  查看已加载的驱动模块列表
+    rmmod <module_name>    卸载驱动模块 
+
+99  mknod命令用于创建Linux中的字符设备文件和块设备文件。
+    mknod /dev/hello c 232 0
+    

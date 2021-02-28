@@ -2,3 +2,43 @@
 
 2. 安全增强型 Linux（Security-Enhanced Linux）简称 SELinux，它是一个 Linux 内核模块，
     也是 Linux 的一个安全子系统
+
+3. tty：终端设备的统称。
+    tty一词源于Teletypes，或者teletypewriters，原来指的是电传打字机，是通过串行线用打印机键盘通过阅读和发送信息的东西，
+    后来这东西被键盘与显示器取代，所以现在叫终端比较合适。终端是一种字符型设备，它有多种类型，通常使用tty来简称各种类型的终端设备。
+    tty1～6是文本型控制台，tty7是X Window图形显示管理器。
+    在本地机器上可以通过Ctrl+Alt+F1（F1-F7键）切换到对应的登录控制台。
+
+4. 
+/var/log/boot.log：录了系统在引导过程中发生的事件，就是Linux系统开机自检过程显示的信息
+/var/log/lastlog ：记录最后一次用户成功登陆的时间、登陆IP等信息
+/var/log/messages ：记录Linux操作系统常见的系统和服务错误信息
+/var/log/secure ：Linux系统安全日志，记录用户和工作组变坏情况、用户登陆认证情况
+/var/log/btmp ：记录Linux登陆失败的用户、时间以及远程IP地址
+/var/log/syslog：只记录警告信息，常常是系统出问题的信息，使用lastlog查看
+/var/log/wtmp：该日志文件永久记录每个用户登录、注销及系统的启动、停机的事件，使用last命令查看
+/var/run/utmp：该日志文件记录有关当前登录的每个用户的信息。如 who、w、users、finger等就需要访问这个文件
+
+5. 原来linux下也有内存OOM的处理，不同于android 杀掉报OOM的进程，linux是杀掉当前最占用内存的进程
+
+6. https://blog.csdn.net/shuihupo/article/details/80905641
+
+dmesg | egrep -i -B100 'killed process'
+
+## 或:
+egrep -i 'killed process' /var/log/messages
+egrep -i -r 'killed process' /var/log
+
+## 或:
+journalctl -xb | egrep -i 'killed process'
+
+7. RCU(Read-Copy Update)，是 Linux 中比较重要的一种同步机制。顾名思义就是“读，拷贝更新”，再直白点是“随意读，但更新数据的时候，
+   需要先复制一份副本，在副本上完成修改，再一次性地替换旧数据”。这是 Linux 内核实现的一种针对“读多写少”的共享数据的同步机制。
+   不同于其他的同步机制，它允许多个读者同时访问共享数据，而且读者的性能不会受影响（“随意读”），读者与写者之间也不需要同步机制（但需要“复制后再写”），
+   但如果存在多个写者时，在写者把更新后的“副本”覆盖到原数据时，写者与写者之间需要利用其他同步机制保证同步
+
+   根据场景选择对应的同步方式
+   访问共享资源的代码区块叫做临界区，临界区需要用某种同步方法来保护
+
+   信号量是用于进程之间的同步，进程在信号量保护的临界区代码里是可以睡眠的，这是和自旋锁的最大的区别
+   

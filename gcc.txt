@@ -31,3 +31,8 @@ https://www.jianshu.com/p/e5967e46797b
 
 gcc -Wall -Wextra -Werror
 
+20. orbids mixed declarations and code    //就是要把函数内的变量定义到函数开头
+    变量定义之前任何一条非变量定义的语句(注意：语句是会带分号的)都会引起这个警告！
+    解决方法：
+    将非变量的定义移到变量定义之后 即可
+    在内核中还需要将   printk的打印放在变量定义之后
