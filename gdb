@@ -62,6 +62,8 @@ info registers <regname >  查看所指定的寄存器的情况
 7.    https://blog.csdn.net/jctian000/article/details/80695747
       thread apply all bt
 
+7.    b main    main函数设置断点
+
 8. 
 gdb attach {pid} #gdb 调试运行的进程
 info thread #进入以后使用，查看线程信息
@@ -120,5 +122,53 @@ break，tbreak可以根据行号、函数、条件生成断点。tbreak设置方
    l 文件名：函数名     表示查看tst.c文件中main周围10行代码
    l -命令            表示查看上一个l命令查看的代码之前的10行
 
+10
+    gdb中跳入函数的命令是step，相当于Visual Studio中的快捷键F11
+    gdb中跳出函数的命令是finish，相当于Visual Studio中的快捷键Shift+F11，函数完整执行后返回
+    gdb中还有一个直接返回的命令是return，它会跳过当前函数后面的语句直接返回，返回值可以自定义，紧跟在return命令后面即可
+
+11
+print /x var 
+这里可以知道，print可以指定显示的格式，这里用'/x'表示16进制的格式。 
+可以支持的变量显示格式有： 
+x  按十六进制格式显示变量。 
+d  按十进制格式显示变量。 
+u  按十六进制格式显示无符号整型。 
+o  按八进制格式显示变量。 
+t  按二进制格式显示变量。 
+a  按十六进制格式显示变量。 
+c  按字符格式显示变量。 
+f  按浮点数格式显示变量。 
+
+info source 
+这样会显示当前所在的源代码文件信息,例如文件名称，程序语言等。 
+
+*删除N号断点： 
+(gdb) delete N 
+
+*删除所有断点： 
+(gdb) delete 
+
+gdb -tui 
+这样,使用了'-tui'选项，启动可以直接将屏幕分成两个部分，上面显示源代码，比用list方便多了。这时候使用上下方向键可以查看源代码,想要命令行使用上下键就用[Ctrl]n和[Ctrl]p. 
+
+*指定程序直到退出当前循环体： 
+(gdb) until 
+或(gdb) u 
+
+jump 5 
+这里，可以简写为"j 5"需要注意的是，跳转到第5行执行完毕之后，如果后面没有断点则继续执行，而并不是停在那里了。 
+另外，跳转不会改变当前的堆栈内容，所以跳到别的函数中就会有奇怪的现象，因此最好跳转在一个函数内部进行,跳转的参数也可以是程序代码行的地址,函数名等等类似list.
 
 
+查看当前程序栈的信息: info frame----list general info about the frame
+查看当前程序栈的参数: info args---lists arguments to the function
+查看当前程序栈的局部变量: info locals---list variables stored in the frame
+
+
+jump <location>
+location 可以是程序的行号或者函数的地址，jump 会让程序执行流跳转到指定位置执行，当然其行为也是不可控制的，
+例如您跳过了某个对象的初始化代码，直接执行操作该对象的代码，那么可能会导致程序崩溃或其他意外行为。jump 命令可以简写成 j，
+但是不可以简写成 jmp，其使用有一个注意事项，即如果 jump 跳转到的位置后续没有断点，那么 GDB 会执行完跳转处的代码会继续执行
+
+gdb -tui ./scsensord core
