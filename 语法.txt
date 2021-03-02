@@ -992,7 +992,10 @@ underflow_error：算数运算时发生下溢
 
 191  const_cast< >
 
+192  std::launch::async，那么就是声明的时候就回去创建新的线程 系统默认使用的就是这个参数
 
+
+https://blog.csdn.net/qq_40666620/article/details/102639505
 
 
 

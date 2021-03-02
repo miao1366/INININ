@@ -172,3 +172,8 @@ location 可以是程序的行号或者函数的地址，jump 会让程序执行
 但是不可以简写成 jmp，其使用有一个注意事项，即如果 jump 跳转到的位置后续没有断点，那么 GDB 会执行完跳转处的代码会继续执行
 
 gdb -tui ./scsensord core
+
+catch throw         
+catch throw int    <-- 指定捕获“throw int”事件
+
+编译器默认没有把宏定义扩展信息编译进二进制文件    需要加入-g3 和-gdwarf-2

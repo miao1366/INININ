@@ -298,3 +298,39 @@ SeriesWork(SubTask *first, series_callback_t&& cb) :
     bool canceled;
     std::mutex mutex;
 }
+
+class SeriesWork;
+SeriesWork::SeriesWork(SubTask *first, series_callback_t&& cb) :
+	callback(std::move(cb))
+{
+	this->queue = new SubTask *[4];
+	this->queue_size = 4;
+	this->front = 0;
+	this->back = 0;
+	this->in_parallel = false;
+	this->canceled = false;
+	first->set_pointer(this);
+	this->first = first;
+	this->last = NULL;
+	this->context = NULL;
+}
+
+
+class ParallelWork : public ParallelTask
+
+
+
+class ParallelTask : public SubTask
+ParallelTask(SubTask **subtasks, size_t n)
+{
+	this->subtasks = subtasks;
+	this->subtasks_nr = n;
+}
+{
+    SubTask **subtasks;
+    size_t subtasks_nr;
+    size_t nleft;
+    friend class SubTask;
+}
+
+
