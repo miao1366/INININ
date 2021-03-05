@@ -81,3 +81,6 @@
 35 一些编译告警、错误可能是字体格式 如utf-8 ascii 等造成的。
 
 36 产生”undefined reference to `typeinfo for xxx’“最常见的原因就是基类的虚函数未实现了
+
+37 产生”undefined reference to  原因可能是库路径 和系统库路径顺序有问题，可以调换下顺序尝试下
+

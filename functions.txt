@@ -930,7 +930,9 @@ struct timespec {
 	W_OK 只判断是否有写权限
 	X_OK 判断是否有执行权限
 	F_OK 只判断是否存在
-	
+    
+    成功返回0 失败返回-1
+
 132 char *strtok_r(char *str, const char *delim, char **saveptr);
    
    str是传入的字符串。需要注意的是  ：第一次使用strtok_r之后，要把str置为NULL,
@@ -1536,6 +1538,9 @@ EAI_SYSTEM	         errno中有系统错误返回
     int touppre()函数是把字符串都转化为大写字母
     
     int isxdigit(int c) 检查参数c是否为16进制数字，真返回非零值，否则返回0。
+    isalnum()：判断字符是否为字母或者数字
+    isalpha()：判断字符是否为字母
+    isdigit()：判断字符是否为数字
 
 202 int isspace(int c) 当c为空白符时，返回非零值，否则返回零。（空白符指空格、水平制表、垂直制表、换页、回车和换行符。
     \r    回车，将当前位置移到本行开头
@@ -1567,3 +1572,14 @@ sem_op :  如果其值为正数，该值会加到现有的信号内含值中。�
           操作将会阻塞，直到信号值大于或等于sem_op的绝对值。通常用于获取资源的使用权；如果sem_op的值为0，则操作将暂时阻塞，直到信号的值变为0。
 _semflg IPC_NOWAIT //对信号的操作不能满足时，semop()不会阻塞，并立即返回，同时设定错误信息。
 IPC_UNDO //程序结束时(不论正常或不正常)，保证信号值会被重设为semop()调用前的值。这样做的目的在于避免程序在异常情况下结束时未将锁定的资源解锁，造成该资源永远锁定。
+
+205 std::transform在指定的范围内应用于给定的操作，并将结果存储在指定的另一个范围内
+    template <class InputIterator, class OutputIterator, class UnaryOperation>
+    OutputIterator transform (InputIterator first1, InputIterator last1,
+                            OutputIterator result, UnaryOperation op);
+    std::vector<int> arr{ 1, 3, 5 };
+    std::transform(arr.begin(), arr.end(), arr.begin(),[](int d) -> int {return d * 5; }); 
+    或者 std::vector<int> arr2
+    std::transform(arr.begin(), arr.end(), arr2.begin(),[](int d) -> int {return d * 5; }); 
+
+

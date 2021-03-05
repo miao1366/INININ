@@ -286,4 +286,6 @@ The -Wl,xxx option for gcc passes a comma-separated list of tokens as a space-se
     obj-y  编译成内核模式
 
 62  make V=1 查看完整的gcc编译信息
+    make -n
+    (-n、--just-print、--dry-run、--recon等价)
 
