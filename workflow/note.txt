@@ -1,3 +1,19 @@
 wget 启用了 28个线程
 create_http_task()创建了24个线程
 task->start()创建了4个个线程
+
+.poller_threads		=	4,
+.handler_threads	=	20,
+
+if (scheduler_.init(settings->poller_threads,
+    settings->handler_threads)
+
+    class CommScheduler
+    {
+    public:
+        int init(size_t poller_threads, size_t handler_threads)
+        {
+            return this->comm.init(poller_threads, handler_threads);
+        }
+
+        

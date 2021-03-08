@@ -1,0 +1,32 @@
+
+
+"$GNRMC,060845.00,A,4004.74005,N,11614.19613,E,1.234,,180817,,,A,V*0B"
+typedef struct _gps_raw_data {
+    char gflag[10];       "GNRMC"
+    char time[12];        "060948.00"                                     /* UTC 时间，格式为 hhmmss.sss local_time = hh+8(hours)*/
+    float time_f;          60498+80000.00                                       
+    char pos_state[3];    "A"                                             /*gps状态位*/ 
+    char latitude[15];    "4002.23306"                                    /*纬度 */
+    double latitude_d;    40.037                                          /*纬度 */
+    char N_S[3]     ;     "N"                                                             
+    char longitude[15];   "11618.44601"                                   /* 经度 */
+    double longitude_d;   116.307                                         /* 经度 */
+    char E_W[3];          "E"                                                   
+    char speed[15];       "0.000"                                         /* 速度 */
+    char direction[15];   ""                                              /*航向 */
+    char date[10];        "080321"                                        /*UTC 日期，格式为 ddmmyy*/
+    double declination;                                                   /* 磁偏角 */
+    char mvE[4];                                                          
+    char mode[4];                                                         /* GPS模式位 */
+    char navStates[4];                                                     
+    GGA gga;                                                               
+ } gps_raw_data_t;
+ 
+ 
+ 
+ typedef struct __gga__
+ {
+    int nosv;          15                      
+    char msl[20];       "54.8"                
+    char Altref[20];    ""                //两者相加等于高度
+ }GGA;

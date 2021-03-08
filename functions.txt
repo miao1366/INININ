@@ -622,7 +622,10 @@ type __sync_val_compare_and_swap (type *ptr, type oldval, type newval, ...);
      it_interval不为0则表示是周期性定时器。
      it_value和it_interval都为0表示停止定时器
 		
-		
+     timerfd_settime：能够启动和停止定时器；可以设置第二个参数：flags，0表示是相对定时器，TFD_TIMER_ABSTIME表示是绝对定时器。
+     第三个参数设置超时时间，如果为0则表示停止定时器。定时器设置超时方法：
+     设置超时时间是需要调用clock_gettime获取当前时间，如果是绝对定时器，那么需要获取CLOCK_REALTIME，在加上要超时的时间。
+     如果是相对定时器，要获取CLOCK_MONOTONIC时间
 		
   
   		struct itimerspec {
@@ -650,7 +653,7 @@ timefd_*系列函数优点:
 	 
 	 
 102 int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
-    timeout时间内监听到事件，会立即返回。
+    timeout时间内监听到事件，会立即返回。 当timeout为-1是，epoll_wait调用将永远阻塞，直到某个时间发生。当timeout为0时，epoll_wait调用将立即返回.
 	epoll_create()、
 	epoll_ctl()、
 	epoll_wait()、
@@ -1581,5 +1584,18 @@ IPC_UNDO //程序结束时(不论正常或不正常)，保证信号值会被重�
     std::transform(arr.begin(), arr.end(), arr.begin(),[](int d) -> int {return d * 5; }); 
     或者 std::vector<int> arr2
     std::transform(arr.begin(), arr.end(), arr2.begin(),[](int d) -> int {return d * 5; }); 
+
+206 void *calloc(size_t n, size_t size)；
+    在内存的 动态存储区中分配n个长度为size的连续空间，函数返回一个指向分配起始地址的 指针；如果分配不成功，返回NULL
+
+207 int pipe(int fd[2]);
+    pipe函数定义中的fd参数是一个大小为2的一个数组类型的指针。该函数成功时返回0，并将一对打开的文件描述符值填入fd参数指向的数组。失败时返回 -1并设置errno。
+    通过pipe函数创建的这两个文件描述符 fd[0] 和 fd[1] 分别构成管道的两端，往 fd[1] 写入的数据可以从 fd[0] 读出。并且 fd[1] 一端只能进行写操作，fd[0]
+    一端只能进行读操作，不能反过来使用。要实现双向数据传输，可以使用两个管道。
+    默认情况下，这一对文件描述符都是阻塞的。此时，如果我们用read系统调用来读取一个空的管道，则read将被阻塞，知道管道内有数据可读；
+    如果我们用write系统调用往一个满的管道中写数据，则write也将被阻塞，直到管道有足够的空闲空间可用(read读取数据后管道中将清除读走的数据)。当然，用户可自行将 fd[0] 和 fd[1] 设置为非阻塞的。
+    如果管道的写端文件描述符 fd[1] 的引用计数减少至0，即没有任何进程需要往管道中写入数据，则对该管道的读端文件描述符 fd[0] 的read操作将返回0(管道内不存在数据的情况)，
+    即读到了文件结束标记(EOF，End Of File)；反之，如果管道的读端文件描述符 fd[0] 的引用计数减少至0，即没有任何进程需要从管道读取数据，
+    则针对该管道的写端文件描述符 fd[1] 的write操作将失败，并引发SIGPIPE信号(往读端被关闭的管道或socket连接中写数据)
 
 

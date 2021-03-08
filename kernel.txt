@@ -23,3 +23,22 @@
 
    物理地址    物理块编号 + offset
    CR3寄存器 
+
+4.  信号量的特点
+    1. 用于进程和进程之间的同步
+    2. 允许有多个进程进入临界区代码执行
+    3. 进程获取不到信号量锁会陷入休眠，并让出cpu
+    4. 被信号量锁保护的临界区代码允许休眠
+    5. 本质是基于进程调度器，UP和SMP下的实现无差异
+    6. 不支持进程和中断之间的同步
+
+5. linux内核是环形双向链表
+   list_add_tail() 
+   list_add_tail( struct  list_head * new ,  struct  list_head *head)  将new所代表的list_head插入head所索引的队列的尾部
+
+    static inline long __timeout_cmp(const struct __poller_node *node1, const struct __poller_node *node2) {
+        long ret = node1->timeout.tv_sec - node2->timeout.tv_sec;
+        if (ret == 0)
+        ret = node1->timeout.tv_nsec - node2->timeout.tv_nsec;
+        return ret;
+    }

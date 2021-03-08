@@ -758,3 +758,23 @@ $ grep "invalid user" /var/log/auth.log | cut -d ' ' -f 10 | sort | uniq -c | so
     可以用sudo apt-get install pkgname  升级特定软件
     
 102 cat /proc/cpuinfo
+
+103 rpm 安装
+    sudo alien -i ./XMind-2020-for-Linux-x86-64bit-10.3.1-202101132117.rpm
+
+104  sudo ip addr del 192.168.1.242 dev enp4s0
+     取消网卡enp4s0添加的虚拟地址
+
+105  查看CPU信息（型号）             cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c
+# 查看物理CPU个数                    cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l
+# 查看每个物理CPU中core的个数(即核数)  cat /proc/cpuinfo| grep "cpu cores"| uniq
+# 查看逻辑CPU的个数                  cat /proc/cpuinfo| grep "processor"| wc -l
+
+106  sudo ifconfig enp4s0 down    // enp4s0 网卡驱动关闭
+     sudo ifconfig enp4s0 up      // enp4s0 网卡驱动开启
+
+107  sudo ethtool eth1，Speed那行代表了是万兆网卡
+     Speed: 1000Mb/s
+     这里的万兆网卡单位是Mb，跟我们上面讲的MB不一样，需要换算成MB=10000/8
+
+108 sort是在Linux里非常常用的一个命令
