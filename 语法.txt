@@ -997,13 +997,14 @@ underflow_error：算数运算时发生下溢
 
 https://blog.csdn.net/qq_40666620/article/details/102639505
 
+193  std::defer_lock调用std::unique_lock 的构造函数，锁不会自动锁定
 
+194 try_lock()
+    尝试给互斥量加锁，如果拿不到锁，返回false,如果拿到了锁，返回true,这个函数是不阻塞的
 
+195  条件变量必须在获得锁权限后才能调用notify();
 
-
-
-
-
+196  编译动态库时如果有依赖其他动态库，只需要依赖库的头文件即可。
 
 
 

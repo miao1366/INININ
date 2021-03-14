@@ -1,0 +1,9 @@
+1.  源码解析好的blog
+    https://blog.csdn.net/zxm342698145/article/details/80235203?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.baidujs&dist_request_id=&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.baidujs
+
+2.  https://www.cnblogs.com/RainRill/p/8986572.html
+    https://www.cnblogs.com/RainRill/p/9002848.html
+
+3.  lpeg解析语法
+    https://www.jianshu.com/p/e8e1c5abfdbb
+

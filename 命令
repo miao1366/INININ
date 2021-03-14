@@ -717,7 +717,7 @@ $ grep "invalid user" /var/log/auth.log | cut -d ' ' -f 10 | sort | uniq -c | so
     ulimit -c unlimited   //unlimited 代表不限制core文件大小， 可以指定core文件大小 ulimit -c 1024  
 
     core文件生成路径: 输入可执行文件运行命令的同一路径下
-    gdb peer_tracker.wd  core.3189 （peer_tracker.wd为执行的文件）
+    gdb peer_tracker.wd  core （peer_tracker.wd为执行的文件）
 
 97  dmesg命令行实用程序用于在Linux和其他类似Unix的操作系统中打印和控制内核环形缓冲区。对于检查内核启动消息和调试与硬件相关的问题很有用
     dmesg -c        在显示的同时，clean掉dmesg缓存中信息
@@ -778,3 +778,40 @@ $ grep "invalid user" /var/log/auth.log | cut -d ' ' -f 10 | sort | uniq -c | so
      这里的万兆网卡单位是Mb，跟我们上面讲的MB不一样，需要换算成MB=10000/8
 
 108 sort是在Linux里非常常用的一个命令
+
+109 history history 10  //显示最近10条终端执行过的命令
+    
+    有 4 种方法可以快速重复执行上一条命令:
+            1.使用上方向键，并回车执行。
+            2.按 !! 并回车执行。
+            3.输入 !-1 并回车执行。
+            4.按 Ctrl+P 并回车执行。
+            
+    !4 执行历史记录里的第四条记录
+    !command 从最近的命令查到以command开头的命令执行
+    使用Ctrl+r反向查询历史命令，将匹配的最新一条显示出来,如果还想继续向上查询，继续按Ctrl+r
+
+110 cksum命令用于检查文件的CRC是否正确。确保文件从一个系统传输到另一个系统的过程中不被损坏
+
+111 nm  names的缩写， nm命令主要是用来列出某些文件中的符号(说白了就是一些函数和全局变量等).
+
+112 strings    工具可以对任何文件的内容进行分析，并输出可打印字符长度不小于4的串
+    1.  strings命令很简单， 看起来好像没什么， 但实际有很多用途。 下面， 我来举一个例子。  在大型的软件开发中， 假设有100个.c/.cpp文件， 
+        这个.cpp文件最终生成10个.so库， 那么怎样才能快速知道某个.c/.cpp文件编译到那个.so库中去了呢？ 当然， 你可能要说， 
+        看makefile不就知道了。 对， 看makefile肯定可以， 但如下方法更好， 直接用命令：
+        strings -f "*.so" | grep "xxxxxx"
+
+113 
+    1.查看当前正在使用的shell
+        echo $SHELL
+        /bin/bash
+    2.查看系统中安装了哪些shell
+    cat /etc/shells 
+        /bin/sh
+        /bin/bash
+        /sbin/nologin
+        /bin/dash
+        /bin/tcsh
+        /bin/csh
+
+114 /etc/passwd   可以修改用户的终端

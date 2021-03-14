@@ -16,4 +16,128 @@ if (scheduler_.init(settings->poller_threads,
             return this->comm.init(poller_threads, handler_threads);
         }
 
-        
+
+WFHttpTask = WFNetworkTask
+ComplexHttpTask -> WFComplexClientTask<HttpRequest, HttpResponse> 
+        -> WFClientTask<REQ, RESP> -> WFNetworkTask<REQ, RESP> -> CommRequest -> SubTask  CommSession
+
+class  __CommManager{}
+class  __WFGlobal{Communicator comm}
+class  Communicator{}
+
+
+// msgqueue_t
+
+struct __msgqueue
+{
+    size_t msg_max;                 4096
+    size_t msg_cnt;                 0
+    int linkoff; 
+    int nonblock;                   0
+    void *head1;
+    void *head2;
+    void **get_head;
+    void **put_head;
+    void **put_tail;
+    pthread_mutex_t get_mutex;
+    pthread_mutex_t put_mutex;
+    pthread_cond_t get_cond;
+    pthread_cond_t put_cond;
+};
+
+Communicator
+{
+    struct __mpoller *mpoller;
+    struct __msgqueue *queue;
+    struct __thrdpool *thrdpool;
+    int stop_flag;
+}
+
+
+struct __mpoller
+{
+    unsigned int nthreads;
+    poller_t *poller[1];
+};
+
+struct __poller
+{
+    size_t max_open_files;     65536
+    poller_message_t *(*create_message)(void *);   Communicator::create_message
+    int (*partial_written)(size_t, void *);        Communicator::partial_written
+    void (*cb)(struct poller_result *, void *);    Communicator::callback
+    void *ctx;                                     Communicator::this
+    pthread_t tid;
+    int pfd;
+    int timerfd;
+    int pipe_rd;                                   pipefd[0]
+    int pipe_wr;                                   pipefd[1]
+    int stopped;                                   1
+    struct rb_root timeo_tree;                      
+    struct rb_node *tree_first;                     
+    struct list_head timeo_list;                    
+    struct list_head no_timeo_list;                 
+    struct __poller_node **nodes;                   
+    pthread_mutex_t mutex;                          
+    char buf[POLLER_BUFSIZE];                       
+};
+
+
+struct poller_params params = {
+    .max_open_files		=	65536,
+    .create_message		=	Communicator::create_message,
+    .partial_written	=	Communicator::partial_written,
+    .callback			=	Communicator::callback,
+    .context			=	this
+};
+
+struct __poller_node
+{
+    int state;
+    int error;
+    struct poller_data data;
+#pragma pack(1)
+    union
+    {
+    	struct list_head list;
+    	struct rb_node rb;
+    };
+#pragma pack()
+    char in_rbtree;
+    char removed;
+    int event;
+    struct timespec timeout;
+    struct __poller_node *res;
+};
+
+struct poller_data
+{
+    short operation;
+    unsigned short iovcnt;
+    int fd;
+    union
+    {
+        SSL *ssl;
+        void *(*accept)(const struct sockaddr *, socklen_t, int, void *);
+        void *(*event)(void *);
+        void *(*notify)(void *, void *);
+    };
+    void *context;
+    union
+    {
+        poller_message_t *message;
+        struct iovec *write_iov;
+        void *result;
+    };
+};
+
+class SeriesWork {}
+Workflow::start_series_work(SubTask *first, series_callback_t callback) { }
+
+template<class REQ, class RESP, typename CTX> void WFComplexClientTask<REQ, RESP, CTX>::dispatch()
+
+
+class WFNSPolicy
+class WFDNSResolver : public WFNSPolicy 
+
+class WFNameService

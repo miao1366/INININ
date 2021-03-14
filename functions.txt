@@ -1598,4 +1598,40 @@ IPC_UNDO //程序结束时(不论正常或不正常)，保证信号值会被重�
     即读到了文件结束标记(EOF，End Of File)；反之，如果管道的读端文件描述符 fd[0] 的引用计数减少至0，即没有任何进程需要从管道读取数据，
     则针对该管道的写端文件描述符 fd[1] 的write操作将失败，并引发SIGPIPE信号(往读端被关闭的管道或socket连接中写数据)
 
+208 int sysinfo(struct sysinfo *info);    操作成功返回0，错误返回-1；
+    
+    在Linux 2.3.16中，结构体的信息是（单位是字节）：
+    struct sysinfo {                    
+        long uptime;              
+        /* 启动到现在经过的时间 */                    
+        unsigned long loads[3];    
+        /* 1, 5, and 15 minute load averages */                    
+        unsigned long totalram;  /* 总的可用的内存大小 */  
+        unsigned long freeram;   /* 还未被使用的内存大小 */  
+        unsigned long sharedram; /* 共享的存储器的大小 */  
+        unsigned long bufferram; /* 缓冲区大小 */                    
+        unsigned long totalswap; /* 交换区大小 */                    
+        unsigned long freeswap;  /* 还可用的交换区大小 */  
+        unsigned short procs;    /* 当前进程数目 */  
+        char _f[22];         /* 64字节的补丁结构 */
+    }
+    自Linux 2.3.23(i386), 2.3.48 (all architectures)中，结构体的信息是（单位是mem_unit字节）：
+    struct sysinfo {  
+        long uptime;          /* 启动到现在经过的时间 */  
+        unsigned long loads[3];    
+        /* 1, 5, and 15 minute load averages */  
+        unsigned long totalram;  /* 总的可用的内存大小 */  
+        unsigned long freeram;   /* 还未被使用的内存大小 */  
+        unsigned long sharedram; /* 共享的存储器的大小*/  
+        unsigned long bufferram; /* 共享的存储器的大小 */  
+        unsigned long totalswap; /* 交换区大小 */  
+        unsigned long freeswap;  /* 还可用的交换区大小 */  
+        unsigned short procs;    /* 当前进程数目 */  
+        unsigned long totalhigh; /* 总的高内存大小 */  
+        unsigned long freehigh;  /* 可用的高内存大小 */  
+        unsigned int mem_unit;   /* 以字节为单位的内存大小 */  
+        char _f[20-2*sizeof(long)-sizeof(int)];   
+        /* libc5的补丁  
+    };
 
+209 gzoffset()    返回压缩文件中将要读或写的位置

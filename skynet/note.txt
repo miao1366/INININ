@@ -1,0 +1,12 @@
+1. databuffer.h
+    struct databuffer {} 应该是一个存储字符的链表
+       offset是读取了的字符位置    size是还剩多少字符未读取
+
+2.  一些好的源码解析blog
+    https://blog.csdn.net/zxm342698145/category_9273485.html
+    https://github.com/cloudwu/skynet/wiki/ThirdPartyDocument
+    https://www.cnblogs.com/RainRill/p/9019614.html
+
+3.  LPEG是一个供lua使用的基于 Parsing Expression Grammars 的模式匹配库
+    https://blog.csdn.net/suzuiyue/article/details/52905372
+    https://blog.csdn.net/akof1314/article/details/8049649

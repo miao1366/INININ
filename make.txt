@@ -289,3 +289,6 @@ The -Wl,xxx option for gcc passes a comma-separated list of tokens as a space-se
     make -n
     (-n、--just-print、--dry-run、--recon等价)
 
+63 “|”后面是 order-only prerequisite 就是创建 .o 文件前要先创建存放该文件的目录
+
+64 makefile，默认执行第一个target
