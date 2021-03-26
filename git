@@ -124,3 +124,5 @@ Git 查看远端仓库地址  git remote -v
         git checkout dev
         git merge master 
         git push -u origin dev
+
+34  git rm -f  //删除文件

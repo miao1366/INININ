@@ -554,3 +554,70 @@ endif(CURL_FOUND)
     if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     # 设置多种编译类型的选项
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+
+80  一、指令介绍
+    cmake_parse_arguments 为解析函数（function）或 宏（macros） 参数的命令；
+    cmake_parse_arguments(<prefix> <options> <one_value_keywords>
+                      <multi_value_keywords> <args>...)
+    cmake_parse_arguments(PARSE_ARGV <N> <prefix> <options>
+                      <one_value_keywords> <multi_value_keywords>)
+    1.1 参数解析
+    <options>: 可选值
+    此处包含可选项的变量名称, 对应的值为 TRUE 或 FALSE;
+    如果传递进来的参数包含此变量,则为 TRUE 反之为 FALSE
+    <one_value_keywords>: 单值关键词列表
+    每个关键词仅仅对应一个值
+    <multi_value_keywords>: 多值关键词列表
+    每个关键词可对应多个值
+    <args>... 参数, 一般传入 ${ARGN} 即可
+    <prefix>前缀, 解析出的参数都会按照 prefix_参数名 的形式形成新的变量;
+    1.2 Coding
+    cmake_minimum_required(VERSION 3.5)
+    project(PARSE)
+    function(MY_PARSE)
+        set(options ADULT)
+        set(oneValueArgs NAME AGE)
+        set(multiValueArgs SCORE)
+        cmake_parse_arguments(STUDENT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+        # 通过 prefix_参数名: 例如 STUDENT_ADULT
+        message("isadult  = ${STUDENT_ADULT}")
+        message("name  = ${STUDENT_NAME}")
+        message("age  = ${STUDENT_AGE}")
+        message("score  = ${STUDENT_SCORE}")
+    endfunction()
+    MY_PARSE(ADULT NAME zhangsan AGE 20 SCORE 100 200 300 400 500)
+    add_executable(DEMO main.cpp)
+    运行结果
+    rs:cmake-parse-arguments$ cmake ./
+    ....
+    isadult  = TRUE
+    name  = zhangsan
+    age  = 20
+    score  = 100;200;300;400;500
+    ....
+    二、其他
+    <prefix>_UNPARSED_ARGUMENTS: 表示未被使用的参数变量（ ${ARGN}里面）
+    <prefix>_KEYWORDS_MISSING_VALUES：定义了关键词，但是没有对应的值
+
+81  configure_file(<input> <output>
+        [COPYONLY] [ESCAPE_QUOTES] [@ONLY]
+        [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
+        configure_file 主要实现如下两个功能:
+        将 <input> 文件里面的内容全部复制到 <output> 文件中；
+        根据参数规则，替换 @VAR@ 或 ${VAR} 变量；
+    2.1 参数解析
+            COPYONLY
+            仅拷贝 <input> 文件里面的内容到 <output> 文件， 不进行变量的替换；
+            ESCAPE_QUOTES
+            使用反斜杠（C语言风格）来进行转义；
+            @ONLY
+            限制替换， 仅仅替换 @VAR@ 变量， 不替换 ${VAR} 变量
+            NEWLINE_STYLE
+            指定输入文件的新行格式， 例如：Unix 中使用的是 \n, windows 中使用的 \r\n
+            **注意: ** COPYONLY 和 NEWLINE_STYLE 是冲突的，不能同时使用
+
+82  根据cmake官方关于交叉编译的介绍: 《Cross Compiling for Linux》,
+    CMAKE_SYSTEM_NAME和CMAKE_SYSTEM_PROCESSOR是交叉编译的时候必须指定的两个参数
+
+83  aux_source_directory(<dir> <variable>)
+    收集指定目录中所有源文件的名称，并将列表存储在提供的<variable>变量中

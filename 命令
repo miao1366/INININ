@@ -860,6 +860,7 @@ $ grep "invalid user" /var/log/auth.log | cut -d ' ' -f 10 | sort | uniq -c | so
         chkconfig mysqld on        #设定mysqld在各等级为on，“各等级”包括2、3、4、5等级
 
 117  service --status-all    列出所有服务(service).
+     systemctl list-units --type=service： 列出正在运行的服务
 
 118  在Systemd出现之前，Linux系统及各应用的日志都是分别管理的，Systemd开始统一管理了所有Unit的启动日志，
      这样带来的好处就是可以只用一个 journalctl命令，查看所有内核和应用的日志。
@@ -896,5 +897,25 @@ $ grep "invalid user" /var/log/auth.log | cut -d ' ' -f 10 | sort | uniq -c | so
             6: info
             7: debug
 
-119 minicom  -s  1500000
-   
+119 minicom  -s  重新配置参数    进入后 a:配置设备描述符  e:设置波特率，停止位
+
+120  nautilus
+     nautilus是GNOME桌面下的一个文件管理工具。 通过这个命令我们可以在终端下非常方便的打开指定目录的文件。
+     $ nautilus . // 命令后面一个“.”，表示当前目录
+
+121  sudo dpkg -r 软件名“进行卸载
+
+122     xargs 
+        $ cat /etc/passwd | grep root
+        上面的代码使用了管道命令（|）。管道命令的作用，是将左侧命令（cat /etc/passwd）的标准输出转换为标准输入，提供给右侧命令（grep root）作为参数。
+        因为grep命令可以接受标准输入作为参数，所以上面的代码等同于下面的代码。
+        $ grep root /etc/passwd
+        但是，大多数命令都不接受标准输入作为参数，只能直接在命令行输入参数，这导致无法用管道命令传递参数。举例来说，echo命令就不接受管道传参。
+        $ echo "hello world" | echo
+        上面的代码不会有输出。因为管道右侧的echo不接受管道传来的标准输入作为参数。
+        xargs命令的作用，是将标准输入转为命令行参数。
+        $ echo "hello world" | xargs echo
+        hello world
+        上面的代码将管道左侧的标准输入，转为命令行参数hello world，传给第二个echo命令。
+        xargs的作用在于，大多数命令（比如rm、mkdir、ls）与管道一起使用时，都需要xargs将标准输入转为命令行参数。
+        

@@ -1,0 +1,5 @@
+1. void ngx_cpuinfo();  //获取cpu信息
+2. Nginx对非常多的基础设施（红黑树 内存池 连接池 hash表）都重复造了轮子，我们来看看为什么要这么做
+3. ngx_pagesize是一块内存页的大小，在x86下通常为4096
+4. 内存池
+    https://initphp.blog.csdn.net/article/details/50588790#comments_15490811

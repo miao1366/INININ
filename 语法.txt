@@ -1006,5 +1006,75 @@ https://blog.csdn.net/qq_40666620/article/details/102639505
 
 196  编译动态库时如果有依赖其他动态库，只需要依赖库的头文件即可。
 
+197  把数组定义为一个类型，这样函数传值时相当于传送地址了。  typedef struct __jmp_buf_tag jmp_buf[1];
 
+198  骚操作001
+            struct people {
+                int id;
+                char name[1];
+            };
+            struct people * a = malloc(sizeof(struct people) + 7);
+            a->id = 0;
+            sprintf(&a->name,"Poly000");
 
+199 内存对齐
+    内存对齐是操作系统为了快速访问内存而采取的一种策略。那么为什么要内存对齐呢？因为处理器读写数据，并不是以字节为单位，而是以块(2,4,8,16字节)为单位进行的，
+    而且由于操作系统的原因，块的起始地址必须整除块大小。如果不进行对齐，那么本来只需要一次进行的访问，可能需要好几次才能完成，并且还要进行额外的数据分离和合并，
+    导致效率低下。更严重地，有的CPU因为不允许访问unaligned address，就报错，或者打开调试器或者dump core，比如sun sparc solaris绝对不会容忍你访问unaligned address，
+    都会以一个core结束你的程序的执行。所以一般编译器都会在编译时做相应的优化以保证程序运行时所有数据地址都是在'aligned address'上的，这就是内存对齐的由来。
+    为了更好理解上面的意思，这里给出一个示例。在32位系统中，假如一个int变量在内存中的地址是0x00ff42c3,因为int是占用4个字节，所以它的尾地址应该是0x00ff42c6，
+    这个时候CPU为了读取这个int变量的值，就需要先后读取两个4字节的块，分别是0x00ff42c0~0x00ff42c3和0x00ff42c4~0x00ff42c7，然后通过移位等一系列的操作来得到，
+    在这个计算的过程中还有可能引起一些总线数据错误的。但是如果编译器对变量地址进行了对齐，比如放在0x00ff42c0，CPU就只需要一次就可以读取到，这样的话就加快读取效率。
+    综合，内存对齐的原因有2点：
+        (1) 平台原因(移植原因)：不是所有的硬件平台都能访问任意地址上的任意数据的；某些硬件平台只能在某些地址处取某些特定类型的数据，否则抛出硬件异常。
+        (2) 性能原因：数据结构(尤其是栈)应该尽可能地在自然边界上对齐。原因在于，为了访问未对齐的内存，处理器需要至少要两次内存访问；而对齐的内存访问仅需要一次访问
+
+200 emplace_back()和push_back()的区别
+            emplace_back() 和 push_back() 的区别，就在于底层实现的机制不同。push_back() 向容器尾部添加元素时，首先会创建这个元素，
+            然后再将这个元素拷贝或者移动到容器中（如果是拷贝的话，事后会自行销毁先前创建的这个元素）；而 emplace_back() 在实现时，
+            则是直接在容器尾部创建这个元素，省去了拷贝或移动元素的过程。
+            为了让大家清楚的了解它们之间的区别，我们创建一个包含类对象的 vector 容器，如下所示：
+            #include <vector> 
+            #include <iostream> 
+            using namespace std;
+            class testDemo
+            {
+            public:
+                testDemo(int num):num(num){
+                    std::cout << "调用构造函数" << endl;
+                }
+                testDemo(const testDemo& other) :num(other.num) {
+                    std::cout << "调用拷贝构造函数" << endl;
+                }
+                testDemo(testDemo&& other) :num(other.num) {
+                    std::cout << "调用移动构造函数" << endl;
+                }
+            private:
+                int num;
+            };
+            int main()
+            {
+                cout << "emplace_back:" << endl;
+                std::vector<testDemo> demo1;
+                demo1.emplace_back(2);  
+                cout << "push_back:" << endl;
+                std::vector<testDemo> demo2;
+                demo2.push_back(2);
+            }
+            运行结果为：
+            emplace_back:
+            调用构造函数
+            push_back:
+            调用构造函数
+            调用移动构造函数
+
+201     malloc
+        Windows里malloc时，操作系统分配内存时会在分配的内存前面多分配20个字节，其中前16个字节用于内存管理时使用，后4个字节用于标识内存边界。
+        分配空间后面也会有4个字节用于标识边界。
+        如malloc分配一个n字节的空间，实际的内存为
+        返回的指针指向如下内存段的首地址
+        |16个字节的内存管理信息|4字节边界|n字节的空间|4字节边界|
+        这里的第5个字节到第8字节是一个4字节整形，记录着内存空间的大小
+        这也就解释了为什么我们可以malloc一个0字节的空间，也能正常返回指针
+
+        机64位机,只要malloc传的参数小于24(包括0) 则分配24字节，不同机器可能会有出入 若大于24字节, 例如1000,则分配1000或者1000大一点预分配内存

@@ -41,10 +41,16 @@
     这两个函数类似于read和write，不过readv和writev允许单个系统调用读入到或写出自一个或多个缓冲区。
     这些操作分别称为分散读（scatter read）和集中写（gather write），因为来自读操作的输入数据被分散到多个应用缓冲区中，
     而来自应用缓冲区的输出数据则被集中提供给单个写操作。
+    //
+    UNIX网络编程第14章提及，通过使用另外—组接口 readv() / writev()，
+    它们只需一次系统调用就可以实现在文件和进程的多个缓冲区之间传送数据，免除了多次系统调用或复制数据的开销。
+    这些操作被称为分散读（scatter read）和集合写（gather write）
 
+    readv和writev特点在于允许单个系统调用读入到或者写出自一个或多个缓冲区。这些操作分别称为分散读和集中写。
+    有了这两个函数，当想要集中写出某张链表时，只需让iov数组的各个元素包含链表中各个表项的地址和其长度，然后将iov和它的元素个数作为参数传递给writev()，这些数据便可一次写出。
 6. 
 #define GUARDED_BY(x) \
-THREAD_ANNOTATION_ATTRIBUTE__(guarded_by(x))
+THREAD_ANNOTATION_ATTRIBUTE__(guarded_by(x)) 
 #define PT_GUARDED_BY(x) \
 THREAD_ANNOTATION_ATTRIBUTE__(pt_guarded_by(x))
 #define ACQUIRED_BEFORE(...) \
@@ -62,7 +68,7 @@ THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
 10. 给线程起名字 
     ::prctl(PR_SET_NAME, muduo::CurrentThread::t_threadName);
 
-11. size_t fread_unlocked(void *ptr, size_t size, size_t n, FILE *stream)   //https://blog.csdn.net/qu1993/article/details/109382285
+11. size_t fwrite_unlocked(void *ptr, size_t size, size_t n, FILE *stream)   //https://blog.csdn.net/qu1993/article/details/109382285
     fwrite的线程不安全版本, 效率比fwrite()高
 
 12. void setbuffer(FILE * stream,char * buf,size_t size);  将缓冲区设置为本地的buffer_   

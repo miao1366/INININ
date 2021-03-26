@@ -1545,7 +1545,7 @@ EAI_SYSTEM	         errno中有系统错误返回
     isalpha()：判断字符是否为字母
     isdigit()：判断字符是否为数字
 
-202 int isspace(int c) 当c为空白符时，返回非零值，否则返回零。（空白符指空格、水平制表、垂直制表、换页、回车和换行符。
+202 int isspace(int c) 当c为空白符时，返回true值，否则返回零。（空白符指空格、水平制表、垂直制表、换页、回车和换行符。
     \r    回车，将当前位置移到本行开头
     \n    换行，将当前位置移到下一行开头
 
@@ -1635,3 +1635,34 @@ IPC_UNDO //程序结束时(不论正常或不正常)，保证信号值会被重�
     };
 
 209 gzoffset()    返回压缩文件中将要读或写的位置
+
+210  int setjmp(jmp_buf env);
+     void longjmp(jmp_buf env, int val);
+    =============================================================
+        #include <stdio.h>
+        #include <stdlib.h>
+        #include <setjmp.h>
+        jmp_buf env;
+        int my_func(int a, int b) {
+            if (b == 0) {
+                printf("do not allow division by 0\n");
+                longjmp(env, 1);
+            }
+            return a / b;
+        }
+        int main(int argc, char const *argv[]) {
+            int res = setjmp(env);
+            if (res == 0) {
+                printf("return from setjmp\n");
+                my_func(10, 0);
+            } else {
+                printf("return from longjmp: %d\n", res);
+            }
+            return 0;
+        }
+    -----------------------------------------------------------
+            输出结果为：
+            return from setjmp
+            do not allow division by 0
+            return from longjmp: 1
+    ===========================================================
