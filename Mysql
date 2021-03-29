@@ -6,6 +6,8 @@
 2. 回表查询
 3. 覆盖索引
 
+mysql -uroot -pmiao
+
 1. E-R图、  数据库模型图
 2. 数据库设计      
 
@@ -1357,3 +1359,5 @@ SQL常见优化规则
 primary      主要的；
 distinct     截然不同的；
 unique       独特的
+
+localhost和127.0.0.1是不同的

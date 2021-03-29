@@ -25,7 +25,24 @@ class  __CommManager{}
 class  __WFGlobal{Communicator comm}
 class  Communicator{}
 
+class ParallelTask : public SubTask;
 
+subTask 里面三个比较重要的函数
+public:
+    virtual void dispatch() = 0;
+private:
+    virtual SubTask *done() = 0;
+protected:
+    void subtask_done();
+
+CommSession里面比较重要的函数
+    virtual CommMessageOut *message_out() = 0;
+    virtual CommMessageIn *message_in() = 0;
+    virtual void handle(int state, int error) = 0;
+
+
+class Communicator;
+WFGlobal::get_scheduler();
 // msgqueue_t
 
 struct __msgqueue
@@ -141,3 +158,5 @@ class WFNSPolicy
 class WFDNSResolver : public WFNSPolicy 
 
 class WFNameService
+
+redis demo: ./redis_cli redis://127.0.0.1  s1 hello

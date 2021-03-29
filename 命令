@@ -919,3 +919,13 @@ $ grep "invalid user" /var/log/auth.log | cut -d ' ' -f 10 | sort | uniq -c | so
         上面的代码将管道左侧的标准输入，转为命令行参数hello world，传给第二个echo命令。
         xargs的作用在于，大多数命令（比如rm、mkdir、ls）与管道一起使用时，都需要xargs将标准输入转为命令行参数。
         
+123    nproc 命令显示当前进程可用的CPU数目
+
+124    sysctl命令用于运行时配置内核参数，这些参数位于/proc/sys目录下
+            常用参数的意义：
+                -w   临时改变某个指定参数的值，如
+                     sysctl -w net.ipv4.ip_forward=1
+                -a   显示所有的系统参数
+                -p   从指定的文件加载系统参数，如不指定即从/etc/sysctl.conf中加载
+
+

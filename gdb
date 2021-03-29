@@ -189,9 +189,90 @@ catch throw int    <-- 指定捕获“throw int”事件
 3. tui
 是一个命令行的界面，能同时把代码显示出来
 
+15  disas/disass/disassemble    将内存中的机器码程序以指令助记符的形式显示出来。
+    disas/disass/disassemble 函数名/起始地址[,结束地址]
+    例如：
+       disas main，显示main函数对应的汇编代码 
 
+16   gdb ./rhs core.7714
 
+17  使用gdb调试core文件
+gdb --core=core.PID
+(gdb)bt(第一次不会出现堆栈信息)
+(gdb)file ./a.out（运行程序）
+(gdb)bt（backtrace信息出现）
+https://taohui.blog.csdn.net/article/details/9171375
 
+18  寄存器
+        对于调试来说寄存器中的值也很重要，可以查看到当前正在执行的指令的地址等。具体操作罗列如下：
+        (gdb) info reg：显示所有寄存器。可以简写为：i r。如果要查看具体的寄存器可以这样：`i $ebx`
+        (gdb) p $eax：显示eax寄存器内容。
+        (gdb) p/c $eax：用字符显示eax寄存器内容
 
+19  内存
+        可以查看具体内存地址中的内容，比如：目前执行的汇编指令，以及栈中内容等。
+        (gdb) x $pc：显示程序指针指向位置的内容。
+        (gdb) x/i $pc：显示程序当前位置的汇编指令。
+        (gdb) x/10i $pc：显示程序当前位置开始往后的10条汇编指令。
+        (gdb) disassem $pc：反汇编当前函数。简写为：`disas $pc`。
 
+20  gdb 设置core文件大小
+    /etc/security/limits.conf 
+        @root soft core unlimited
+        @root hard core unlimited
+        @miao soft core unlimited
+        @miao hard core unlimited
 
+    gdb core文件增加pid后缀
+    echo 1 |sudo dd of=/proc/sys/kernel/core_uses_pid
+    
+    https://blog.csdn.net/qq_39759656/article/details/82858101
+    https://blog.csdn.net/nice_wen/article/details/102508398
+    程序崩溃了不一定都产生 core文件
+
+21  
+    rwatch 命令：只要程序中出现读取目标变量（表达式）的值的操作，程序就会停止运行；
+    awatch 命令：只要程序中出现读取目标变量（表达式）的值或者改变值的操作，程序就会停止运行。
+    watch 命令的功能是：只有当被监控变量（表达式）的值发生改变，程序才会停止运行。
+    
+    GDB 调试器支持在被调试程序中打 3 种断点，分别为普通断点、观察断点和捕捉断点
+
+22 
+(gdb) bt：显示所有栈帧，backtrace。
+(gdb) bt 10：显示前面10个栈帧。
+(gdb) bt -10：显示后面10个栈帧。
+(gdb) bt full：显示栈帧以及局部变量。
+(gdb) bt full 10：显示前面10个栈帧以及局部变量。
+(gdb) bt full -10：显示后面10个栈帧以及局部变量。
+(gdb) frame <栈帧编号>：进入指定的栈帧中，然后可以查看当前栈帧中的局部变量，以及栈帧内容等信息。
+(gdb) info frame <栈帧编号>：可以查看指定栈帧的详细信息。
+(gdb) up：进入上层栈帧。
+(gdb) down：进入下层栈帧。
+
+https://blog.csdn.net/lm409/article/details/80303709
+https://blog.csdn.net/lm409/article/details/80303709
+https://blog.csdn.net/lm409/article/details/80303709
+
+23  在调试的时候通常用catchpoints来捕获事件，如c++的异常等。捕获点的设置通过catch与tcatch两个命令。
+    tcatch所设置的断点停止一次后自动删除，设置断点的方法与catch相同。
+    用法：catch event
+    这些event事件如下：
+    throw
+        The throwing of a C++ exception.
+    catch
+        The catching of a C++ exception.
+    exception
+    
+    exception unhandled
+        An exception that was raised but is not handled by the program.
+    assert
+        Ada 语言 assert断言失败时，断点被踩到。
+    exec
+        调用exec时断点被踩到。
+    syscall
+    syscall [name | number] ...
+        通过系统函数的名称和系统号，来设置捕获点，当所设定的系统调用时，断点被踩到。
+         因为经常在linux用c语言，所以主要用到的event是最后四个，其他的没有仔细研究。
+     例如：
+     catch syscall open
+     catch syscall 5

@@ -1,0 +1,4 @@
+1. 
+    PV（Page View）：页面访问量，每次用户访问或者刷新页面都会被计算在内。
+    QPS（Query Per Second）：每秒查询数，每秒系统能够处理的查询请求次数。
+    TPS（Transactions Per Second）：每秒事务数，每秒系统能够处理的事务次数

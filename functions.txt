@@ -213,7 +213,9 @@ to_string(x)
     printf ("最大打开的文件数: %ld\n", sysconf(_SC_OPEN_MAX));                        //1024
     printf("每秒的节拍数: %ld\n", sysconf(_SC_CLK_TCK));                             //100
     printf ("主机名的最大长度: %ld\n", sysconf(_SC_HOST_NAME_MAX));                   //64
-    printf ("登录名的最大长度: %ld\n", sysconf(_SC_LOGIN_NAME_MAX));                  //256 
+    printf ("登录名的最大长度: %ld\n", sysconf(_SC_LOGIN_NAME_MAX));                  //256
+
+    具体还是要看man page里的东西
 
 58  std::atomic
 
@@ -244,7 +246,7 @@ to_string(x)
 		   
 62  void assert( int expression );
    assert的作用是现计算表达式 expression ，如果其值为假（即为0），那么它先向stderr打印一条出错信息，然后通过调用 abort 来终止程序运行  
-   // fp = fopen( "noexitfile.txt", "r" )   assert( fp ); 出错的话，打印 Assertion `fp' failed  
+   // fp = fopen( "noexitfile.txt", "r" )   assert( fp ); 出错的话，打印 Assertion  fp  failed  
    已放弃使用assert()的缺点是，频繁的调用会极大的影响程序的性能，增加额外的开销。应该在debug模式下使用。
    
 63 int prctl ( int option,unsigned long arg2,unsigned long arg3,unsigned long arg4,unsigned long arg5 )
@@ -271,7 +273,7 @@ void swap(vector<_Tp, _Alloc>& __x) {
   
 65. ssize_t pread(int fd, void *buf, size_t count, off_t offset);
     ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset);
-	pread简单来说就是在指定偏移offset位置开始读取count个字节，同理可推``pwrite`。;
+	pread简单来说就是在指定偏移offset位置开始读取count个字节，同理可推 pwrite 。;
 	pread函数相当于先后调用了lseek和read函数，但是还是有区别的，有以下两点区别：1. pread函数是原子操作，而先后调用两个函数不是原子操作;2. pread函数是不会改变当前文件偏移量的，而read和wr
 	
 66. char* getenv( const char* env_var );
@@ -1441,6 +1443,8 @@ char * __strdup(const char *s) {
 
 函数原型 int getaddrinfo( const char *hostname, const char *service, 
                     const struct addrinfo *hints, struct addrinfo **result );
+    gethostbyname() 已经不再维护了,官方推荐用 getaddrinfo() 替代
+
 参数说明
     hostname:一个主机名或者地址串(IPv4的点分十进制串或者IPv6的16进制串)
     service：服务名可以是十进制的端口号，也可以是已定义的服务名称，如ftp、http等
