@@ -928,4 +928,9 @@ $ grep "invalid user" /var/log/auth.log | cut -d ' ' -f 10 | sort | uniq -c | so
                 -a   显示所有的系统参数
                 -p   从指定的文件加载系统参数，如不指定即从/etc/sysctl.conf中加载
 
-
+125     apt-get install inetutils-ping  net-tools
+ 
+126     比如说我们要安装skype，就用在缓存中搜索一下skype这个软件
+        命令：
+        sudo apt-cache search skype
+        sudo apt-get remove软件名

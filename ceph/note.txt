@@ -10,3 +10,8 @@
 4. nfs          网络文件系统
    hdfs         分布式网络文件系统
    glusterfs    分布式网络文件系统
+
+5. Sphinx是由俄罗斯人Andrew Aksyonoff开发的一个全文检索引擎。意图为其他应用提供高速、低空间占用、高结果 相关度的全文搜索功能。Sphinx可以非常容易的与SQL数据库和脚本语言集成。
+
+6. 2. https://blog.csdn.net/yysalad/article/details/90340109
+解压源码后，执行 ./install-deps.sh  ->  ./do_cmake.sh  ->  cd build  ->  make

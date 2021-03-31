@@ -126,3 +126,9 @@ Git 查看远端仓库地址  git remote -v
         git push -u origin dev
 
 34  git rm -f  //删除文件
+
+35  git 查看某个文件的修改记录
+        如果是在linux环境下，比如centos,ubuntu之类的，建议安装tig命令
+        炒鸡好用，tig后面可以跟文件或者文件夹，比如：
+        tig  dir_name
+        tig file_name

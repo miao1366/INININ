@@ -42,3 +42,88 @@
         ret = node1->timeout.tv_nsec - node2->timeout.tv_nsec;
         return ret;
     }
+
+6. unsigned long int getauxval(unsigned long int type);
+用户空间应用程序与内核之间有许多交流机制。系统调用和伪文件系统（诸如：/proc和/sys）广为人知。信号也同样广为人知；内核利用信号通知进程的各种同步或异步事件——例子：当进程尝试写一个破碎的管道或子进程终止时。
+内核和用户空间交流还有许多复杂的机制。包括Linux专用的netlink sockets和user-mode helper功能。Netlink套接字为内核交换信息提供了一套套接字风格的API。user-mode helper功能允许内核自动调用用户空间的可执行文件；这个机制被用于许多地方，包括控制组的实现和piping core dumps to a user-space application。
+辅助向量(auxiliary vector)，一个从内核到用户空间的信息交流机制，它一直保持透明。然而，在GNU C库(glibc)2.16发布版中添加了一个新的库函数"getauxval()"，这似乎在六月底，现在它已经变得更加可见。
+历史上，许多UNIX系统实现过辅助向量功能。本质上，它是一个键值对列表，当一个新的可执行映像被加载到进程中时被内核的ELF二进制加载器（fs/binfmt_elf.c文件，在内核源码中）构造。这个列表被放在进程地址空间的特定位置；在Linux系统上它存在于用户地址空间的高位(high end)，在栈，命令行参数（argv）和环境变量（environ）的正上方（向下生长）。
+输入图片说明
+从描述和图表中我们可以看到，虽然在辅助向量在一定程度上被隐藏，对它的访问需要费点功夫。即使不使用新的库函数，一个应用程序想要访问辅助向量只需要获得挨着环境变量列表结尾的NULL指针的地址。而且，在shell级别(level)，我们可以通过设置LD_SHOW_AUXV环境变量来查明当执行一个应用程序时提供给可执行文件的辅助向量。
+$ LD_SHOW_AUXV=1 sleep 1000
+AT_SYSINFO_EHDR: 0x7fff35d0d000
+AT_HWCAP:        bfebfbff
+AT_PAGESZ:       4096
+AT_CLKTCK:       100
+AT_PHDR:         0x400040
+AT_PHENT:        56
+AT_PHNUM:        9
+AT_BASE:         0x0
+AT_FLAGS:        0x0
+AT_ENTRY:        0x40164c
+AT_UID:          1000
+AT_EUID:         1000
+AT_GID:          1000
+AT_EGID:         1000
+AT_SECURE:       0
+AT_RANDOM:       0x7fff35c2a209
+AT_EXECFN:       /usr/bin/sleep
+AT_PLATFORM:     x86_64
+在系统中每个进程的辅助向量可以通过/proc/PID/auxv文件看到。dump的文件内容与上面命令的一致（作为八字节十进制数，用于该例子的键和值的尺寸在64位系统上），我们可以看到在向量中的键值对，下面内容中键值对均为0的行表示向量的结尾：
+
+$ od -t d8 /proc/15558/auxv
+0000000                   33      140734096265216
+0000020                   16           3219913727
+0000040                    6                 4096
+0000060                   17                  100
+0000100                    3              4194368
+0000120                    4                   56
+0000140                    5                    9
+0000160                    7                    0
+0000200                    8                    0
+0000220                    9              4200012
+0000240                   11                 1000
+0000260                   12                 1000
+0000300                   13                 1000
+0000320                   14                 1000
+0000340                   23                    0
+0000360                   25      140734095335945
+0000400                   31      140734095347689
+0000420                   15      140734095335961
+0000440                    0                    0
+0000460
+扫描用户空间内存的高位或读取/proc/PID/auxv的方法从辅助向量中取值是不优雅的。新的库函数提供了从列表中取出单个值的简单机制：
+
+#include <sys/auxv.h> 
+unsigned long int getauxval(unsigned long int type);
+
+函数仅有一个参数，并返回对应的值。glibc头文件定义一个符号常量集，它们均以"AT_*"这种格式定义，将这些符号作为键传入getauxval；这些名称与执行带LD_SHOW_AUXV=1的命令时显示的字符串完全一样。
+当然，现在显而易见的问题是：什么样的信息被放在辅助向量中，和谁需要这些信息？辅助向量的主要访问者是动态链接器（ld-linux.so）。在正常的方案中，内核的ELF二进制加载器通过加载可执行文件到进程的内存构造一个进程映像，同样的加载linker到内存。此时，动态链接器(dynamic linker)准备好接管加载程序需要的动态链接库的任务，移交控制程序本身的准备工作。然而，它缺少对这些任务某些至关重要的信息：程序在虚拟地址空间中的位置，和程序执行的起始地址。
+理论上，内核可以提供一个系统调用动态链接器可以获得所需的信息。然而，这是一种低效的做事方式：内核的程序加载器已经拥有信息（因为它扫描了ELF二进制文件并构建了进程映像）并知道动态链接程序会需要它。而不是保留这个信息的记录，直到动态链接程序要求，内核可以简单的让它在进程映像的某个动态链接器已知的位置被获得。该位置当然保存的是辅助向量。
+事实证明，内核的程序加载器拥有这些信息并且是动态链接器所需要的。By placing all of this information in the auxiliary vector, the kernel either saves the programming overhead of making this information available in some other way (e.g., by implementing a dedicated system call), or saves the dynamic linker the cost of making a system call, or both.辅助向量中的值可通过getauxval()获得，下面是该函数可传入的参数：
+AT_PHDR和AT_ENTRY：这些键的值是可执行文件的ELF程序头的地址和可执行文件的入口地址。动态链接器使用这些信息执行链接并将控制权交给可执行文件。
+AT_SECURE：如果这个可执行文件应该被安全地对待，内核会给这个键分配一个非零值。这个设置可以被Linux Security Module触发，but the common reason is that the kernel recognizes that the process is executing a set-user-ID or set-group-ID program.在这种情况下，动态链接器禁用某些环境变量（就如ld-linux.so(8)手册页中的描述）并且C库改变其行为的其他方面。
+AT_UID, AT_EUID, AT_GID, 和 AT_EGID：这些是进程的真实和有效的用户ID和组ID。Making these values available in the vector saves the dynamic linker the cost of making system calls to determine the values.如果AT_SECURE值不可获得，动态链接器使用这些值来做出是否安全地处理可执行的决定。
+AT_PAGESZ：这个值是系统页尺寸。动态链接器在链接阶段需要这个信息，并且C库在malloc函数族的实现中使用它。
+AT_PLATFORM：这个值指向一个字符串，用于辨认程序运行在哪个硬件平台。在某些情况下，the dynamic linker uses this value in the interpretation of rpath values. (The ld-linux.so(8) man page describes rpath values.)
+AT_SYSINFO_EHDR：这个值指向包含有Virtual Dynamic Shared Object (VDSO)的页，这是内核创建的以提供某些系统调用的快速实现。（一些VDSO的文档可在内核源文件Documentation/ABI/stable/vdso中找到）
+AT_HWCAP：这个值指向一个多字节位掩码，设置指示详细的处理器能力。这个信息可以被用来提供某些库函数优化的行为。位掩码是硬件相关（例如：内核源码文件"arch/x86/include/asm/cpufeature.h"详细的讲述了Intel x86架构）。
+AT_RANDOM：The value is a pointer to sixteen random bytes provided by the kernel. The dynamic linker uses this to implement a stack canary.
+为什么GNU C库开发者选择添加getauxval()函数的确切的原因还有点不清楚。提交消息和新文件项的变更只是简单的说明什么改变了，而没有改变的理由
+
+7 proc文件
+/proc/[pid]/auxv 包含传递给进程的 ELF 解释器信息，格式是每一项都是一个 unsigned long长度的 ID 加上一个 unsigned long 长度的值。最后一项以连续的两个 0x00 开头
+/proc/[pid]/cmdline 是一个只读文件，包含进程的完整命令行信息。如果该进程已经被交换出内存或者这个进程是 zombie 进程，则这个文件没有任何内容。该文件以空字符 null 而不是换行符作为结束标志
+/proc/[pid]/comm 包含进程的命令名
+/proc/[pid]/cwd 是进程当前工作目录的符号链接。举例如下：
+/proc/[pid]/environ 显示进程的环境变量
+/proc/[pid]/exe 为实际运行程序的符号链接
+/proc/[pid]/fd 是一个目录，包含进程打开文件的情况
+/proc/[pid]/latency 显示哪些代码造成的延时比较大。如果要使用这个特性需要执行 echo 1 > /proc/sys/kernel/latencytop
+/proc/[pid]/maps 显示进程的内存区域映射信息
+/proc/[pid]/root 是进程根目录的符号链接
+/proc/[pid]/stack 示当前进程的内核调用栈信息，只有内核编译时打开了 CONFIG_STACKTRACE 编译选项，才会生成这个文件
+/proc/[pid]/statm 显示进程所占用内存大小的统计信息。包含七个值，度量单位是 page(page大小可通过 getconf PAGESIZE 得到
+/proc/[pid]/status 包含进程的状态信息。其很多内容与 /proc/[pid]/stat 和 /proc/[pid]/statm 相同，但是却是以一种更清晰地方式展现出来
+/proc/[pid]/syscall 显示当前进程正在执行的系统调用
+/proc/[pid]/wchan 显示当进程 sleep 时，kernel 当前运行的函数

@@ -44,3 +44,6 @@ journalctl -xb | egrep -i 'killed process'
    
 8. 临界资源：具有排他性的资源
    临界区：访问临界资源的代码段
+
+9. SELinux是「Security-Enhanced Linux」的简称，是美国国家安全局「NSA＝The National Security Agency」 和SCC（Secure Computing Corporation）
+   开发的 Linux的一个扩张强制访问控制安全模块

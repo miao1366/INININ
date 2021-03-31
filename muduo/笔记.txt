@@ -312,5 +312,12 @@ THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
     ENOTSOCK：文件描述符不与套接字相关。
     ETIMEDOUT：连接超时。
 
+44 儒略日数（Julian Day Number，JDN）的计算是从格林威治标准时间的中午开始，包含一个整天的时间，起点的时间（0日）回溯至儒略历的公元前4713年1月1日中午12点
+   （在格里历是公元前4714年11月24日），这个日期是三种多年周期的共同起点，且是历史上最接近现代的一个起点。例如，2000年1月1日的UT12:00是儒略日2,451,54
+
+45  扩展
+    https://blog.csdn.net/adkada1/article/details/54893541
+
+46  muduo的日志写的太快了, 一秒写的数据超过kRollSize了，不会新建日志文件了
 
 

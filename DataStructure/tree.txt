@@ -1,3 +1,5 @@
+数据结构网站:  https://www.cs.usfca.edu/~galles/visualization/RedBlack.html
+
 1. 红黑树的特性:
 （1）每个节点或者是黑色，或者是红色。
 （2）根节点是黑色。

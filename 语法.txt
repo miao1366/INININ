@@ -1078,3 +1078,35 @@ https://blog.csdn.net/qq_40666620/article/details/102639505
         这也就解释了为什么我们可以malloc一个0字节的空间，也能正常返回指针
 
         机64位机,只要malloc传的参数小于24(包括0) 则分配24字节，不同机器可能会有出入 若大于24字节, 例如1000,则分配1000或者1000大一点预分配内存
+
+202 is_arithmetic    检查类型是否为算术类型   //muduo
+class A {};
+ 
+int main()
+{
+    std::cout << std::boolalpha
+        << "A:           " << std::is_arithmetic_v<A>           << '\n' // false
+        << "bool:        " << std::is_arithmetic_v<bool>        << '\n' // true
+        << "int:         " << std::is_arithmetic_v<int>         << '\n' // true
+        << "int const:   " << std::is_arithmetic_v<int const>   << '\n' // true
+        << "int &:       " << std::is_arithmetic_v<int&>        << '\n' // false
+        << "int *:       " << std::is_arithmetic_v<int*>        << '\n' // false
+        << "float:       " << std::is_arithmetic_v<float>       << '\n' // true
+        << "float const: " << std::is_arithmetic_v<float const> << '\n' // true
+        << "float &:     " << std::is_arithmetic_v<float&>      << '\n' // false
+        << "float *:     " << std::is_arithmetic_v<float*>      << '\n' // false
+        << "char:        " << std::is_arithmetic_v<char>        << '\n' // true
+        << "char const:  " << std::is_arithmetic_v<char const>  << '\n' // true
+        << "char &:      " << std::is_arithmetic_v<char&>       << '\n' // false
+        << "char *:      " << std::is_arithmetic_v<char*>       << '\n' // false
+        ;
+}
+
+203 O_NONBLOCK和O_NDELAY所产生的结果都是使I/O变成非搁置模式(non-blocking)，在读取不到数据或是写入缓冲区已满会马上return，
+   而不会搁置程序动作，直到有数据或写入完成。它们的差别在于设立O_NDELAY会使I/O函式马上回传0，但是又衍生出一个问题，因为读取到档案结尾时所回传的也是0，
+   这样无法得知是哪中情况；因此，O_NONBLOCK就产生出来，它在读取不到数据时会回传-1，并且设置errno为EAGAIN。不过需要注意的是，在GNU C中O_NDELAY只是为了与BSD的程序兼容，
+   实际上是使用O_NONBLOCK作为宏定义，而且O_NONBLOCK除了在ioctl中使用，还可以在open时设定
+
+   O_NOCTTY如果路径名指向终端设备，不要把这个设备用作控制终端
+   对于串口的打开操作，必须使用O_NOCTTY参数，它表示打开的是一个终端设备，程序不会成为该端口的控制终端。如果不使用此标志，任务的一个输入(比如键盘终止信号等)都会影响进程
+

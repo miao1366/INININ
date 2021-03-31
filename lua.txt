@@ -217,3 +217,43 @@ package.path = "../myLuaTest/myLuaCode/?.lua;"..package.path
 
 39 luaL_newstate()  lua_newstate(arg1, arg2)  //创建新的虚拟机
 
+40 二 require加载模块文件的策略
+如果模块文件曾经被加载过，我们不会傻傻的再加载一次模块。所以加载模块要遵循一定的规则，也就是策略。这个策略是：
+1 首先查找package.loaded表，检测是否被加载过。如果被加载过，require返回保存的值，这个值在哪里被保存后面会讲到。否则进行下面的为模块寻找加载器。
+2 加载器在package的searchers表中，共有四个加载器。require也按照顺序来执行加载器。找到了就成功返回，没有就继续查找。
+a   预加载器，执行package.preload[modname]，一些特殊模块会有预加载器。
+b  lua加载器查找前面介绍的package.path
+c  加载器查找package.cpath
+d  一体化加载器，这个在后面会有详细解释。
+
+三 加载器如何加载
+由于路径是一个包含有一系列以；分隔的模版构成的字符串，所以在加载器加载文件时，首先将每个路径模版用模块名字替换其中的？,然后尝试打开这个文件名。例如，如果路径字符串是
+"./?.lua;./?.lc;/usr/local/?/init.lua"
+require('foo')，将会依次尝试打开文件./foo.lua,./foo.lc,以及/usr/local/foo/init.lua。如果模块名包含.，例如require('foo.a')那么将会依次尝试打开文件
+./foo/a.lua,./foo/a.lc,以及/usr/local/foo/a/init.lua。
+同理，如果这一步没有找到，则以同样的方式查找cpath。例如cpath是这个字符串
+ 
+"./?.so;./?.dll;/usr/local/?/init.so"
+查找器查找模块 foo 会依次尝试打开文件 ./foo.so，./foo.dll， 以及 /usr/local/foo/init.so。 一旦它找到一个 C 库， 查找器首先使用动态链接机制连接该库。
+然后尝试在该库中找到可以用作加载器的 C 函数。 这个 C 函数的名字必须是 "luaopen_" 紧接模块名的字符串，其中字符串中所有的下划线都会被替换成点。
+此外，如果模块名中有横线， 横线后面的部分（包括横线）都被去掉。 例如，如果模块名为 a.b.c-v2.1， 函数名就是 luaopen_a_b_c。
+也就是不仅提供的c模块名字要和require的模块名字一致，而且c模块导出的函数也要符合规范才行。如果有该模块而函数名对不上则会出现如下错误
+lua loader error : error loading module 'xxx' from file './luaclib/xxx.so'。
+最后一个搜索器是一体化加载器。本质上他是cpath加载器的延伸。他允许多个导出函数绑定在一个c库里。例如require('foo.a')，上述加载器都没有加载到，
+那么试图加载foo模块(过程和上面一样)，然后再在foo里寻找luaopen_foo_a导出函数。
+lua为我们提供了在指定path中搜索模块的函数，package.searchpath(),过程上述已讲。
+
+如果require('mod')成功，则在package.loaded['mod']中记录该模块。如果该模块没有返回值则package.loaded['mod']==true,有返回值则记录的是其返回值。
+值得注意的是，在同一个lua虚拟机中，多次require同一个模块，该模块返回一个table，那么任何地方修改该table的值都会引起其他地方table值的改变
+
+https://blog.csdn.net/zxm342698145/article/details/80607072
+
+41  https://www.jishuchi.com/read/lua-5.3/1984
+
+42  void luaL_newlib (lua_State *L, const luaL_Reg l[]); 
+    创建一张新的表，并把列表 l 中的函数注册进去。
+43  void *lua_newuserdata(lua_State*L,size_t size) 
+    在C中调用函数lua_newuserdata会根据指定的大小分配一块内存，并将相应的userdata压入栈中，最后返回这个内存块的地址：。
+44  lua_pushcclosure()  压入c方法，并根据栈上的参数创建闭包
+
+45  LPEG是一个供lua使用的基于 Parsing Expression Grammars 的模式匹配库.
