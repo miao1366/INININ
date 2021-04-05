@@ -1,0 +1,91 @@
+1. lpeg.P (value)
+    将 value 转变为 patten。value 可以是以下值
+    pattern， 返回 pattern
+    string， 返回匹配该string固定值得pattern
+    非负数n， 返回一个匹配 n 个字符的 pattern
+    负数 -n， lpeg.P(-n) = -lpeg.P(n), 即匹配任意 不匹配 lpeg.P(n)的subject， 所以匹配少于n个字符的 subject， 
+    注意的是，它不会消耗任何字符，比如 n = 3, subject = “ab”， match成功后返回的 index 是1， 就像没有匹配过一样。
+    boolean ， 返回一个 Pattern， 匹配总是 失败 或者 成功， 也不消耗任何字符
+    function， 相当于lpeg.Cmt(”, function), 这个后面讲Capture时会讲到。
+    期待使用pattern时传入以上的值，也会通过lpeg.P 函数转换为pattern。
+
+2. lpeg.match (pattern, subject [, init])
+    以上为 match 函数， 第一个参数为用来匹配的 pattern，第二个参数则为用来匹配的字符串， 可选参数 init指明 subject 开始匹配的位置， 
+    负数指从subject 结尾处开始数。另外， match 函数中还可以传入一些额外参数， 供 capture 使用，这个后面涉及到的时候再讲。
+    match 函数只匹配给定subject（计算过 init参数之后的subject）字符串的前缀， 而不是匹配其任意位置。不过，我们可以通过一些方式改写 pattern, 
+    使其匹配任意位置的subject。
+    match的返回值有两种情况，一种是返回 pattern 匹配时捕获的值， 如果没有捕获的值则返回pattern匹配后subject的第一个字符的index， 
+    比如 pattern 为匹配任意一个字符， 则返回值为2。 这个在后面的例子里会再具体讲。 如果匹配 pattern失败，则返回 nil。
+
+3.  Capture 就是指一个Pattern，当前匹配时会产生某些捕获的值
+
+3. lpeg.Carg(n)
+    匹配空字符串，返回lpeg.match（）函数的第n个额外参数，我们将match的时候也提到过
+
+4. lpeg类似于正则表达式
+
+5. P(-1)
+
+6. lpeg.B  返回一个匹配模式，只有在输入的字符串在当前位置是patt的谓语时，才被匹配到。patt在有调整长度的字符串中匹配，并且不包含捕获
+
+7.  lpeg.R ({range})
+    返回一个在给定的范围内任何一个字符。范围是一个长度为2的字符串xy，返回的所有字符都是x和y对应ASCII编码之间（包括x和y）。
+    举个例子， pattern lpeg.R("09") 匹配所有的数字，lpeg.R("az", "AZ") 匹配所有的ASCII字母
+
+8. net
+https://www.cnblogs.com/cnxkey/articles/5377061.html
+https://www.jianshu.com/p/e8e1c5abfdbb
+https://blog.csdn.net/liwenxin_at/article/details/50404524
+
+Operation	                What it Produces
+lpeg.C(patt)	            所有pattern捕获的子串
+lpeg.Carg(n)	            the value of the nth extra argument to lpeg.match (matches the empty string)
+lpeg.Cb(name)	            the values produced by the previous group capture named name (matches the empty string)
+lpeg.Cc(values)	            the given values (matches the empty string)
+lpeg.Cf(patt, func)	        捕获的结果将作为参数依次被func调用
+lpeg.Cg(patt [, name])      把patt所有的返回值作为一个返回值并指定一个名字
+lpeg.Cp()	                捕获的位置
+lpeg.Cs(patt)	            创建一个替代捕获
+lpeg.Ct(patt)	            把patt中所有的返回值按照父子关系放到一个数组里返回
+patt / string	            string, with some marks replaced by captures of patt
+patt / number	            the n-th value captured by patt, or no value when number is zero.
+patt / table	            table[c], where c is the (first) capture of patt
+patt / function	            the returns of function applied to the captures of patt
+lpeg.Cmt(patt, function)	the returns of function applied to the captures of patt; the application is done at match time
+
+Operator	                Description
+lpeg.P(string)	            匹配字符串
+lpeg.P(n)	                匹配n个字符串
+lpeg.S(string)	            匹配字符串中任意一个字符 (Set)
+lpeg.R("xy")	            匹配x和y之间的任意一个字符(Range)
+patt^n	                    匹配至少n个patt
+patt^-n	                    匹配最多n个patt
+patt1 * patt2	            先匹配patt1 然后接着匹配 patt2
+patt1 + patt2	            匹配满足patt1 或者满足patt2 (二选一)
+patt1 - patt2	            匹配满足patt1而且不满足patt2
+-patt	                    和 ("" - patt)一样
+#patt	                    Matches patt but consumes no input
+lpeg.B(patt)	            Matches patt behind the current position, consuming no input
+
+9. 
+lpeg.Cc ([value, …])
+匹配空字符串，将所有的value作为捕获的值。
+lpeg.Cf (patt, func)
+如果patt捕获的值为C1, C2,…, Cn, 该Capture则会返回 (…func(func(C1,C2),C3)…, Cn).
+
+10. 
+patt / string
+匹配patt，返回string。
+如果string是%n，n为1-9，则返回patt中第n个捕获的值。%0 返回整个匹配的值.
+%%代表字符%。
+patt / number
+返回patt中第n个捕获的值，如果number = 0， 没有捕获的值。
+patt / table
+将patt第一个捕获的值作为key，没有则将整个匹配的值作为key，table[key]就是最好捕获的值，如果没有，则没有捕获的值。
+patt / function
+将patt捕获的值全部作为参数传递给function，没有则将整个capture作为参数，function返回的值就是捕获的值，没有返回值，则没有捕获的值。
+
+lpeg.Cmt(patt, function)
+将整个subject，当前index，捕获的值作为参数传递给function。
+function返回数字的话，匹配成功，并且将该数字作为subject新的index。如果返回true，则匹配成功，不消耗任何字符。如果返回false，nil，不返回任何字符，匹配失败。
+该函数返回的额外值，作为该Capture捕获的值

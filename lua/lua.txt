@@ -254,6 +254,99 @@ https://blog.csdn.net/zxm342698145/article/details/80607072
     创建一张新的表，并把列表 l 中的函数注册进去。
 43  void *lua_newuserdata(lua_State*L,size_t size) 
     在C中调用函数lua_newuserdata会根据指定的大小分配一块内存，并将相应的userdata压入栈中，最后返回这个内存块的地址：。
-44  lua_pushcclosure()  压入c方法，并根据栈上的参数创建闭包
+
+44  创建闭包 关键函数是int lua_pushcclosure(lua_State *L,lua_CFunction func,int n )，
+    其中n是堆栈顶端值得个数，这些值将复制到closure中，func是使用closure的函数，这个函数调用后会清除栈中n个值，会压入一个closure到栈中
+    
+    2，访问upvalue
+        当一个closure被调用，这个closure指定的函数就能通过upvalueindex索引访问所有upvalue。
+        比如:
+            int num=lua_tointeger(L,lua_upvalueindex(1));//获得第一个upvalue的值
+            int table_len=lua_objlen(L,upvalueindex(2));//获得第二个upvalue的长度
+            puts(lua_tostring(L,lua_upvalueindex(3)));//输出第三个upvalue
 
 45  LPEG是一个供lua使用的基于 Parsing Expression Grammars 的模式匹配库.
+
+46  void lua_setfield(lua_State *L, int index, const char *k);
+
+47  堆栈
+           -----
+      4   |     |  -1
+           -----
+      3   |     |  -2
+           -----
+      2   |     |  -3
+           -----
+      1   |     |  -4
+           -----
+             
+48  (1)原型 void lua_setfield (lua_State *L, int index, const char *k);
+    (2)作用
+        在lua脚本中表达的操作是：t[k] = v.  index指明了t在栈中的位置（说明：栈中首先要有表t），k代表了t的下标，v代表了赋予的值（即：放置在栈顶的元素） 
+    (注：调用这个函数之前，栈中应该有：表t 和 栈顶元素v)
+    (3)对栈的操作
+       调用完成后，会将栈顶元素v弹出
+
+49  void luaL_checkversion (lua_State *L);
+    检查调用它的内核是否是创建这个 Lua 状态机的内核。以及调用它的代码是否使用了相同的 Lua 版本。
+    同时也检查调用它的内核与创建该 Lua 状态机的内核是否使用了同一片地址空间。
+
+    https://blog.codingnow.com/2012/01/lua_link_bug.html
+    何在出现这个问题时立刻检查出问题呢?
+    可以在每个为 lua 写的 C 扩展库的第一行调用一下 luaL_checkversion , 它可以检查有没有多次链接 lua 库, 以及其它一些版本问题.
+
+50  
+..	连接两个字符串	a..b ，其中 a 为 "Hello " ， b 为 "World", 输出结果为 "Hello World"。
+#	一元运算符，返回字符串或表的长度。	#"Hello" 返回 5
+
+and	逻辑与操作符。 若 A 为 false，则返回 A，否则返回 B。	(A and B) 为 false。
+or	逻辑或操作符。 若 A 为 true，则返回 A，否则返回 B。	(A or B) 为 true。
+not	逻辑非操作符。与逻辑运算结果相反，如果条件为 true，逻辑非为 false。	not(A and B) 为 true。
+
+
+local type = [[
+    .Person {
+        name 0 : string
+        id 1 : integer
+        email 2 : string
+    
+        .PhoneNumber {
+            number 0 : string
+            type 1 : integer
+        }
+    
+        phone 3 : *PhoneNumber
+    }
+    
+    .AddressBook {
+        person 0 : *Person(id)
+        others 1 : *Person
+    }
+    
+    ]]
+    
+local pro = [[
+    testprot 1 {
+        request {
+            p       0 : Person
+            addr    1 : AddressBook
+        }
+        response {
+            ret      0 : integer
+        }
+    }
+]]
+
+51  可变参数
+    Lua 函数可以接受可变数目的参数，和 C 语言类似，在函数参数列表中使用三点 ... 表示函数有可变的参数。
+
+    function add(...)  
+    local s = 0  
+      for i, v in ipairs{...} do   --> {...} 表示一个由所有变长参数构成的数组  
+        s = s + v  
+      end  
+      return s  
+    end  
+    print(add(3,4,5,6,7))  --->25
+
+52  

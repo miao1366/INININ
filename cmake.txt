@@ -621,3 +621,5 @@ endif(CURL_FOUND)
 
 83  aux_source_directory(<dir> <variable>)
     收集指定目录中所有源文件的名称，并将列表存储在提供的<variable>变量中
+
+84  cmaek .. -DCROSS=ON
