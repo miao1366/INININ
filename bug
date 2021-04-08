@@ -85,3 +85,12 @@
 37 产生”undefined reference to  原因可能是库路径 和系统库路径顺序有问题，可以调换下顺序尝试下
 
 38 NFO_LOG这种类printf的日志打印在参数多的时候太容易出错了    //日志格式化输出
+
+39 我们写 C 程序，经常碰到 Crash，绝大部分情况下都是空指针或野指针造成，从 call stack 来看，
+   一般很容易找出问题。但是有一类 Crash 很难 debug，那就是内存溢出。溢出的部分的内存空间正好覆盖另外一个线程访问的数据（比如一个结构体），
+   那么另外一个线程读取这块数据时，获取的数据就是无效的，往往导致不可预见的错误，甚至 Crash。但因为造成数据溢出的线程已经离开现场，导致问题很难定位
+
+40  万幸，我们有很棒的运行时内存检查工具 valgrind, 可以通过运行它来找找蛛丝马迹。一运行(valgrind 有很多选项，我运行的是 
+    valgrind –leak-check=yes –track-origins=yes taosd -c test/dnode1/cfg)，一下就发现有 invalid write
+
+41  

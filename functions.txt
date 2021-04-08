@@ -233,7 +233,11 @@ to_string(x)
         long tv_nsec; /* 纳秒*/
  };
  
- 60 int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, 
+1秒=1000毫秒
+1毫秒=1000微秒
+1微秒=1000纳秒
+
+60 int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, 
                                const struct timespec *restrict abstime)
 							 
 							 
@@ -1682,3 +1686,8 @@ IPC_UNDO //程序结束时(不论正常或不正常)，保证信号值会被重�
 213    char *fgets(char *str, int n, FILE *stream);
        从指定的流 stream 读取一行，并把它存储在str所指向的字符串内。当读取(n-1)个字符时，
        或者读取到换行符时，或者到达文件末尾时，它会停止，具体视情况而定。
+
+214    int strcmp(const char *s1, const char *s2);
+       返回值：若s1、s2字符串相等，则返回零；若s1大于s2，则返回大于零的数；否则，则返回小于零的数。
+
+215    

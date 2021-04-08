@@ -7,6 +7,103 @@
     https://github.com/cloudwu/skynet/wiki/ThirdPartyDocument
     https://www.cnblogs.com/RainRill/p/9019614.html
 
+    https://www.jianshu.com/u/a0a85735b129  简书
+
 3.  LPEG是一个供lua使用的基于 Parsing Expression Grammars 的模式匹配库
     https://blog.csdn.net/suzuiyue/article/details/52905372
     https://blog.csdn.net/akof1314/article/details/8049649
+
+4. skynet_mq.c    先进先出队列
+
+5. struct message_queue {
+    int in_global;
+};
+
+6. skynet_mq.c    消息文件
+
+7. skynet.h    模组对外头文件
+
+8.  Skynet 仅解决一个问题： 
+    把一个符合规范的 C 模块，从动态库（so 文件）中启动起来，绑定一个永不重复（即使模块退出）的数字 id 做为其 handle 。
+    模块被称为服务（Service），服务间可以自由发送消息。每个模块可以向 Skynet 框架注册一个 callback 函数，用来接收发给它的消息。
+    每个服务都是被一个个消息包驱动，当没有包到来的时候，它们就会处于挂起状态，对 CPU 资源零消耗。
+    如果需要自主逻辑，则可以利用 Skynet 系统提供的 timeout 消息，定期触发
+
+9.  for (i=0; i<n; ++i) {
+        if (s->name[i].handle == handle) {
+            skynet_free(s->name[i].name);
+            continue;
+        } else if (i!=j) {
+            s->name[j] = s->name[i];
+        }
+        ++j;
+    }
+    s->name_count = j;
+
+10  
+    while (begin<=end) {
+        int mid = (begin+end)/2;
+        struct handle_name *n = &s->name[mid];
+        int c = strcmp(n->name, name);     //按照从小到大排序
+        if (c==0) {
+            return NULL;
+        }
+        if (c<0) {
+            begin = mid + 1;
+        } else {
+            end = mid - 1;
+        }
+    }
+
+11 skynet是单进程多线程的，线程的种类有monitor/timer/socket/worker，monitor在第4篇中讲过了，就是监控服务是不是陷入死循环了。
+   timer是skynet自己实现的定时器。socket是负责网络的，这个应该是最容易被理解的。worker就是工作线程了，monitor/timer/socket都只有一个线程，
+   唯独worker有多个线程，是可配的，不配的话是8个线程。每个工作线程有个叫worker_parm的参数
+
+12  TIME_NEAR_SHIFT    8
+    TIME_NEAR          2^8   256
+    TIME_NEAR_MASK     255
+    TIME_LEVEL_SHIFT   6
+    TIME_LEVEL         2^6   64
+    TIME_LEVEL_MASK    63
+    TIME_NEAR << TIME_LEVEL_SHIFT  2^14  16384
+    2^8    2^14    2^20    2^26    2^32
+
+13  struct link_list t[4][TIME_LEVEL]     [0][2]比[2][2]更接近触发的定时器, [0][0]比[0][2]更接近触发的定时器
+
+14
+        uint32_t time = ct >> TIME_NEAR_SHIFT;
+        int i=0;
+        while ((ct & (mask-1))==0) {
+            int idx=time & TIME_LEVEL_MASK;
+            if (idx!=0) {
+                move_list(T, i, idx);
+                break;				
+            }
+            mask <<= TIME_LEVEL_SHIFT;
+            time >>= TIME_LEVEL_SHIFT;
+            ++i;
+        }
+
+15
+        if (ct == 0) {
+            move_list(T, 3, 0);
+        }
+
+16  skynet中的时间精度是10ms级别
+
+17
+    struct timer {
+        struct link_list near[TIME_NEAR];
+        struct link_list t[4][TIME_LEVEL];
+        struct spinlock lock;
+        uint32_t time;
+        uint32_t starttime;         //1970-01-01到现在的秒数
+        uint64_t current;           //1970-01-01到现在的纳秒数/1000000   (10毫秒数)
+        uint64_t current_point;     //系统启动时间毫秒数/10
+    };
+
+18  skynet_timer.c 
+    1. timer_shift()
+    2. node->expire=time+T->time;
+
+19  

@@ -54,8 +54,4 @@ ptrdiff_t   size_t   wchar_t   	NULL   	offsetof(type, member-designator)
 
 20 头文件 <sys/un.h>    struct sockaddr_un server_sockaddr;    struct sockaddr_un cli_sockaddr ;
 
-
-
-
-
-
+21 #include <stdatomic.h>    atomic_int

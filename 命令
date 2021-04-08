@@ -936,3 +936,8 @@ $ grep "invalid user" /var/log/auth.log | cut -d ' ' -f 10 | sort | uniq -c | so
         sudo apt-get remove软件名
 
 127     aarch64-linux-gnu-gcc    -v
+
+128     file filename　　#filename表示要查看的文件名
+
+129    linux 如何查看一个软连接实际指向的文件的位置  
+       在Linux命令行界面输入命令:ls -al 带有“->”符号的则为软连接
