@@ -1,0 +1,172 @@
+1. 
+https://goproxy.cn/
+https://golang.google.cn/doc/install?download=go1.16.3.linux-amd64.tar.gz
+go env -w GO111MODULE=on
+go env -w GOPROXY=https://goproxy.cn,direct
+
+2.  /*...*/ 是注释，在程序执行时将被忽略。单行注释是最常见的注释形式，你可以在任何地方使用以 // 开头的单行注释。多行注释也叫块注释
+
+3. 
+文件名与包名没有直接关系，不一定要将文件名与包名定成同一个。
+文件夹名与包名没有直接关系，并非需要一致。
+同一个文件夹下的文件只能有一个包名，否则编译报错。
+
+测试代码:
+// helloworld.go
+package main
+
+import (
+"fmt"
+"./myMath"
+)
+
+func main(){
+    fmt.Println("Hello World!")
+    fmt.Println(mathClass.Add(1,1))
+    fmt.Println(mathClass.Sub(1,1))
+}
+// myMath1.go
+package mathClass
+func Add(x,y int) int {
+    return x + y
+}
+// myMath2.go
+package mathClass
+func Sub(x,y int) int {
+    return x - y
+}
+
+4. 在 Go 程序中，一行代表一个语句结束。每个语句不需要像 C 家族中的其它语言一样以分号 ; 结尾，因为这些工作都将由 Go 编译器自动完成。
+   如果你打算将多个语句写在同一行，它们则必须使用 ; 人为区分，但在实际开发中我们并不鼓励这种做法
+
+5. 
+序号	类型和描述
+1	布尔型
+布尔型的值只可以是常量 true 或者 false。一个简单的例子：var b bool = true。
+2	数字类型
+整型 int 和浮点型 float32、float64，Go 语言支持整型和浮点型数字，并且支持复数，其中位的运算采用补码。
+3	字符串类型:
+字符串就是一串固定长度的字符连接起来的字符序列。Go 的字符串是由单个字节连接起来的。Go 语言的字符串的字节使用 UTF-8 编码标识 Unicode 文本。
+4	派生类型:
+包括：
+(a) 指针类型（Pointer）
+(b) 数组类型
+(c) 结构化类型(struct)
+(d) Channel 类型
+(e) 函数类型
+(f) 切片类型
+(g) 接口类型（interface）
+(h) Map 类型
+
+5 数字类型
+Go 也有基于架构的类型，例如：int、uint 和 uintptr。
+序号	类型和描述
+1	uint8   无符号 8 位整型 (0 到 255)
+2	uint16  无符号 16 位整型 (0 到 65535)
+3	uint32  无符号 32 位整型 (0 到 4294967295)
+4	uint64  无符号 64 位整型 (0 到 18446744073709551615)
+5	int8    有符号 8 位整型 (-128 到 127)
+6	int16   有符号 16 位整型 (-32768 到 32767)
+7	int32   有符号 32 位整型 (-2147483648 到 2147483647)
+8	int64   有符号 64 位整型 (-9223372036854775808 到 9223372036854775807)
+浮点型
+序号	类型和描述
+1	float32      IEEE-754 32位浮点型数
+2	float64      IEEE-754 64位浮点型数
+3	complex64    32 位实数和虚数
+4	complex128   64 位实数和虚数
+其他数字类型
+以下列出了其他更多的数字类型：
+
+序号	类型和描述
+1	byte       类似 uint8
+2	rune       类似 int32
+3	uint       32 或 64 位
+4	int        与 uint 一样大小
+5	uintptr    无符号整型，用于存放一个指针
+
+6. 
+    第一种，指定变量类型，如果没有初始化，则变量默认为零值(bool 默认为false)  var v_name v_type
+    第二种，根据值自行判定变量类型。 var v_name = value
+    第三种，省略 var, 注意 := 左侧如果没有声明新的变量，就产生编译错误，格式
+
+7.  Go 语言常量
+    const identifier [type] = value
+    常量还可以用作枚举：
+    const (
+        Unknown = 0
+        Female = 1
+        Male = 2
+    )
+    常量可以用len(), cap(), unsafe.Sizeof()函数计算表达式的值。常量表达式中，函数必须是内置函数，否则编译不过
+    package main
+    package main
+
+    import "fmt"
+    func main() {
+        const (
+                a = iota   //0
+                b          //1
+                c          //2
+                d = "ha"   //独立值，iota += 1
+                e          //"ha"   iota += 1
+                f = 100    //iota +=1
+                g          //100  iota +=1
+                h = iota   //7,恢复计数
+                i          //8
+        )
+        fmt.Println(a,b,c,d,e,f,g,h,i)
+    }
+    以上实例运行结果为：0 1 2 ha ha 100 100 7 8
+
+import "fmt"
+const (
+    i=1<<iota
+    j=3<<iota
+    k
+    l
+)
+func main() {
+    fmt.Println("i=",i)
+    fmt.Println("j=",j)
+    fmt.Println("k=",k)
+    fmt.Println("l=",l)
+}
+i= 1
+j= 6
+k= 12
+l= 24
+
+8 
+&	返回变量存储地址	&a; 将给出变量的实际地址。
+*	指针变量。	       *a; 是一个指针变量
+
+9. select 语句	select 语句类似于 switch 语句，但是select会随机执行一个可运行的case。如果没有case可运行，它将阻塞，直到有case可运行。
+
+10. 给导入包起别名
+import io "fmt" //引用fmt这个包时，名字重命名为io
+import _ "os"    //引用os这个包，但是不调用，其实就是引用它的init函数
+
+11. Go 语言函数返回错误 error 的方法
+import (
+    ...
+    "errors"
+    ...
+)
+func TestError() error {
+    ...
+    return errors.New("My Error Message!")
+}
+
+12. 
+也就是说，只要receiver是值类型的，无论是使用值类型的实例还是指针类型的实例，都是拷贝整个底层数据结构的，方法内部访问的和修改的都是实例的副本。所以，如果有修改操作，不会影响外部原始实例。
+setage()中，receiver部分(p *person)明确指定了要拷贝的对象是指针类型的实例，无论是指针类型的实例p1还是值类型的p2，都是拷贝指针。所以p2.setage()等价于(&p2).setage()。
+也就是说，只要receiver是指针类型的，无论是使用值类型的实例还是指针类型的实例，都是拷贝指针，方法内部访问的和修改的都是原始的实例数据结构。所以，如果有修改操作，会影响外部原始实例。
+那么选择值类型的receiver还是指针类型的receiver？一般来说选择指针类型的receiver。
+
+13. 指针类型 var p *int
+
+14. type关键字（类型别名）
+    type byte = uint8
+    type rune = int32
+    

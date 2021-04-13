@@ -74,22 +74,11 @@ sqlite3_step()
 12  int sqlite3_step(sqlite3_stmt *pStmt)
    有数据可读返回 SQLITE_ROW , 没有数据可读返回SQLITE_DONE
 
-
-
-
-
-
-
 随机插入一行记录(遥测数据)
 insert into BreakerTelemetry(
 DeviceId, A_phsA, A_phsB, A_phsC, PhV_phsA, PhV_phsB, PhV_phsC, TotW, TotVar, published, TimeStamp
 ) values
 ('8a:8d:e2:ae:49:31', abs(random() % 110), abs(random() % 110), abs(random() % 110), abs(random() % 380), abs(random() % 380), abs(random() % 380), abs(random() % 2200), abs(random() % 150), 0, 1599201667)
-
-
-
-
-
 
 随机插入一行记录(遥信数据)
 insert into BreakerTeleSignal(
@@ -134,7 +123,7 @@ delete from image where id = 7;  // 删除image表 id=7 的数据
 https://blog.csdn.net/linux_wgl/article/details/51620343
 
 sqlite3  database file
-.tables  show all table
+.tables  show all table    //不需要分号
 
 delete from search_history where (select count(keyword) from search_history 
 )> 50 and keyword in (select keyword from search_history order by time desc limit (select count(keyword) from search_history) offset 50 )
@@ -146,10 +135,9 @@ insert into PublishTable (TimeStamp, data) values(strftime('%s','now'),"ss");
 http://www.bejson.com/validators/yaml_editor/
 
 
+13 .schema table_name 查看表的结构
 
-
-
-
+14 .exit  退出sqlite3
 
 
 

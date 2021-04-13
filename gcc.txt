@@ -40,4 +40,8 @@ gcc -Wall -Wextra -Werror
 21  -E  在正常的情况下，GCC 不会保留预处理阶段的输出文件，也即.i文件。
     然而，可以利用-E选项保留预处理器的输出文件，以用于诊断代码。-E选项指示GCC在预处理完毕之后即可停止
 
-22  
+22  gcc -E kqueue.h -o kqueue.i    编译成预处理文件
+    预处理过滤代码中的不需要的代码
+    gcc -E file.c -o file.i
+    预处理过滤代码中的不需要的代码，并且保留注释
+    gcc -E -C file.c -o file.i

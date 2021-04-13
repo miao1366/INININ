@@ -127,3 +127,5 @@ AT_RANDOM：The value is a pointer to sixteen random bytes provided by the kerne
 /proc/[pid]/status 包含进程的状态信息。其很多内容与 /proc/[pid]/stat 和 /proc/[pid]/statm 相同，但是却是以一种更清晰地方式展现出来
 /proc/[pid]/syscall 显示当前进程正在执行的系统调用
 /proc/[pid]/wchan 显示当进程 sleep 时，kernel 当前运行的函数
+
+8 queue.h 

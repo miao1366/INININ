@@ -941,3 +941,21 @@ $ grep "invalid user" /var/log/auth.log | cut -d ' ' -f 10 | sort | uniq -c | so
 
 129    linux 如何查看一个软连接实际指向的文件的位置  
        在Linux命令行界面输入命令:ls -al 带有“->”符号的则为软连接
+
+130     
+        将没有出现 root 的行取出来
+        $ grep -v root /etc/passwd
+
+131    回收站位置  ~/.local/share/Trash
+
+132    Linux中修改环境变量及生效方法
+       方法一：
+　　        在/etc/profile文件中添加变量【对所有用户生效(永久的)】
+　　        用VI在文件/etc/profile文件中增加变量，该变量将会对Linux下所有用户有效，并且是“永久的”。
+　　        要让刚才的修改马上生效，需要执行以下代码
+　　        # source /etc/profile
+　　    方法二：
+　　        在用户目录下的.bash_profile文件中增加变量【对单一用户生效(永久的)】
+　　        用VI在用户目录下的.bash_profile文件中增加变量，改变量仅会对当前用户有效，并且是“永久的”。
+　　        要让刚才的修改马上生效，需要在用户目录下执行以下代码
+　　        # source .bash_profile

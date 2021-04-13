@@ -679,6 +679,8 @@ timefd_*系列函数优点:
 	POLLHUP:	指定的文件描述符挂起事件。
 	POLLNVAL:	指定的文件描述符非法。
 	
+    该函数返回需要处理的事件数目，如返回0表示已超时。如果返回–1，则表示出现错误，需要检查 errno错误码判断错误类型
+
 103 	#include <arpe/inet.h>
    这两个函数是随IPv6出现的函数，对于IPv4地址和IPv6地址都适用，函数中p和n分别代表表达（presentation)和数值（numeric)。
    地址的表达格式通常是ASCII字符串，数值格式则是存放到套接字地址结构的二进制值
@@ -1690,4 +1692,29 @@ IPC_UNDO //程序结束时(不论正常或不正常)，保证信号值会被重�
 214    int strcmp(const char *s1, const char *s2);
        返回值：若s1、s2字符串相等，则返回零；若s1大于s2，则返回大于零的数；否则，则返回小于零的数。
 
-215    
+215     在C11标准中，首次引入原子操作，正式将其标准化。然而在我现在的系统ubuntu14.04上，仍然不能使用man来查看其相关手册，需要看标准文档。ansi.org上的文档估计要$60吧，
+        不过在网上还能免费下载到草案文档WG14 draft version N1570。里面7.17 Atomics <stdatomic.h>章节中给出了详尽的定义。这里简单的介绍一下。
+        首先，定义了所需要引用的头文件stdatomic.h。在我的系统上，该头文件并没有在/usr/include目录下，而是/usr/lib/gcc/x86_64-linux-gnu/4.9/include/stdatomic.h
+        插一句题外话，从标准中还可以看到stdbool.h，stdint.h, stddef.h等等头文件，定义了很多以前标准中没有、然而特别实用的类型，特别是很多C++里的类型。
+        其次，标准定义了__STDC_NO_ATOMICS__宏，用来在编译时检测是否支持stdatomic。同时还有一系列的宏和函数用来判断各种数据类型在当前的实现中是否支持原子操作，
+        例如ATOMIC_CHAR_LOCK_FREE, atomic_is_lock_free。
+        然后，标准引入了memory order and consistency，在不同的memory order下，原子操作的效率和严格性不尽相同，具体可以看这里和这里。
+        同时，标准定义了许多原子数据类型，例如atomic_char, atomic_int, atomic_size_t。必须使用这些数据类型，因为其类型内部可能包含其他数据来保证原子性操作。
+        初始化原子变量可以使用如下函数，但不保证原子性(当然一般也不会在多线程中进行初始化):
+        
+        ATOMIC_VAR_INIT
+        atomic_init
+        ATOMIC_FLAG_INIT
+       
+        操作原子变量则使用如下函数，保证原子性:
+        atomic_store
+        atomic_load
+        atomic_exchange
+        atomic_compare_exchange_strong, atomic_compare_exchange_weak
+        atomic_fetch_add, atomic_fetch_sub, atomic_fetch_or, atomic_fetch_xor, atomic_fetch_and
+        atomic_flag_test_and_set
+        atomic_flag_clear
+
+216  原型：int mkdir (const char *filename, mode_t mode)
+    以model方式创建一个以参数pathname命名的目录，mode定义新创建目录的权限
+    返回0表示成功，返回-1表述出错。使用该函数需要包含头文件sys/stat.h
