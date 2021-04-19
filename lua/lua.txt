@@ -50,7 +50,8 @@
    https://itbook.xuxinkai.cn/read/lua-5.3/spilt.32.spilt.1.5.md
    
    https://www.cnblogs.com/chenny7/p/3993456.html     ×××
-   
+   https://www.wenjiangs.com/doc/lual_loadbuffer
+
 10 Lua判断OS并添加cpath
 
 Lua初始化时需要根据OS来设置package.cpath,
@@ -123,6 +124,31 @@ $	匹配字符串结尾
 你可能更喜欢使用'[0-7]'而不是'[01234567]'。你可以在字符集(char-set)的开始处使用 `^′ 表示其补集: '[^0-7]' 匹配任何不是八进制数字的字符
 %b'用来匹配对称的字符.常写为 '%bxy',x和y是任意两个不同的字符；x作为匹配的开始,y作为匹配的结束。比如， '%b()'匹配以`(′开始， 以 `)′结束的字符串:
 常用的这种模式有： '%b()', '%b[]', '%b%{%}',和 '%b<>'。你也可以使用任何字符作为分隔符
+
+------------------------------------------------------------
+------------------------------------------------------------
+在模式匹配中有一些特殊字符，他们有特殊的意义，Lua中的特殊字符如下：
+( ) . % + - * ? [ ^ $
+'%' 用作特殊字符的转义字符，因此 '%.' 匹配点；'%%' 匹配字符 '%'。转义字符 '%'不仅可以用来转义特殊字符，还可以用于所有的非字母的字符。
+
+模式条目可以是：
+
+单个字符类匹配该类别中任意单个字符；
+单个字符类跟一个 '*'， 将匹配零或多个该类的字符。 这个条目总是匹配尽可能长的串；
+单个字符类跟一个 '+'， 将匹配一或更多个该类的字符。 这个条目总是匹配尽可能长的串；
+单个字符类跟一个 '-'， 将匹配零或更多个该类的字符。 和 '*' 不同， 这个条目总是匹配尽可能短的串；
+单个字符类跟一个 '?'， 将匹配零或一个该类的字符。 只要有可能，它会匹配一个；
+%n， 这里的 n 可以从 1 到 9； 这个条目匹配一个等于 n 号捕获物（后面有描述）的子串。
+%bxy， 这里的 x 和 y 是两个明确的字符； 这个条目匹配以 x 开始 y 结束， 且其中 x 和 y 保持 平衡 的字符串。 意思是，如果从左到右读这个字符串，对每次读到一个 x 就 +1 ，读到一个 y 就 -1， 
+最终结束处的那个 y 是第一个记数到 0 的 y。 举个例子，条目 %b() 可以匹配到括号平衡的表达式。
+%f[set]， 指 边境模式； 这个条目会匹配到一个位于 set 内某个字符之前的一个空串， 且这个位置的前一个字符不属于 set 。 集合 set 的含义如前面所述。 匹配出的那个空串之开始和结束点的计算就看成该处有个字符 '\0' 一样。
+模式：
+模式 指一个模式条目的序列。 在模式最前面加上符号 '^' 将锚定从字符串的开始处做匹配。 在模式最后面加上符号 '$' 将使匹配过程锚定到字符串的结尾。 如果 '^' 和 '$' 出现在其它位置，它们均没有特殊含义，只表示自身。
+捕获：
+模式可以在内部用小括号括起一个子模式； 这些子模式被称为 捕获物。 当匹配成功时，由 捕获物 匹配到的字符串中的子串被保存起来用于未来的用途。 捕获物以它们左括号的次序来编号。 例如，对于模式 "(a*(.)%w(%s*))" ， 
+字符串中匹配到 "a*(.)%w(%s*)" 的部分保存在第一个捕获物中 （因此是编号 1 ）； 由 "." 匹配到的字符是 2 号捕获物， 匹配到 "%s*" 的那部分是 3 号。
+作为一个特例，空的捕获 () 将捕获到当前字符串的位置（它是一个数字）。 例如，如果将模式 "()aa()" 作用到字符串 "flaaap" 上，将产生两个捕获物： 3 和 5 。
+
 
 14  文件io  从当前位置读取整个文件。例：file.read("*a")
 
@@ -351,3 +377,198 @@ local pro = [[
 
 52 .. 链接两个字符串
 
+53  int luaL_loadbuffer (lua_State *L, const char *buff, size_t sz, const char *name);
+Loads a buffer as a Lua chunk. This function uses lua_load to load the chunk in the buffer pointed to by buff with size sz.
+This function returns the same results as lua_load(). name is the chunk name, used for debug information and error messages.
+
+54  int luaL_loadbufferx (lua_State *L, const char *buff, size_t size, const char *name, const char *mode)
+    类似于luaL_loadbuffer()
+
+55  Lua 字符串
+    字符串或串(String)是由数字、字母、下划线组成的一串字符。
+    Lua 语言中字符串可以使用以下三种方式来表示：
+    单引号间的一串字符。
+    双引号间的一串字符。
+    [[ 与 ]] 间的一串字符
+
+56  include    作用应该是把某个文件所有的内容包含进来。
+
+57   lua load()
+local function loadconfig(tmp)
+if tmp == nil then
+    tmp = {}
+    if config_name then
+        local f = assert(io.open(config_name))
+        local source = f:read "*a"
+        f:close()
+        assert(load(source, "@"..config_name, "t", tmp))()
+    end
+end
+for name,address in pairs(tmp) do
+    assert(type(address) == "string")
+    if node_address[name] ~= address then
+        -- address changed
+        if rawget(node_channel, name) then
+            node_channel[name] = nil    -- reset connection
+        end
+        node_address[name] = address
+    end
+end
+end
+
+58  string.gsub
+函数原型 string.gsub(s, pat, repl [, n])
+就是 global 全局替换子字符串的意思
+s: 源字符串
+pat: 即 pattern， 匹配模式
+repl: replacement， 将 pat 匹配到的字串替换为 repl
+[, n]: 可选， 表示只看源字符串的前 n 个字符
+
+59 metatable
+__index 元方法, 这是 metatable 最常用的键。
+当你通过键来访问 table 的时候，如果这个键没有值，那么Lua就会寻找该table的metatable（假定有metatable）
+中的__index 键。如果__index包含一个表格，Lua会在表格中查找相应的键
+
+60 lua_getglobal()
+
+int main(int argc, char *argv[])
+{
+    const char* buf = "background = {r=30, g=10, b=0} ";
+    lua_State* L = luaL_newstate();
+    luaL_dostring(L, buf);
+    lua_getglobal(L, "background");//获取全局变量的background的值,并将其放入栈顶
+    if (!lua_istable(L, -1))//判断是否是table
+    {
+        
+    }
+    int red = getfield("r", L);
+    int green = getfield("g", L);
+    int black = getfield("b", L);
+
+    getchar();
+
+    return 0;
+}
+
+61lua_pop(L,num)函数从栈顶开始移除。
+
+当num>0时从栈顶移除指定个数 。
+ 当num=0时栈不受影响
+当num=-1时栈中元素全部移除 
+其他负数逻辑就有点乱了，建议不要使用其他(<-1)负值。最终的解释权还得看lua_settop.
+
+61  lua_setglobal
+(1)原型
+    void lua_setglobal (lua_State *L, const char *name);
+(2)作用
+    将栈顶元素赋值给name变量。(name参数的值，是lua脚本中全部变量的名字。)
+    (注：调用完函数，我们调用luaL_dofile,然后我们就可以在lua脚本中打印出_G表中内容，会发现name名字的变量正在其中，所以可以在lua脚本中操作该name名变量)
+(3)对栈的操作
+    调用完成后，会将栈顶元素弹出
+
+62  lua_getglobal
+(1)原型
+    void lua_getglobal (lua_State *L, const char *name);
+(2)作用
+    从lua脚本中获取一个name参数描述的变量，放到栈顶
+(3)对栈的操作
+  将获得的变量，放置到栈顶 
+
+63  lua_setfield
+(1)原型
+    void lua_setfield (lua_State *L, int index, const char *k);
+(2)作用
+    在lua脚本中表达的操作是：t[k] = v.  index指明了t在栈中的位置（说明：栈中首先要有表t），k代表了t的下标，v代表了赋予的值（即：放置在栈顶的元素） 
+(注：调用这个函数之前，栈中应该有：表t 和 栈顶元素v)
+(3)对栈的操作
+    调用完成后，会将栈顶元素v弹出。
+
+64  lua_getfield
+(1)原型
+    void lua_getfield (lua_State *L, int index, const char *k);
+(2)作用
+    取t[k]的值放到栈顶，index指出栈中t表的位置， k为t的key值
+(3)对栈的操作
+    放置t[k] 的值到栈顶
+65  lua_push*
+(1)原型 
+    lua_pushnil(lua_State *L, xxx)
+    lua_pushstring(lua_State *L, xxx)
+    lua_pushnumber(lua_State *L, xxx)
+    lua_pushinteger(lua_State *L, xxx)
+(2)作用
+    放置xxx元素到栈顶
+(3)对栈的操作
+    放置一个元素到栈顶
+
+66  lua_to*
+(1)原型
+(2)作用
+    将index指明位置上的元素转换为对应类型返回
+(3)对栈的操作
+    不会改变栈的大小，内容.
+67  lua_is*
+(1)原型
+    int  lua_isstring(lua_State *L, int index)
+    ...
+(2)作用
+    判断index指明位置上的元素是为对应的*类型，这里是string.  如果是则返回1，否则返回0
+(3)对栈的操作
+    不会改变栈的大小，内容
+68  lua_pcall
+(1)原型
+    lua_pcall(lua_State *L, int nargs, int nresults, int errfunc);
+(2)作用
+    调用函数.nargs指明了参数的个数，nresults指明了返回结果的个数，errfunc指明了发生错误的处理函数
+(注：调用lua_pcall之前，我们应该先：放置一个函数到栈中（可用：lua_getglobal）,然后压入要传递的参数（可用：lua_push*）)
+(3)对栈的操作
+    调用lua_pcall之后，它会首先将栈中的：函数，参数全部弹出 ； 然后：将结果一次压入栈中。
+69.lua_gettop
+(1)原型
+    int lua_gettop (lua_State *L);
+(2)作用
+    获取栈中的元素个数
+(3)对栈的操作
+    不会修改栈的内容和大小
+70.lua_settop
+(1)原型
+    void lua_settop (lua_State *L, int index);
+(2)作用
+    如果新传入的index比原来的栈顶大，那么超出的元素被填入nil. 可以传入0，那么栈将会被清空
+(3)对栈的操作
+    会修改栈的大小
+71  lua_pop
+(1)原型
+    void lua_pop (lua_State *L, int n);
+(2)作用
+    从栈中弹出n个元素
+(3)对栈的操作
+    从战中弹出n个元素
+
+72  lua_settable
+(1)原型
+    void lua_settable (lua_State *L, int index);
+(2)作用
+    t[k] = v的作用， index指明了栈中t表的位置，v是栈顶的值，k是栈顶之下的那个值
+(3)对栈的操作
+    调用这个函数之后，会将v和k的值从栈中弹出。
+73  lua_gettable
+(1)原型
+    void lua_gettable (lua_State *L, int index);
+(2)作用
+    将t[k]的值放到栈顶， index指明栈中t表的位置， k从何而来呢？调用这个函数时，k代表了在栈顶元素。
+(3)对栈的操作
+    调用这个函数后，会将k从栈顶弹出，然后再把t[k]值放到栈顶
+74  lua_next() 这个函数的工作过程是：
+1) 先从栈顶弹出一个 key
+2) 从栈指定位置的 table 里取下一对 key-value，先将 key 入栈再将 value 入栈
+3) 如果第 2 步成功则返回非 0 值，否则返回 0，并且不向栈中压入任何值
+第 2 步中从 table 里取出所谓“下一对 key-value”是相对于第 1 步中弹出的 key 的。table 里第一对 key-value 的前面没有数据，所以先用 lua_pushnil() 压入一个 nil 充当初始 key。
+注意开始的时候先用 lua_gettop() 取了一下 table 在栈中的正索引（前面说过了，在进行这个 lua_next() 过程之前先将 table 入栈，所以栈大小就是 table 的正索引），后面的 lua_next() 
+过程中不断的有元素出入栈，所以使用正索引来定位 table 比较方便。
+到了 table 中已经没有 key-value 对时，lua_next() 先弹出最后一个 key，然后发现已经没有数据了会返回 0，while 循环结束。所以这个 lua_next() 过程结束以后 table 就又位于栈顶了
+
+75  lua_close
+代码：LUA_API void lua_close (lua_State *L) {
+销毁指定虚拟机的所有对像（如果有垃圾回收相关的无方法则会调用该方法）并收回所有由该虚拟机动态分配产生的内存，在有些平台下我们不需要调用此函数，因为当主程序退出时，
+资源会被自然的释放掉，但是但一个长时间运行的程序，比如后台运行的web服务器，需要立即回收虚拟机资源以避免内存过高占用

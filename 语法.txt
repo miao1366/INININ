@@ -499,7 +499,9 @@ int main() {
 	0644->即用户具有读写权限，组用户和其它用户具有只读权限；
  	一般赋予目录0755权限，文件0644权限
 	
-108 FILE*fdopen(intfildes,constchar*mode);   //把流与一个文件句柄相接
+108 FILE*fdopen(intfildes,constchar*mode);   //把流与一个文件句柄相接    FILE *f = fdopen(fd, "w+");
+    fdopen 函数用于在一个已经打开的文件描述符上打开一个流，其第1个参数表示一个已经打开的文件描述符，第2个参数type的意义和fopen函数的第2个参数一 样。
+    只有一点不同的是，由于文件已经被打开，所以fdopen函数不会创建文件，而且也不会将文件截短为0，这一点要特别注意
 
 109 define SIZE_MAX		(18446744073709551615UL)
 

@@ -93,4 +93,8 @@
 40  万幸，我们有很棒的运行时内存检查工具 valgrind, 可以通过运行它来找找蛛丝马迹。一运行(valgrind 有很多选项，我运行的是 
     valgrind –leak-check=yes –track-origins=yes taosd -c test/dnode1/cfg)，一下就发现有 invalid write
 
-41  
+41  问题：Linux环境下编程时，在读串口时，出现“Resource temporarily unavailable”的错误提示。
+    原因：串口设置成了非阻塞模式，但是没有用select去判断是否有数据到来就去读。
+    解决方法：要么将串口设置成阻塞模式，要么使用select。
+
+42  -ldl dlclose(), dlopen(), dlsym()

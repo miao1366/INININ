@@ -4,3 +4,16 @@
 
 3. LUA语言没有实现独立的线程，但是实现了协程序
 
+4. os.getenv(variable)
+    返回环境变量的值，如果不存在，返回nil。
+    print(os.getenv('HOME')) -- /root
+    print(os.getenv('ROOT')) -- nil
+
+5. 当Lua遇到不期望的情况时就会抛出错误，比如：两个非数字进行相加；调用一个非函数的变量；
+   访问表中不存在的值等。你也可以通过调用error函数显示的抛出错误，error的参数是要抛出的错误信息。
+   assert(a,b) a是要检查是否有错误的一个参数，b是a错误时抛出的信息。第二个参数b是可选的
+   assert()在a为false 或者 nil时才会触发断言
+    print(assert(1, "hello world"))          //1       hello world
+    print(type(assert(1, "hello world")))    //number
+
+6. 

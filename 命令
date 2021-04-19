@@ -959,3 +959,8 @@ $ grep "invalid user" /var/log/auth.log | cut -d ' ' -f 10 | sort | uniq -c | so
 　　        用VI在用户目录下的.bash_profile文件中增加变量，改变量仅会对当前用户有效，并且是“永久的”。
 　　        要让刚才的修改马上生效，需要在用户目录下执行以下代码
 　　        # source .bash_profile
+
+133    echo miao | sudo -S docker ps -a
+
+134     sudo apt-get install sshpass
+        sshpass -p senscape ssh senscape@192.168.0.195

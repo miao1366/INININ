@@ -127,3 +127,40 @@
 21  SOCKET_TYPE_HALFCLOSE_READ
 
 22  socket_server.c  ctrl_cmd() return -1成功;
+
+23  
+    首先是lua调c，lua到C层的参数是按顺序来的，也就是说第一个参数就是1，第二个就是2....第n个就是n。从C层传递到lua层也是一样，但是会多一个参数个数
+    这是一个lua调C以后，C返回的例子
+    static int foo (lua_State *L) {
+      int n = lua_gettop(L);    /* number of arguments */  参数个数
+      lua_Number sum = 0.0;
+      int i;
+      for (i = 1; i <= n; i++) {
+        if (!lua_isnumber(L, i)) { //参数是不是数字
+          lua_pushliteral(L, "incorrect argument"); //不是数字报错
+          lua_error(L);
+        }
+        sum += lua_tonumber(L, i); //取第i个参数
+      }
+      lua_pushnumber(L, sum/n);        /* first result */ 第一个返回值
+      lua_pushnumber(L, sum);         /* second result */ 第二个返回值
+      return 2;                   /* number of results */ 一共两个返回值
+    }
+
+24  struct skynet_node {
+	ATOM_INT total;
+	int init;
+	uint32_t monitor_exit;
+	pthread_key_t handle_key;
+	bool profile;	// default is off
+};
+
+25  luaL_initcodecache()  //  云风自己定义的函数，修改lua的源码了。
+    #ifdef LUA_CACHELIB
+    // init the lock of code cache
+    luaL_initcodecache();
+    #endif
+
+26  luaL_openlibs() 在给定的Lua状态机中打开所有的标准Lua库
+
+27  thread:8, module_path:./cservice/?.so, harbor:1, bootstrap:snlua bootstrap, logservice:logger, profile:1

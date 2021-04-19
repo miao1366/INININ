@@ -141,7 +141,7 @@ cmake内置变量是区分大小写的，或者干脆就说，cmake的所有变�
 lc 是link libc
 lm 是link libm
 lz 是link libz
-
+ldl dlclose(), dlopen(), dlsym()
 28 -fno-use-cxa-atexit   // 
    c++ dlclose()不调用全局对象的析构函数 这个问题在GCC的后期版本中得到解决，包括C/C++标准库和链接器。
    基本上，C析构函数应该使用__cxa_atexit函数而不是atexit(3)进行注册.
