@@ -528,9 +528,9 @@ int main() {
    如果是用pthread_kill产生的内部信号，则只有pthread_kill参数中指定的目标线程收到并处理。
    如果是外部使用kill命令产生的信号，通常是SIGINT、SIGHUP等job control信号，则会遍历所有线程，直到找到一个不阻塞该信号的线程，
    然后调用它来处理。(一般从主线程找起)，注意只有一个线程能收到。
-　 其次，每个线程都有自己独立的signal mask，但所有线程共享进程的signal action。这意味着，你可以在线程中调用pthread_sigmask(不是sigmask)来决定本线程阻塞哪些信号。
-  但你不能调用sigaction来指定单个线程的信号处理方式。如果在某个线程中调用了sigaction处理某个信号，那么这个进程中的未阻塞这个信号的线程在收到这个信号都会按同一种方式处理这个信号。
-  另外，注意子线程的mask是会从主线程继承而来的。
+   其次，每个线程都有自己独立的signal mask，但所有线程共享进程的signal action。这意味着，你可以在线程中调用pthread_sigmask(不是sigmask)来决定本线程阻塞哪些信号。
+   但你不能调用sigaction来指定单个线程的信号处理方式。如果在某个线程中调用了sigaction处理某个信号，那么这个进程中的未阻塞这个信号的线程在收到这个信号都会按同一种方式处理这个信号。
+   另外，注意子线程的mask是会从主线程继承而来的。
 
 
 113 _Bool是C99新增加的关键字，长度是1
@@ -1112,3 +1112,75 @@ int main()
    O_NOCTTY如果路径名指向终端设备，不要把这个设备用作控制终端
    对于串口的打开操作，必须使用O_NOCTTY参数，它表示打开的是一个终端设备，程序不会成为该端口的控制终端。如果不使用此标志，任务的一个输入(比如键盘终止信号等)都会影响进程
 
+204 栈  ：先进后出（LIFO-last in first out） 仅允许在表的一端进行插入和删除运算
+    队列：先进先出（FIFO-first in first out）
+    数组元素与栈的增长方向：C与C++语言规范都规定了数组元素是分布在连续递增的地址上
+    C与C++语言的数组元素要分配在连续递增的地址上，也不反映栈的增长方向。
+    void test(char *para1，char *param2，char *param3, char *param4) {} 
+    在linux中，栈由高地址往低地址生长,调用test函数时，其参数入栈情况如下 函数参数是以栈的形式存取，从右至左入栈
+    ---------- 0xffffffff
+    | 其他内存 |
+    ----------  栈底
+    | param4  |
+    ----------
+    | param3  |
+    ----------
+    | param2  |
+    ----------
+    | param1  |
+    ----------
+    | list    |
+    ----------  栈顶
+    | 其他内存 |
+    ----------  0
+
+va_start宏，获取可变参数列表的第一个参数的地址（list是类型为va_list的指针，param1是可变参数最左边的参数）：
+#define va_start(list,param1)   ( list = (va_list)&param1+ sizeof(param1) )
+va_arg宏，获取可变参数的当前参数，返回指定类型并将指针指向下一参数（mode参数描述了当前参数的类型）：
+#define va_arg(list,mode)   ( (mode *) ( list += sizeof(mode) ) )[-1]
+va_end宏，清空va_list可变参数列表：
+#define va_end(list) ( list = (va_list)0 )
+#include <stdio.h> 
+ 
+//获取参数列表中的所有参数，并打印
+void PrintInt(int cnt, ...) 
+{ 
+  int *temp = &cnt;
+  temp++;
+  for (int i = 0; i < cnt; ++i) 
+  { 
+    printf("%d\n", *temp); 
+    temp++; 
+  } 
+}
+ 
+int main(void)
+{
+    int a = 1; 
+    int b = 2; 
+    int c = 3; 
+    int d = 4;
+    PrintInt(4, a, b, c, d); 
+    return 0;
+}
+执行程序后输出： 
+1
+2
+3
+4
+
+
+
+205.  悬垂引用
+    std::vector<std::string> v;
+    v.push_back("hello");
+    std::string &x = v[0];
+
+    首先必须明白空悬指针是针对动态内存来说明的：
+
+eg：p=new int ;
+delete p;
+当我们delete一个指针后，指针值就变为无效了。虽然指针已经无效，但在很多及其上指针仍保留着（已经释放了的）动态内存的地址。在delete之后，
+指针就变成了人们所说的空悬指针，即，指向一块曾经保存数据对象但现在已经无效的内存的指针。
+未初始化指针的所有缺点空悬指针也都有。有一种方法可以避免空悬指针的问题：在指针即将要理考其作用域之前释放掉它所关联的内存。
+这样，在指针关联的内存被释放后，就没有机会使用指针了。如果我们需要保留指针，可以在delete之后将nullptr赋予指针，这样就可以清楚地指出指针不指向任何对象

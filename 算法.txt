@@ -12,3 +12,4 @@
 3. 常用的三级缓存主要有LruCache、DiskLruCache、网络，其中LruCache对应内存缓存、DiskLruCache对应持久化缓存。
    Lru表示最近最少使用，意思是当缓存到达限制时候，优先淘汰近期内最少使用的缓存，LruCache和DisLruCache都是如此
 
+4. raft协议

@@ -488,3 +488,5 @@ Oracle XDB（XML 数据库），默认的端口号为8080
 Oracle XDB FTP服务，默认的端口号为2100
 MS SQL*SERVER数据库server，默认的端口号为1433/tcp 1433/udp
 MS SQL*SERVER数据库monitor，默认的端口号为1434/tcp 1434/udp
+
+12  网络带宽  https://www.zhihu.com/question/40309762

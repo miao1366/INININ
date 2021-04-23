@@ -123,3 +123,5 @@ ctrl + alt + k 向上选择
         "when": "textInputFocus"
     }
 ]
+
+crtl+e    等同于crtl+p

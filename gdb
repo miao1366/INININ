@@ -276,3 +276,6 @@ https://blog.csdn.net/lm409/article/details/80303709
      例如：
      catch syscall open
      catch syscall 5
+
+24  用gdb调试时想打印变量值，结果出现了optimized out，打印不出变量内容，后来找到解决方案，
+    将makefile中的编译命令中-O3优化改为-O0取消优化即可

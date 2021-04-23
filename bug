@@ -98,3 +98,5 @@
     解决方法：要么将串口设置成阻塞模式，要么使用select。
 
 42  -ldl dlclose(), dlopen(), dlsym()
+
+43  (void *)(uintptr_t)2    //数字转地址，编译不会告警

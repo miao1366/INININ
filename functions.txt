@@ -33,6 +33,9 @@ thread::hardware_concurrency();//获取cpu核心个数
 to_string(x)
 
 5.strftime()  格式化输出时间
+%D     月/天/年
+%T     The time in 24-hour notation (%H:%M:%S).  (SU)
+
 6.strptime()  函数将字符串转换成 tm 结构
 7.int vsprintf(char *string, char *format, va_list param) 可变参数按照format格式输出到string
 8.int vfprintf(FILE *stream, char *format, va_list param) 可变参数按照format格式输出到文件 stream
@@ -497,18 +500,38 @@ mapTest.erase(iter++);
    现在有一全局变量，所有线程都可以使用它，改变它的值。而如果每个线程希望能单独拥有它，那么就需要使用线程存储了。
    表面上看起来这是一个全局变量，所有线程都可以使用它，而它的值在每一个线程中又是单独存储的。这就是线程存储的意义
    
-1  创建一个类型为pthread_key_t类型的变量。
-2  调用 pthread_key_create(pthread_key_t *key, void (*destructor)(void*))来创建该变量。
+   在多线程的环境下，进程内的所有线程共享进程的数据空间。因此全局变量为所有线程共享。在程序设计中有时需要保存线程自己的全局变量，这种特殊的变量仅在线程内部有效。
+   如常见的errno，它返回标准的错误码。errno不应该是一个局部变量。几乎每个函数都应该可以访问他，但他又不能作为是一个全局变量。否则在一个线程里输出的很可能是另一个线程的
+   出错信息，这个问题可以通过创建线程的私有数据（TSD  thread specific data）来解决。在线程内部，私有数据可以被各个函数访问。但他对其他线程是屏蔽的。
+   线程私有数据采用了一键多值的技术，即一个键对应多个值。访问数据时都是通过键值来访问，好像是对一个变量进行访问，其实是在访问不同的数据。
+   int pthread_key_create(pthread_key_t *key, void (*destructor)(void*));第一个参数为指向一个键值的指针，第二个参数指明了一个destructor函数，
+   如果这个参数不为空，那么当每个线程结束时，系统将调用这个函数来释放绑定在这个键上的内存块。
+   key一旦被创建，所有线程都可以访问它，但各线程可根据自己的需要往key中填入不同的值，这就相当于提供了一个同名而不同值的全局变量，一键多值。
+   一键多值靠的是一个关键数据结构数组即TSD池，创建一个TSD就相当于将结构数组中的某一项设置为“in_use”，并将其索引返回给*key，然后设置清理函数。
+   1、创建一个键
+   2、为一个键设置线程私有数据
+   3、从一个键读取线程私有数据void *pthread_getspecific(pthread_key_t key);
+   4、线程退出（退出时，会调用destructor释放分配的缓存，参数是key所关联的数据）
+   5、删除一个键
+   int pthread_setspecific(pthread_key_t key,const void *pointer));
+   void *pthread_getspecific(pthread_key_t key);
+   set是把一个变量的地址告诉key，一般放在变量定义之后，get会把这个地址读出来，然后你自己转义成相应的类型再去操作，注意变量的有效期。
+   只不过，在不同的线程里可以操作同一个key，他们不会冲突，比如线程a,b,c set同样的key，分别get得到的地址会是之前各自传进去的值。
+   这样做的意义在于，可以写一份线程代码，通过key的方式多线程操作不同的数据。
+   int pthread_setspecific(pthread_key_t key, const void *value)；该函数将value的值（不是内容）与key相关联。用pthread_setspecific为一个键指定新的线程数据时，
+   线程必须先释放原有的线程数据用以回收空间。
+   nt pthread_key_delete(pthread_key_t key);用来删除一个键，删除后，键所占用的内存将被释放。注销一个TSD，这个函数并不检查当前是否有线程正使用该TSD，也不会调用清理函数（destr_function），
+   而只是将TSD释放以供下一次调用pthread_key_create()使用。需要注意的是，键占用的内存被释放。与该键关联的线程数据所占用的内存并不被释放。因此，线程数据的释放，必须在释放键之前完成
+    1    创建一个类型为pthread_key_t类型的变量。
+    2    调用 pthread_key_create(pthread_key_t *key, void (*destructor)(void*))来创建该变量。
    该函数有两个参数，第一个参数就是上面声明的pthread_key_t变量，第二个参数是一个清理函数，
    用来在线程释放该线程存储的时候被调用。该函数指针可以设成 NULL，这样系统将调用默认的清理函数。
    该函数成功返回0.其他任何返回值都表示出现了错误。
-   
    pthread_key_create 只需要调用一次 表面上key看起来这是一个全局变量，所有线程都可以使用它，
    而它的值在每一个线程中又是单独存储的
-   
-3  当线程中需要存储特殊值的时候，可以调用 pthread_setspecific() 。该函数有两个参数，第一个为前面声明的pthread_key_t变量，
+    3  当线程中需要存储特殊值的时候，可以调用 pthread_setspecific() 。该函数有两个参数，第一个为前面声明的pthread_key_t变量，
     第二个为void*变量，这样你可以存储任何类型的值。
-4   如果需要取出所存储的值，调用pthread_getspecific()。该函数的参数为前面提到的pthread_key_t变量，该函数返回void *类型的值。下面是前面提到的函数的原型：
+    4   如果需要取出所存储的值，调用pthread_getspecific()。该函数的参数为前面提到的pthread_key_t变量，该函数返回void *类型的值。下面是前面提到的函数的原型：
 
 85 int pthread_key_delete(pthread_key_t key);用来删除一个键，删除后，键所占用的内存将被释放。注销一个TSD，这个函数并不检查当前是否有线程正使用该TSD，
    也不会调用清理函数（destr_function），而只是将TSD释放以供下一次调用pthread_key_create()使用。需要注意的是，键占用的内存被释放。与该键关联的线程数据所占用的内存并不被释放。
@@ -746,6 +769,9 @@ struct rlimit {
 	int dup2(int fd, int fd2);    复制一个文件描述符，fd表示已经存在的打开的文件描述符，fd2是指定新的文件描述符，如果fd2等于fd，则直接返回，如果fd2存在并且打开，
 	                                   则先close(fd2)后，重新打开，这样fd2和fd就指向了同一个文件（共享打开的文件），如果fd2不存在或者没有打开，
 									   则打开fd2，并且指向fd所指向的文件。函数的返回值和fd2一致。该函数可以实现文件的重定位
+                                  返回值：
+                                  若dup2调用成功则返回新的文件描述符，出错则返回-1
+    int dup2(int oldfd, intnewfd);  将已有的一个newfd重定向到oldfd的位置，返回第一个不小于oldfd的整数值
 								
 115  pid_t setsid(void); 
 	当进程是会话组长时setsid()调用失败。setsid()调用成功后，进程成为新的会话组长和新的进程组长，并与原来的登录会话和进程组脱离。
@@ -1781,3 +1807,37 @@ EIO I/O 存取错误.
 (1)O_APPEND为什么能够将分别写改为接续写？关键的核心的东西是文件指针。分别写的内部原理就是2个fd拥有不同的文件指针，并且彼此只考虑自己的位移。但是O_APPEND标志可以让write和read函数内部多做一件事情，就是移动自己的文件指针的同时也去把别人的文件指针同时移动。（也就是说即使加了O_APPEND，fd1和fd2还是各自拥有一个独立的文件指针，但是这两个文件指针关联起来了，一个动了会通知另一个跟着动）
 (2)O_APPEND对文件指针的影响，对文件的读写是原子的。
 (3)原子操作的含义是：整个操作一旦开始是不会被打断的，必须直到操作结束其他代码才能得以调度运行，这就叫原子操作。每种操作系统中都有一些机制来实现原子操作，以保证那些需要原子操作的任务可以运行。
+
+219 FILE *freopen( const char *path, const char *mode, FILE *stream );
+参数说明：
+path: 文件名，用于存储输入输出的自定义文件名。
+mode: 文件打开的模式。和fopen中的模式（如r-只读, w-写）相同。
+stream: 一个文件，通常使用标准流文件。
+返回值：成功，则返回一个path所指定文件的指针；失败，返回NULL。
+功能：实现重定向，把预定义的标准流文件定向到由path指定的文件中。标准流文件具体是指stdin、stdout和stderr。
+     其中stdin是标准输入流，默认为键盘；stdout是标准输出流，默认为屏幕；stderr是标准错误流，一般把屏幕设为默认
+
+220 int snprintf(char *str, size_t size, const char *format, ...) 
+    最多从源串中拷贝size－1个字符到目标串中，然后再在后面加一个0。所以如果目标串的大小为size的话，将不会溢出
+    返回值:若成功则返回欲写入的字符串长度，若出错则返回负值。返回值并不是真正写入字符串的大小  -->snprintf函数返回的是预写入的字符串长度
+
+    size是限定最终生成的dest的字符数,最多拷贝size-1个字符; 一般情况下size会取sizeof(dest),这是为了dst不溢出.
+    在snprintf(dest, size, "str: %s\n", src)中如果size-1大于等于"str: %s\n"的长度,则把"str: %s\n"都拷贝到dst; 
+    如果size-1小于"str: %s\n"的长度,则从"str: %s\n"拷贝size-1长度的字符串到dst，并且末尾置\0.
+
+int main()  
+{  
+  char buf[10] = "";  
+  char src[30] = "hello world! hello world!";  
+  int len = snprintf(buf, sizeof(buf), "%s", src);  
+  printf("return len=%d\n", len);  
+  buf[len] = '\0';  
+  printf("buf=%s, bufLen=%d\n", buf, strlen(buf));  
+  return 0;  
+}
+输出结果:
+return len=25
+buf=hello wor, bufLen=9
+
+221  char *strncpy(char *dest, const char *src, size_t n) 
+     把src所指向的字符串复制到dest，最多复制n个字符。当src的长度小于n时，dest的剩余部分将用空字节填充
