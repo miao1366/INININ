@@ -292,3 +292,43 @@ The -Wl,xxx option for gcc passes a comma-separated list of tokens as a space-se
 63 “|”后面是 order-only prerequisite 就是创建 .o 文件前要先创建存放该文件的目录
 
 64 makefile，默认执行第一个target
+
+65 打印
+使用info/warning/error增加调试信息
+info
+$(info “here add the debug info”)
+注,info信息,不打印信息所在行号
+warning
+$(warning “here add the debug info”)
+error
+$(error “error: this will stop the compile”)
+这个可以停止当前makefile的编译
+打印变量的值
+$(info $(TARGET_DEVICE) )
+使用echo增加调试信息
+注:echo只能在target：后面的语句中使用，且前面是个TAB,
+$(info $(CC))
+all:
+    @echo $(CC)
+
+66 findstring
+#$(findstring <find>,<in> )
+#功能：在字串<in>中查找<find>字串。
+#返回：如果找到，那么返回<find>，否则返回空字符串。
+
+str1 := a b c
+str2 := b c
+
+#第一个函数返回“a”字符串，第二个返回空字符串
+all:
+    @echo $(findstring a,$(str1))
+    @echo $(findstring a,$(str2))
+
+67 filter  filter命令在过滤时，大小写敏感（区分大小写）
+    sources := a b c d f g
+    # 指定的模式为 a b c ，多个模式间，用空格区分
+    $(filter a b c , $(sources))
+    # 上式返回值为
+    # a b c
+
+68  -include .make-settings    //还不知道什么意思

@@ -1,0 +1,23 @@
+1. 一些网站
+https://github.com/chaozh/MIT-6.824.git
+https://www.bilibili.com/video/av91748150
+https://github.com/feixiao/Distributed-Systems.git 
+https://github.com/bysui/mit6.828.git
+https://www.simtoco.com/#/albums/video?id=1000123
+
+2.  lectures            讲座
+    papers              论文
+    exams               测试
+    labs                实验
+    project(optional)   项目
+
+    lab1   - MapReduce
+    lab2   - raft for fault-tolerance
+    lab3   - K/V service
+    lab4   - shared K/V service
+
+3. RPC  threads  locks  performance(性能)  scalability(可扩展性)
+   fault tolerance  容错
+   availability
+   recoverability
+   non-volatile storage  非易失性存储

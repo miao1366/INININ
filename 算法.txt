@@ -13,3 +13,10 @@
    Lru表示最近最少使用，意思是当缓存到达限制时候，优先淘汰近期内最少使用的缓存，LruCache和DisLruCache都是如此
 
 4. raft协议
+
+5.  Mersenne Twister算法译为马特赛特旋转演算法，是伪随机数发生器之一，其主要作用是生成伪随机数。此算法是Makoto Matsumoto （松本）和Takuji Nishimura （西村）
+    于1997年开发的，基于有限二进制字段上的矩阵线性再生。可以快速产生高质量的伪随机数，修正了古老随机数产生算法的很多缺陷。
+    Mersenne Twister这个名字来自周期长度通常取Mersenne质数这样一个事实。常见的有两个变种Mersenne Twister MT19937和Mersenne Twister MT19937-64
+    #include "mt19937-64.h"
+
+6

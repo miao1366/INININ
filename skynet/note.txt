@@ -6,6 +6,7 @@
     https://blog.csdn.net/zxm342698145/category_9273485.html
     https://github.com/cloudwu/skynet/wiki/ThirdPartyDocument
     https://www.cnblogs.com/RainRill/p/9019614.html
+    https://blog.csdn.net/u010144805/article/details/80349875
 
     https://www.jianshu.com/u/a0a85735b129  简书
 
@@ -358,7 +359,7 @@ struct message_queue {
     int tail;
     int release;
     int in_global;
-    int overload;
+    int overload;           //是否过载
     int overload_threshold;
     struct skynet_message *queue;
     struct message_queue *next;
@@ -397,3 +398,23 @@ skynet_timer_init();                    // 定时器初始化
 skynet_socket_init();                   // socket初始化
 
 skynet_context_new(name, args);   "snlua"  "bootstrap"
+
+gate.so   ：为整个skynet提供socket功能（解决外部连接数据读取的问题）
+snlua.so  ：启动多个lua服务，skynet自带的模块中有一个重要的模块是snlua.so模块，通过snlua.so和指定lua脚本文件可以启动多个lua编写的服务，
+            不用每个服务都是用c来编写，而且大部分逻辑都是在 lua 脚本下开发，只有需要考虑性能的模块才用 C 语言开发成库，直接提供给 lua 调用。 
+logger.so ：日志模块，一个简单的日志系统,可以用来记录服务的相关信息。
+harbar.so ：（集群模块）节点服务,每个Skynet运行都是一个节点
+
+skynet_server.c  ： 管理服务
+skynet_handle.c  ： 管理服务唯一的handle
+skynet_module.c  ： 启动c编写的so模块
+skynet_monitor.c ： 监视服务死循环
+skynet_mq.c      ： 消息队列
+skynet_timer.c   ： 定时器
+skynet_socket.c  ： Socket
+skynet_master.c  ： 不同skynet节点服务名字中心服务
+skynet_harbor.c  ： 不同skynet节点通讯
+
+《skynet设计综述》 https://blog.codingnow.com/2012/09/the_design_of_skynet.html
+简单说，Skynet 只负责把一个数据包从一个服务内发送出去，让同一进程内的另一个服务收到，调用对应的 callback 函数处理。它保证，模块的初始化过程，
+每个独立的 callback 调用，都是相互线程安全的。编写服务的人不需要特别的为多线程环境考虑任何问题。专心处理发送给它的一个个数据包

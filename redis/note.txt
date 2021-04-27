@@ -15,10 +15,50 @@ int (*flush)(struct _rio *);
 // 更新校验和
 void (*update_cksum)(struct _rio *, const void *buf, size_t len);
 
-2. https://blog.51cto.com/sofar/1775474
+2.  https://blog.51cto.com/sofar/1775474
+    https://blog.huangz.me/diary/2014/how-to-read-redis-source-code.html
 
 3. 自从Redis6.0以来，大家呼吁了很久的权限管理功能(ACL[access control list 访问控制列表])终于发布了，
    通过此功能，我们可以设置不同的用户并对他们授权命令或数据权限。
    这样我们可以避免有些用户的误操作导致数据丢失或避免数据泄露的安全风险
 
-4. 
+4. redis行数23000左右
+
+5. 长度小于32的字符串，则会使用sdshdr5结构体
+sdshdr5   ---->    <32       32      sdshdr5结构体特殊在并没有len和alloc属性，其巧妙的使用了flags的高5位用来标识字符串的长度
+sdshdr8   ---->    <256      256
+sdshdr16  ---->    < 2^16    65536
+sdshdr32  ---->    < 2^32    
+sdshdr64  ---->    < 2^64
+
+(1ll<<32)
+return -1; /* this is equivalent to the max SDS_TYPE_64 or SDS_TYPE_32 */   size_t(-1)
+assert(initlen + hdrlen + 1 > initlen); /* Catch size_t overflow */
+assert(newlen > len);   /* Catch size_t overflow */
+
+6.  zmalloc 是Redis的基础。Redis内存管理通过在zmalloc.h和zmalloc.c中重写c语言对内存的管理来完成的，
+    主要是对tcmalloc（google）、jemalloc（facebook）、其他（mac系统等）的封装
+
+7.  sdsRemoveFreeSpace()    //这个函数有点看不太明白
+    回收sds中的空闲空间
+    回收不会对sds中保存的字符串内容做任何修改。
+
+8. SDS和C字符串的区别
+    （1）获取字符串长度的时间复杂度
+        C字符串不记录字符串本身是长度，因此需要遍历字符串才能得到字符串的长度，时间复杂度为O(N)，SDS字符串用属性len记录了字符串的长度，因此获取字符串长度的时间复杂度为O(1)。
+    （2）缓冲区溢出
+        如果对C字符串使用strcat进行拼接，如果没有提前对字符串分配足够的内存，则会导致缓冲区溢出。但是SDS会提前对字符串所需要的内存进行检测。
+    （3）修改字符串时的内存重分配
+        当修改C字符串的时候，无论是增长/缩短字符串，都会通过内存重分配来扩展或者释放内存，否则就会导致缓冲区溢出或者内存泄漏。SDS在扩容是采用的是预分配机制避免了频繁扩容。
+    （4）二进制安全性
+        如果一个字符串保存的时候是什么样子，输出的时候也是什么样子，则称为二进制安全的，C字符串以’\0’作为字符串的结尾标识，会造成从中间截断字符串的情况。
+        SDS使用len属性记录字符串的长度，因此保存二进制数据是安全的。也就是说sds中间也可以存在 \0 字符。
+
+9. sds sdscatvprintf(sds s, const char *fmt, va_list ap);
+
+10. int sdscmp(const sds s1, const sds s2)
+
+11. sds *sdssplitlen(const char *s, ssize_t len, const char *sep, int seplen, int *count)
+
+12. sds *sdssplitargs(const char *line, int *argc);
+
