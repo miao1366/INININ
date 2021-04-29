@@ -55,3 +55,7 @@ ptrdiff_t   size_t   wchar_t   	NULL   	offsetof(type, member-designator)
 20 头文件 <sys/un.h>    struct sockaddr_un server_sockaddr;    struct sockaddr_un cli_sockaddr ;
 
 21 #include <stdatomic.h>    atomic_int
+
+22 只要通过引入头文件<endian.h>便可以在编译时通过宏判断字节序了
+        #if __BYTE_ORDER == __LITTLE_ENDIAN
+        #elif __BYTE_ORDER == __BIG_ENDIAN

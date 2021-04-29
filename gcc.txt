@@ -45,3 +45,10 @@ gcc -Wall -Wextra -Werror
     gcc -E file.c -o file.i
     预处理过滤代码中的不需要的代码，并且保留注释
     gcc -E -C file.c -o file.i
+
+23 GCC扩展 __attribute__ ((visibility("hidden")))
+    试想这样的情景，程序调用某函数A，A函数存在于两个动态链接库liba.so,libb.so中，并且程序执行需要链接这两个库，此时程序调用的A函数到底是来自于a还是b呢？
+    这取决于链接时的顺序，比如先链接liba.so，这时候通过liba.so的导出符号表就可以找到函数A的定义，并加入到符号表中，链接libb.so的时候，
+    符号表中已经存在函数A，就不会再更新符号表，所以调用的始终是liba.so中的A函数
+    这里的调用严重的依赖于链接库加载的顺序，可能会导致混乱；gcc的扩展中有如下属性__attribute__ ((visibility("hidden")))，
+    可以用于抑制将一个函数的名称被导出，对连接该库的程序文件来说，该函数是不可见的

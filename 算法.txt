@@ -19,4 +19,23 @@
     Mersenne Twister这个名字来自周期长度通常取Mersenne质数这样一个事实。常见的有两个变种Mersenne Twister MT19937和Mersenne Twister MT19937-64
     #include "mt19937-64.h"
 
-6
+6  基数估算算法  (目前有LogLog HyperLogLog MinCount)
+
+7  MurmurHash算法由Austin Appleby发明于2008年
+
+8  大神Thomas Wang认为，一个好的哈希函数必须具备以下两点特性：
+    1、一个好的哈希函数应该是可逆的。即，对于哈希函数输入值x和输出值y，如果存在f(x) = y，就一定存在g(y) = x。说白了，就是哈希函数可以将某一个值x转换成一个key，也可以把这个key还原回成x。
+    2、一个好的哈希函数应该容易造成雪崩效应。这里的雪崩效应是从比特位的角度出发的，它指的是，输入值1bit位的变化会造成输出值1/2的bit位发生变化
+    
+    /* Thomas Wang's32 bit Mix Function */
+    unsigned intdictIntHashFunction(unsigned int key)
+    {
+        key += ~(key << 15);
+        key ^= (key >> 10);
+        key += (key << 3);
+        key ^= (key >> 6);
+        key += ~(key << 11);
+        key ^= (key >> 16);
+        return key;
+    }
+    

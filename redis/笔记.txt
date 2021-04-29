@@ -1,4 +1,4 @@
-1.  redis 是cs架构，网络采用epoll 模型，单线程处理每个请求。
+1.  redis 是cs架构，网络采用epoll 模型，单线程处理每个请求。 redis 大概23000行
     很多同学对单线程有些疑问，简单的解释一下 redis 单线程的意思，redis 服务端虽说是单线程，但是可以同时 持有很多connection，
     每个connection 都可以同时发请求，只不过在 redis 服务端，一个一个的处理每个connection 发过来的request， 通俗点说就是，
     很多请求都能发过来，redis 会存下来（其实是存在每个connection socket 内核缓冲区），一个一个处理。
@@ -82,3 +82,5 @@
     pqsort.c 排序算法类 
     rio.c redis定义的一个I/O类 
     syncio.c 用于同步Socket和文件I/O操作
+
+3 Redis使用的是MurmurHash2。当字典被用作数据库的底层实现，或者哈希键的底层实现时，使用MurmurHash2算法来计算键的哈希值.

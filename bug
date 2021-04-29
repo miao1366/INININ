@@ -100,3 +100,28 @@
 42  -ldl dlclose(), dlopen(), dlsym()
 
 43  (void *)(uintptr_t)2    //数字转地址，编译不会告警
+
+44  单字节字节序
+struct iphdr {
+#if defined(__LITTLE_ENDIAN_BITFIELD)
+    __u8    ihl:4,
+        version:4;
+#elif defined (__BIG_ENDIAN_BITFIELD)
+    __u8    version:4,
+        ihl:4;
+#else
+#error  "Please fix <asm/byteorder.h>"
+#endif
+    __u8    tos;
+    __be16  tot_len;
+    __be16  id;
+    __be16  frag_off;
+    __u8    ttl;
+    __u8    protocol;
+    __sum16 check;
+    __be32  saddr;
+    __be32  daddr;
+    /*The options start here. */
+};
+比特序(bit order) 
+ 字节序是一个对象中的多个字节之间的顺序问题，比特序就是一个字节中的8个比特位(bit)之间的顺序问题。一般情况下系统的比特序和字节序是保持一致的
