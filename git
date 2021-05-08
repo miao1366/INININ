@@ -132,3 +132,6 @@ Git 查看远端仓库地址  git remote -v
         炒鸡好用，tig后面可以跟文件或者文件夹，比如：
         tig  dir_name
         tig file_name
+
+36   git status 乱码(ubuntu) 
+git config --global core.quotepath false
