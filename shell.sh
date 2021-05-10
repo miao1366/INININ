@@ -549,3 +549,18 @@ cp $1 $2
 -h filename 如果文件是软链接，则为真
 filename1 -nt filename2 如果 filename1比 filename2新，则为真。
 filename1 -ot filename2 如果 filename1比 filename2旧，则为真。
+
+109
+${1}  输入的第2个参数${2} 输入的第3个参数${0} 输入的第1个参数
+     #====== 示例 ================./main.sh 25 43 当执行脚本main.sh时候，后面接了25 43 参数，那么$0代表第一个参数main.sh $1代表25 $2代表43 以此类推
+
+
+
+
+
+
+
+
+
+
+

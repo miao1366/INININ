@@ -51,6 +51,8 @@ crtl + shift + h    全局查找
 ctrl + alt + j 向下选择
 ctrl + alt + k 向上选择
 
+文件 -> 首选项 -> 键盘快捷方式，打开keybindbings.json文件进行编辑
+touch  /home/miao/.config/Code/User/keybindings.json  
 // keybindings.json
 // 将键绑定放在此文件中以覆盖默认值auto[]
 [

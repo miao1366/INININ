@@ -135,3 +135,6 @@ Git 查看远端仓库地址  git remote -v
 
 36   git status 乱码(ubuntu) 
 git config --global core.quotepath false
+
+git config --global user.email "1029081208@qq.com"
+git config --global user.name  "miao1366"

@@ -84,3 +84,9 @@
     syncio.c 用于同步Socket和文件I/O操作
 
 3 Redis使用的是MurmurHash2。当字典被用作数据库的底层实现，或者哈希键的底层实现时，使用MurmurHash2算法来计算键的哈希值.
+4 Hyperloglog 在redis作为一种特殊的数据类型,主要应用于大型集合中的个数估算.
+    hyperloglog数据类型的优点:
+    无论输入数据的多少和大小，都不会影响Hyperloglog所占用redis的内存大小,hyperloglog在redis中占用固定的大小。
+    hyperloglog 占用12k大小，可以统计2的64次放个不同元素的数量。
+    hyperloglog数据类型的缺点:
+    只能统计出元素的个数，但是不能统计返回输入元素。

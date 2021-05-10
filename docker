@@ -38,10 +38,7 @@ b-> sudo docker save -o ./face_recogn0821.tar  face_recogn0821:latest
 c-> sudo docker load -i face_recogn0821.tar
 
 
-
-
 docker-compose.yml 
-
 
 dockerfile里的一般内容
 
@@ -57,6 +54,14 @@ CMD /usr/sbin/nginx
 11 创建新的docker image 
   docker build -t 新的大版本号: 新的小版本号 .  //此时docker会从当前目录”.”中读取Dockerfile，并按其设置建立新的image
   
+FROM ubuntu:18.04
+
+ENV  TIME_ZONE Asiz/Shanghai
+RUN set -x && \
+    apt-get update && \
+    apt-get install -y  cmake make wget tar vim git
+    
+
   
 12 Docker-Compose        //https://www.cnblogs.com/minseo/p/11548177.html
    Docker-Compose项目是Docker官方的开源项目，负责实现对Docker容器集群的快速编排
@@ -100,21 +105,3 @@ CMD /usr/sbin/nginx
 13 docker 参数
 privileged          指定容器是否为特权容器，特权容器拥有所有的capabilities
   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
