@@ -59,3 +59,6 @@ ptrdiff_t   size_t   wchar_t   	NULL   	offsetof(type, member-designator)
 22 只要通过引入头文件<endian.h>便可以在编译时通过宏判断字节序了
         #if __BYTE_ORDER == __LITTLE_ENDIAN
         #elif __BYTE_ORDER == __BIG_ENDIAN
+
+23  #include <iomanip>
+   这里面iomanip的作用比较多: 主要是对cin,cout之类的一些操纵运算子，比如setfill,setw,setbase,setprecision等等

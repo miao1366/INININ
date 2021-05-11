@@ -138,3 +138,42 @@ git config --global core.quotepath false
 
 git config --global user.email "1029081208@qq.com"
 git config --global user.name  "miao1366"
+
+37 .gitmodules 文件。 该置文件保存了项目 URL 与已经拉取的本地目录之间的映射：
+    https://zhuanlan.zhihu.com/p/97761640
+
+38  git submodule init 用来初始化本地配置文件，而 git submodule update 则从该项目中抓取所有数据并检出父项目中列出的合适的提交
+    git submodule add http://github.com/chaconinc/DbConnector    将会添加一个名为 “DbConnector” 的库
+
+39  git submodule add  仓库地址   路径
+仓库地址是指子模块仓库地址，路径指将子模块放置在当前工程下的路径       注意：路径不能以 / 结尾（会造成修改不生效）、不能是现有工程已有的目录（不能順利 Clone）
+命令执行完成，会在当前工程根路径下生成一个名为“.gitmodules”的文件，其中记录了子模块的信息。添加完成以后，再将子模块所在的文件夹添加到工程中即可
+
+40  git submodule
+添加
+为当前工程添加submodule，命令如下：
+git submodule add  仓库地址   路径
+仓库地址是指子模块仓库地址，路径指将子模块放置在当前工程下的路径       注意：路径不能以 / 结尾（会造成修改不生效）、不能是现有工程已有的目录（不能順利 Clone）
+命令执行完成，会在当前工程根路径下生成一个名为“.gitmodules”的文件，其中记录了子模块的信息。添加完成以后，再将子模块所在的文件夹添加到工程中即可。
+
+删除
+submodule的删除稍微麻烦点：首先，要在“.gitmodules”文件中删除相应配置信息。然后，执行“git rm –cached ”命令将子模块所在的文件从git中删除。
+
+下载
+下载的工程带有submodule
+当使用git clone下来的工程中带有submodule时，初始的时候，submodule的内容并不会自动下载下来的，此时，只需执行如下命令：
+git submodule update --init --recursive
+即可将子模块内容下载下来后工程才不会缺少相应的文件
+
+41  .gitignore
+   文件用来忽略被指定的文件或文件夹的改动，被记录在.gitignore文件里的文件或文件夹，是无法被git跟踪到的，换句话说，被忽略的文件是不会被放入到远程仓库里的。
+   也就是说，如果文件已经存在于远程仓库中，是无法通过.gitignore文件来忽略的
+
+42  git 基于某个分支创建分支
+      1、拷贝源代码
+      git clone git@git地址 
+      cd 项目目录
+      2、根据已有分支创建新的分支
+      git checkout -b yourbranchname origin/oldbranchname
+      3、推送到git
+      git push origin yourbranchname 

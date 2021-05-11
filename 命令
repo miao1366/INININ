@@ -95,10 +95,6 @@ l 多线程，克隆线程
 
 
 
-
-
-
-
 10 重定向文件
 
 2>1 | tee a.log  标准错误输出重定向到标准输出，然后标准输出定向到a.log
@@ -210,6 +206,7 @@ network:
    --report：只打印输出
 
 39 test
+    test命令是shell环境中测试条件表达式的实用工具
 
 40 anacron 
    anacron 是用来做什么的呢？设想这样一个场景，Linux 服务器会在周末关机两天，但是设定的定时任务大多在周日早上进行，但在这个时间点，服务器又处于关机状态，导致系统很多定时任务无法运行。
@@ -1004,3 +1001,8 @@ alias c:='mount /dev/hda1 /mnt/c & cd /mnt/c' ;用 c: 命令代替命令序列�
 
 138 谷歌屏蔽不能复制文字
     chrome -> setting -> Debugger -> Disable JavaScript
+
+139 grep正则表达式元字符集：
+ ^ 锚定行的开始 如：'^grep'匹配所有以grep开头的行。 
+ $ 锚定行的结束 如：'grep$'匹配所有以grep结尾的行。
+ grep -w   精确匹配

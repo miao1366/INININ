@@ -127,3 +127,8 @@ touch  /home/miao/.config/Code/User/keybindings.json
 ]
 
 crtl+e    等同于crtl+p
+
+VSCode插件推荐  Bracket Pair Colorizer：为代码中的括号添上一抹亮色
+
+关闭自动关闭文件 
+  设置 -> Workbench中的Enable Preview

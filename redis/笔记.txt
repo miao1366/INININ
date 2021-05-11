@@ -90,3 +90,17 @@
     hyperloglog 占用12k大小，可以统计2的64次放个不同元素的数量。
     hyperloglog数据类型的缺点:
     只能统计出元素的个数，但是不能统计返回输入元素。
+
+5 intset.h/c 是Redis 的整数set实现，intset的结构体如下：
+基本结构：
+typedef struct intset {    
+    uint32_t encoding;
+    uint32_t length;
+    int8_t contents[];
+} intset;
+intset的第一个成员encoding，表明contents中的存储数据的数据长度，可以是16bits, 32bits, 64bits。第二个成员length表示intset中的元素个数。
+一些关键实现：
+    1. 由于intset属于底层存储，所以在读取数据时，要考虑big endian 和little endian的问题。memrev64ifbe和intrev32ifbe函数，可以将big endian的数能够转换成littleendian值。
+    2. intset使用数组（contents）来存储数据，数据按照由小到大的顺序存储，体现在intsetSearch这个函数的二分查找方法中。
+    3. 当插入新元素时，首先判断encoding是否小于当前值，否则调用intsetUpgradeAndAdd函数，将原来intset中的数据都变成新的encoding，同时把新元素插入到set。
+    4. 在执行intsetAdd和intsetRemove函数增删元素的时候，都要调用intsetResize增加或者减少空间，同时按照顺序插入或者删除元素。在移动元素时，使用intsetMoveTail，内部通过memmove实现。

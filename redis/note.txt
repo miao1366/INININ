@@ -62,3 +62,4 @@ assert(newlen > len);   /* Catch size_t overflow */
 
 12. sds *sdssplitargs(const char *line, int *argc);
 
+13.  memcpy(&v64,((int64_t*)is->contents)+pos,sizeof(v64));
