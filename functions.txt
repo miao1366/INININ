@@ -1871,3 +1871,94 @@ buf=hello wor, bufLen=9
 
 226   int isprint( int ch );
       功能：如果参数是可打印字符（包括空格），函数返回非零值，否则返回零值。
+
+227  目录/文件 宏
+    S_ISLNK(st_mode)：是否是一个连接.
+    S_ISREG(st_mode)：是否是一个常规文件.
+    S_ISDIR(st_mode)：是否是一个目录
+    S_ISCHR(st_mode)：是否是一个字符设备.
+    S_ISBLK(st_mode)：是否是一个块设备
+    S_ISFIFO(st_mode)：是否 是一个FIFO文件.
+    S_ISSOCK(st_mode)：是否是一个SOCKET文件     
+
+228 常用的VIDIOC命令    https://blog.csdn.net/Mark_minGE/article/details/81427489#commentBox
+
+使用ioctl VIDIOC_QUERYCAP 来查询当前driver是否合乎规范。因为V4L2要求所有driver 和Device都支持这个Ioctl。 所以，
+可以通过这个ioctl是否成功来判断当前设备和dirver,是否支持V4L2规范。当然，这样同时还能够得到设备足够的能力信息
+
+    V4L2_CAP_VIDEO_CAPTURE   // 是否支持图像获取
+    V4L2_CAP_STREAMING       // 判断是否支持Streaming方式访问
+    1. VIDIOC_QUERYCAP （查询设备属性）
+    2. VIDIOC_ENUM_FMT (显示所有支持的格式)
+    3. VIDIOC_S_FMT （设置视频捕获格式）
+    4. VIDIOC_G_FMT （获取硬件现在的视频捕获格式）
+    5. VIDIOC_TRY_FMT （检查是否支持某种帧格式）
+    6. VIDIOC_ENUM_FRAMESIZES （枚举设备支持的分辨率信息）
+    7. VIDIOC_ENUM_FRAMEINTERVALS (获取设备支持的帧间隔)
+    8. VIDIOC_S_PARM && VIDIOC_G_PARM (设置和获取流参数)
+    9. VIDIOC_QUERYCAP (查询驱动的修剪能力)
+    10. VIDIOC_S_CROP (设置视频信号的边框)
+    11. VIDIOC_G_CROP (读取设备信号的边框)
+    12. VIDIOC_REQBUFS (向设备申请缓存区)
+    13. VIDIOC_QUERYBUF (获取缓存帧的地址、长度)
+    14. VIDIOC_QBUF (把帧放入队列)
+    15. VIDIOC_DQBUF (从队列中取出帧)
+    16. VIDIOC_STREAMON && VIDIOC_STREAMOFF (启动/停止视频数据流)
+
+1. VIDIOC_ENUM_FMT
+  Fun：显示所有支持的格式，即允许应用查询所支持的格式，属于格式协商的部分
+  函数原型： int ioctl(int fd, int request, struct v4l2_fmtdesc *argp);
+  此处 request 即 VIDIOC_ENUM_FMT，后续request 都由前文标注的VIDIOC 命令代替。
+
+//相关的结构体：	
+struct v4l2_fmtdesc
+{
+  __u32  index;   	           // 要查询的格式序号，应用程序设置
+  enum   v4l2_buf_type type;   // 帧类型，应用程序设置
+  __u32  flags;    			   // 是否为压缩格式
+  __u8   description[32];      // 格式名称
+  __u32  pixelformat;		   // 格式
+  __u32	 reserved[4]; 		  // 保留，不使用设置为0
+};
+ 参数分析：
+  1. index ：是用来确定格式的一个简单整型数。与其他V4L2所使用的索引一样，这个也是从0开始递增，至最大允许值为止。应用可以通过一直递增索引值知道返回-EINVAL的方式枚举所有支持的格式。
+  2. type：是描述数据流类型的字段。对于视频捕获设备（摄像头或调谐器）来说，就是V4L2_BUF_TYPE_VIDEO_CAPTURE。
+  3. flags: 只定义了一个值，即V4L2_FMT_FLAG_COMPRESSED，表示这是一个压缩的视频格式。
+  4. description: 是对这个格式的一种简短的字符串描述。
+  5. pixelformat: 应是描述视频表现方式的四字符码
+  ps: 其中第3、4、5项为就index所支持的某个图像格式，V4L2驱动会自动填写的结构体成员信息。
+
+//fun: display all supported formats
+void enum_camera_format(int fd)
+{
+  struct v4l2_fmtdesc fmtdesc;
+  memset(&fmtdesc, 0, sizeof(fmtdesc));
+  fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  printf("Supported format:\n");
+  while(ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc) != -1)
+  {
+    printf("\t%d.%s\n",fmtdesc.index+1, fmtdesc.description);	
+    fmtdesc.index++;
+  }
+  
+  
+V4L2(Video For Linux Two) 是内核提供给应用程序访问音、视频驱动的统一接口。V4L2 的相关定义包含在头文件<linux/videodev2.h> 中.
+2. 工作流程：
+打开设备－> 检查和设置设备属性－> 设置帧格式－> 设置一种输入输出方法（缓冲 区管理）－> 循环获取数据－> 关闭设备
+
+
+VIDIOC_REQBUFS:  分配内存
+VIDIOC_QUERYBUF： 把VIDIOC_REQBUFS中分配的数据缓存转换成物理地址
+VIDIOC_QUERYCAP： 查询驱动功能
+VIDIOC_ENUM_FMT： 获取当前驱动支持的视频格式
+VIDIOC_S_FMT： 设置当前驱动的频捕获格式
+VIDIOC_G_FMT： 读取当前驱动的频捕获格式
+VIDIOC_TRY_FMT： 验证当前驱动的显示格式
+VIDIOC_CROPCAP： 查询驱动的修剪能力
+VIDIOC_S_CROP： 设置视频信号的边框
+VIDIOC_G_CROP： 读取视频信号的边框
+VIDIOC_QBUF： 把数据放回缓存队列
+VIDIOC_DQBUF： 把数据从缓存中读取出来
+VIDIOC_STREAMON： 开始视频显示函数
+VIDIOC_STREAMOFF： 结束视频显示函数
+VIDIOC_QUERYSTD： 检查当前视频设备支持的标准，例如PAL或NTSC

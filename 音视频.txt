@@ -1,0 +1,23 @@
+1.  TTL
+    液晶显示模组(Liquid Crystal Display Module，以下简称模组)及其相关的液晶显示设备(以下简称设备)的使用已十分普遍，
+    同时也由于TTL(Transistor Transistor Logic，晶体管-晶体管逻辑电平)信号稳定可靠、传速率高、功耗较低，
+    很多模组及设备都通过采用该信号作为接收视频图像的显示接口
+
+2. GMSL
+   Gigabit Multimedia Serial Links (GMSL)是Maxim公司推出的一种高速串行接口，适用于视频、音频和控制信号的传输，
+   使用50Ω同轴电缆或100Ω屏蔽双绞线(STP)电缆时的距离可达15m或更长
+
+3. V4L2是Video for linux2的简称,为linux中关于视频设备的内核驱动。在Linux中，视频设备是设备文件，可以像访问普通文件一样对其进行读写，
+   摄像头在/dev/video*下，如果只有一个视频设备，通常为/dev/video0
+
+4. Gbps也称交换带宽，是衡量交换机总的数据交换能力的单位，以太网是IEEE802.3以太网标准的扩展，传输速度为每秒1000兆位(即1Gbps)
+   3Gbps不等于每秒3GB 这里大写小写的B、b是有区别的 我们平常说的GB、MB的B都是大写的 意为Byte 即字节 小写的b是bit的意思 1B=8b 所以实际上3Gbps=375MB每秒
+　　又因为『3000MHz的频率x每次发送一个资料x 80%(8b/10b的编码) / 8 bits per byte = 300Mbytes/s』
+　　所以SATA2.0的 3Gbps传输规范的理论最大速度是300MB每秒
+
+5. 前置摄像头1·2MP这是多少像素啊，求高手帮忙解答一下  -> M是million（百万）的简写，P是pixel（像素）。1.2MP就是120万像素
+
+6. 帧率(Frame rate) = 帧数(Frames)/时间(Time)，单位为帧每秒(f/s, frames per second, fps)
+   帧率是用于测量显示帧数的量度，测量单位为“每秒显示帧数”（ Frame per Second， FPS）或“赫兹”（ Hz），一般来说 FPS 用于描述视频、电子绘图或游戏每秒播放多少幀
+
+7.  

@@ -177,3 +177,13 @@ git submodule update --init --recursive
       git checkout -b yourbranchname origin/oldbranchname
       3、推送到git
       git push origin yourbranchname 
+
+43  运行 git submodule status 可以看到 submodule 的状态
+
+44 
+   git branch --contains 50089   # 显示包含提交50089的分支 
+   git branch -a                 # 显示所有分支 
+   git branch -r                 # 显示所有原创分支 
+
+45  git 获取 remote 的 url
+   git remote get-url --push origin
