@@ -1,0 +1,12 @@
+1. wav格式  https://www.sohu.com/a/421421974_100109711
+   Waveform Audio File Format（WAVE，或者是WAV后缀而被大家所熟悉），它采用RIFF（Resource Interchange File Format）文件格式结构。
+   通常用来保存PCM格式的原始音频数据，所以通常被称为无损音频。但是严格意义上来讲，WAV也可以存储其它压缩格式的音频数据。
+
+格式解析:
+    WAV文件遵循RIFF规则，其内容以区块（chunk）为最小单位进行存储。
+    WAV文件一般由3个区块组成：RIFF chunk, Format chunk, Data chunk。另外，文件中还可能包含一些可选的区块，
+    如：Fact chunk、Cue points chunk、Playlist chunk、Associated data list chunk等。
+    总结来说：WAV编码不会进行压缩操作，它只在PCM数据格式前加上44字节（并不一定严格是44字节）来描述音频的基本信息，例如采样率、声道数、数据格式等。
+    WAV格式结构组成如下图所示:
+
+    

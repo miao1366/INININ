@@ -308,6 +308,8 @@ vim有三种模式   insert  normal  visual
     crtl+w+p 
     ss    快速查找和定位
     LSP 协议
-
+    打开二进制文件
+      1   vim -b your_binary_file
+      2  :%!xxd -g 1
 
 

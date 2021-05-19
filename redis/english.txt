@@ -42,3 +42,9 @@ n. (Register) （美）雷吉斯特（人名）
 
 12. retain
 vt. 保持；雇；记住
+
+13. Validate
+vt. 证实，验证；确认；使生效
+
+14. integrity
+n. 完整；正直；诚实；廉正

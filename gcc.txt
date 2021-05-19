@@ -52,3 +52,5 @@ gcc -Wall -Wextra -Werror
     符号表中已经存在函数A，就不会再更新符号表，所以调用的始终是liba.so中的A函数
     这里的调用严重的依赖于链接库加载的顺序，可能会导致混乱；gcc的扩展中有如下属性__attribute__ ((visibility("hidden")))，
     可以用于抑制将一个函数的名称被导出，对连接该库的程序文件来说，该函数是不可见的
+
+24  __builtin_unreachable

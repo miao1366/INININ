@@ -1772,7 +1772,9 @@ O_SYNC 以同步的方式打开文件.
 O_NOFOLLOW 如果参数pathname 所指的文件为一符号连接, 则会令打开文件失败.
 O_DIRECTORY 如果参数pathname 所指的文件并非为一目录, 则会令打开文件失败。注：此为Linux2. 2 以后特有的旗标, 以避免一些系统安全问题.
 
+对于open函数来说，第三个参数仅当创建新文件时（即 使用了O_CREAT 时）才使用，用于指定文件的访问权限位（access permission bits）
 参数mode 则有下列数种组合, 只有在建立新文件时才会生效, 此外真正建文件时的权限会受到umask 值所影响, 因此该文件权限应该为 (mode-umaks).
+
 S_IRWXU00700 权限, 代表该文件所有者具有可读、可写及可执行的权限.
 S_IRUSR 或S_IREAD, 00400 权限, 代表该文件所有者具有可读取的权限.
 S_IWUSR 或S_IWRITE, 00200 权限, 代表该文件所有者具有可写入的权限.
@@ -1787,6 +1789,7 @@ S_IWOTH 00002 权限, 代表其他用户具有可写入的权限.
 S_IXOTH 00001 权限, 代表其他用户具有可执行的权限.
 
 返回值：若所有欲核查的权限都通过了检查则返回0 值, 表示成功, 只要有一个权限被禁止则返回-1.
+       return the new file descriptor, or -1 if an error occurred (in which case, errno is set appropriately).
 
 错误代码：
 EEXIST 参数pathname 所指的文件已存在, 却使用了O_CREAT 和O_EXCL 旗标.
@@ -1962,3 +1965,25 @@ VIDIOC_DQBUF： 把数据从缓存中读取出来
 VIDIOC_STREAMON： 开始视频显示函数
 VIDIOC_STREAMOFF： 结束视频显示函数
 VIDIOC_QUERYSTD： 检查当前视频设备支持的标准，例如PAL或NTSC
+
+229  函数
+    int ioctl(int fd, int request, struct v4l2_requestbuffers *argp);
+参数
+ fd:open()返回的文件描述符
+ request:VIDIOC_REQBUFS
+ argp
+描述
+    这个ioctl用于初始化内存映射或者用户指针IO，内存映射缓冲区由设备内存分配而且必须在应用程序地址空间分配之前由ioctl分配。用户空间的缓冲区由用户层自己分配，这个ioctl只是用来转换用户指针的一个驱动模块。
+    为分配设备缓冲区的应用程序初始化3个v4l2_requestbuffer结构，用type来区分流或者缓冲区，count是所需buffer数量，memory必须设置为v4l2_MEMORY_MMAP，当ioctl调用一个指针结构去驱动分配buffer数量并把这个数存在count中。当驱动运行的可用内存，请求的number可以更小甚至是0。当驱动正确调用函数请求更多的buffer，number也可以更大，当内存映射i/o不支持ioctl返回EINVAL。
+    应用程序可以重复调用VIDIOC_REQBUFS改变buffer数量，但是对于已经在映射的buffer不能成功。count值为0释放所有buffer，当所有DMA结束或退出，即VIDIOC_STEAMOFF。
+struct v4l2_requestbuffers
+__u32 count       /*请求或得到的buffer数量，这个字段只能在memory设置为V4L2_MEMORY_MMAP后才能生效*/
+enum v4l2_buf_type type  /*stream或者buffer的类型，和v4l2_format结构的type字段相同，*/
+enum v4l2_memory memory  /*应用程序设置这个字段用来设置V4L2_MEMORY_MMAP 或 V4L2_MEMORY_USERPTR*/
+__u32 reserved[2]  /*留出扩展空间，定制buffer类型V4L2_BUF_TYPE_PRIVATE或更高*/
+返回值
+    成功返回0，出错返回-1且errno设为某特定值：
+EBUSY
+    该驱动程序支持多种开放和I / O是已经在进行中，或试图重新分配的缓冲区，虽然仍有一个或多个映射。
+EINVAL
+    缓冲区型（类型字段）或I / O请求方法（内存）不支持
