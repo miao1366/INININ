@@ -190,3 +190,13 @@ git submodule update --init --recursive
 
 46. git comit --amend 
     git push origin HEAD:refs/for/nvidia_develop
+
+47.  git pull = git fetch + git merge FETCH_HEAD 
+     git pull --rebase =  git fetch + git rebase FETCH_HEAD 
+     想要更好的提交树，建议使用rebase操作会更好一点，这样可以线性的看到每一次提交，并且没有增加提交节点。不过也有些项目，不建议使用rebase, 这就得看公司与项目的规定
+
+48.  获取最新commit id或者说sha的简短结果
+      git rev-parse HEAD  
+      0996f0ac76188c324831f19089bdd87b9c364cb6
+      git rev-parse --short HEAD
+      0996f0ac7

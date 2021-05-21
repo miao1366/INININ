@@ -9,4 +9,45 @@
     总结来说：WAV编码不会进行压缩操作，它只在PCM数据格式前加上44字节（并不一定严格是44字节）来描述音频的基本信息，例如采样率、声道数、数据格式等。
     WAV格式结构组成如下图所示:
 
-    
+2. int snd_pcm_open(snd_pcm_t **pcmp, const char *name, snd_pcm_stream_t stream, int mode)
+      pcmp 打开的pcm句柄
+      name 要打开的pcm设备名字，默认default，或者从asound.conf或者asoundrc里面选择所要打开的设备
+      stream SND_PCM_STREAM_PLAYBACK 或 SND_PCM_STREAM_CAPTURE，分别表示播放和录音的PCM流
+      mode 打开pcm句柄时的一些附加参数 SND_PCM_NONBLOCK 非阻塞打开（默认阻塞打开）, SND_PCM_ASYNC 异步模式打开
+      返回值 0 表示打开成功，负数表示失败，对应错误码
+
+3.   snd_pcm_sframes_t snd_pcm_readi ( snd_pcm_t *pcm, void* buffer, snd_pcm_uframes_t  size)
+Read interleaved frames from a PCM.
+Parameters:
+ 	pcm 	PCM handle
+ 	buffer 	frames containing buffer
+ 	size 	frames to be read
+Returns:
+a positive number of frames actually read otherwise a negative error code
+Return values:
+ 	-EBADFD 	PCM is not in the right state (SND_PCM_STATE_PREPARED or SND_PCM_STATE_RUNNING)
+ 	-EPIPE 	an overrun occurred
+ 	-ESTRPIPE 	a suspend event occurred (stream is suspended and waiting for an application recovery)
+If the blocking behaviour was selected and it is running, then routine waits until all requested frames are filled. 
+The returned number of frames can be less only if a signal or underrun occurred.
+If the non-blocking behaviour is selected, then routine doesn't wait at all.
+
+4. snd_pcm_writei()
+snd_pcm_sframes_t snd_pcm_writei (snd_pcm_t * pcm, const void * buffer, snd_pcm_uframes_t size )
+
+Write interleaved frames to a PCM.
+Parameters:
+ 	pcm 	PCM handle
+ 	buffer 	frames containing buffer
+ 	size 	frames to be written
+Returns:
+a positive number of frames actually written otherwise a negative error code
+Return values:
+ 	-EBADFD 	PCM is not in the right state (SND_PCM_STATE_PREPARED or SND_PCM_STATE_RUNNING)
+ 	-EPIPE 	an underrun occurred
+ 	-ESTRPIPE 	a suspend event occurred (stream is suspended and waiting for an application recovery)
+If the blocking behaviour is selected and it is running, then routine waits until all requested frames are played or put to the playback ring buffer. 
+The returned number of frames can be less only if a signal or underrun occurred.
+If the non-blocking behaviour is selected, then routine doesn't wait at all.
+
+

@@ -62,3 +62,5 @@ ptrdiff_t   size_t   wchar_t   	NULL   	offsetof(type, member-designator)
 
 23  #include <iomanip>
    这里面iomanip的作用比较多: 主要是对cin,cout之类的一些操纵运算子，比如setfill,setw,setbase,setprecision等等
+
+24  https://www.jianshu.com/p/e62cc5f7dabf     //函数头文件对应
