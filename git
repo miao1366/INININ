@@ -200,3 +200,6 @@ git submodule update --init --recursive
       0996f0ac76188c324831f19089bdd87b9c364cb6
       git rev-parse --short HEAD
       0996f0ac7
+
+49   git branch --contains 50089    #显示包含提交50089的分支
+     git branch -r                  #显示所有原创分支

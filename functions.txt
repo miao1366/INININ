@@ -1990,3 +1990,51 @@ EINVAL
 
 230  想获取一下目标机运行时linux系统的硬件占用情况，写了这几个小程序，以后直接用了。
      方法就是读取proc下的文件来获取了。 cpu使用率：    /proc/stat ，内存使用情况：     /proc/meminfo
+
+231  FILE *popen(const char *command, const char *type);
+函数说明：
+（1）popen()会调用fork()产生子进程，然后从子进程中调用/bin/sh -c来执行参数command的指令。
+（2）参数type可使用“r”代表读取，“w”代表写入。依照此type值，popen()会建立管道连到子进程的标准输出设备或标准输入设备，然后返回一个文件指针。随后进程便可利用此文件指针来读取子进程的输出设备或是写入到子进程的标准输入设备中。
+（3）此外，所有使用文件指针(FILE*)操作的函数也都可以使用，除了fclose()以外。
+（4）如果 type 为 r，那么调用进程读进 command 的标准输出。
+如果 type 为 w，那么调用进程写到 command 的标准输入。
+返回值：若成功则返回文件指针，否则返回NULL，错误原因存于errno中。
+**注意：**popen()会继承环境变量，通过环境变量可能会造成系统安全的问题
+
+232 int system(const char *command);
+    system()函数先fork一个子进程，在这个子进程中调用/bin/sh -c来执行command指定的命令。/bin/sh在系统中一般是个软链接，指向dash或者bash等常用的shell，
+    -c选项是告诉shell从字符串command中读取要执行的命令（shell将扩展command中的任何特殊字符）。父进程则调用waitpid()函数来为变成僵尸的子进程收尸，获得其结束状态，
+    然后将这个结束状态返回给system()函数的调用者。
+    返回值：
+    （1）当参数command是NULL的时候
+    在参数为NULL的情况下，system函数的返回值很简单明了，只有0和1。
+    返回1，表明系统的命令处理程序，即/bin/sh是可用的。
+    相反，如果命令处理程序不可用，则返回0。
+    （2）当参数command不是NULL的时候
+    当参数不为NULL的时候，情况有些小复杂，根据APUE这里可以分为以下三种情况：
+    1）如果fork等系统调用失败，或者waitpid函数发生除EINTR外的错误时，system返回-1
+    2）一切致使execl失败的情况下，system返回127
+    3）除此之外，system返回/bin/sh的终止状态
+
+233  char* ctime_r( const time_t* timer, char* buf );
+    time_t Nowt=0;
+	char Buf[50];
+	ctime_r(&Nowt,Buf);			//可重入的版本，指定输出的位置，而不是内核随机位置输出
+	printf("Buf=%s",Buf)        // Thu Sep 20 14:00:05 2018
+
+234   int rename(const char *oldpath, const char *newpath)
+        【参数】oldname为旧文件名，newname为新文件名。
+        【返回值】修改文件名成功则返回0，否则返回-1。
+        重命名文件：
+        如果newname指定的文件存在，则会被删除。
+        如果newname与oldname不在一个目录下，则相当于移动文件。
+        重命名目录：
+        如果oldname和oldname都为目录，则重命名目录。
+        如果newname指定的目录存在且为空目录，则先将newname删除。
+        对于newname和oldname两个目录，调用进程必须有写权限。
+        重命名目录时，newname不能包含oldname作为其路径前缀。例如，不能将/usr更名为/usr/foo/testdir，因为老名字（ /usr/foo）是新名字的路径前缀，因而不能将其删除。
+
+235.    头文件：#include <unistd.h>
+        定义函数：int execv (const char * path, char * const argv[]);
+        函数说明：execv()用来执行参数path 字符串所代表的文件路径, 与execl()不同的地方在于execve()只需两个参数, 第二个参数利用数组指针来传递给执行文件.
+        返回值：如果执行成功则函数不会返回, 执行失败则直接返回-1, 失败原因存于errno 中

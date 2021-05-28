@@ -89,19 +89,22 @@ RUN set -x && \
   docker-compose up [options] [--scale SERVICE=NUM...] [SERVICE...]  // 有关该命令的其他参数，可以使用docker-compose up --help查看
   --build 在启动容器前构建服务镜像 
   -d 在后台运行服务容器
-   
-   
-   
-   
-
-作者：ArtisCoder
-链接：https://www.jianshu.com/p/ee2383b6eedf
-来源：简书
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
-   
-   
-
 
 13 docker 参数
 privileged          指定容器是否为特权容器，特权容器拥有所有的capabilities
-  
+
+14 docker ps 
+
+1. 最常见的用法
+$ docker ps
+显示当前正在运行的容器。
+在 PORTS 一列，如果暴露的端口是连续的，还会被合并在一起，例如一个容器暴露了3个 TCP 端口：100，101，102，则会显示为 100-102/tcp。
+2. 显示所有状态的容器
+$ docker ps -a  
+
+15.  Docker attach可以attach到一个已经运行的容器的stdin，然后进行命令执行的动作。
+     但是需要注意的是，如果从这个stdin中exit，会导致容器的停止
+
+16.  docker run -e传递环境变量
+
+17.  sudo docker run -it --privileged=true --shm-size=4g --net=host  --name ros a4a0085a273c

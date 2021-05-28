@@ -279,3 +279,11 @@ https://blog.csdn.net/lm409/article/details/80303709
 
 24  用gdb调试时想打印变量值，结果出现了optimized out，打印不出变量内容，后来找到解决方案，
     将makefile中的编译命令中-O3优化改为-O0取消优化即可
+
+25  非交互模式 下，打印core文件 堆栈
+        gdb -q --batch --ex "set height 0" -ex "thread apply all bt full" [可执行文件] [core文件]
+        -q: 不打印gdb的版权消息
+        --batch: 执行批处理，不进入交互模式
+        --ex: 执行gdb 命令
+        "set height 0": 不对输出进行分页
+        "thread apply all bt full": 打印所有线程堆栈

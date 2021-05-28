@@ -1,0 +1,56 @@
+locale  # check for UTF-8
+
+sudo apt update && sudo apt install locales
+sudo locale-gen en_US en_US.UTF-8
+sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
+
+locale  # verify setting
+
+https://blog.csdn.net/sad490/article/details/81460395?spm=1001.2014.3001.5501
+sudo apt update && sudo apt install curl
+curl http://repo.ros2.org/repos.key | sudo apt-key add -
+sudo sh -c 'echo "deb [arch=amd64,arm64] http://repo.ros2.org/ubuntu/main `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
+
+export ROS_DISTRO=bouncy  # or ardent
+sudo apt update
+sudo apt install ros-$ROS_DISTRO-desktop
+
+
+1. ros2 topic pub /chatter std_msgs/String "data: Hello world"   // 发布数据  主题 类型  数据
+2. 我们可以使用如下命令来查看这个话题所发布的内容。 ros2 topic echo /chatter
+3. ros2 topic info /chatter 可以用于查看一个话题的一些信息。
+4. ros2 msg show visualization_msgs/InteractiveMarkerControl 使用如下命令就可以看到某一种类型所包含的数据类型。
+5. 这是我们所介绍的一个用于创建ROS2包的一个命令. 在工作空间的src目录下使用命令： ros2 pkg create learn
+5. colcon是一个命令行工具，用于改进编译，测试和使用多个软件包的工作流程。它实现过程自动化，处理需求并设置环境以便于使用软件包
+6. 
+
+sudo apt update && sudo apt install -y build-essential cmake git python3-colcon-common-extensions python3-pip python-rosdep python3-vcstool wget
+# install some pip packages needed for testing
+sudo -H python3 -m pip install -U argcomplete flake8 flake8-blind-except flake8-builtins flake8-class-newline flake8-comprehensions flake8-deprecated flake8-docstrings flake8-import-order flake8-quotes pytest-repeat pytest-rerunfailures
+# [Ubuntu 16.04] install extra packages not available or recent enough on Xenial
+python3 -m pip install -U pytest pytest-cov pytest-runner setuptools
+# install Fast-RTPS dependencies
+sudo apt install --no-install-recommends -y libasio-dev libtinyxml2-dev
+
+https://blog.csdn.net/sad490/article/details/81461507?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522162169141116780357287570%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&request_id=162169141116780357287570&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_v2~rank_v29-3-81461507.nonecase&utm_term=ros&spm=1018.2226.3001.4450
+
+source ./install/setup.bash
+ros2 run learn talker
+ros2 run learn listener
+
+colcon --log-level WARNING build $COLCON_CONFIG --cmake-force-configure
+
+--executor parallel --parallel-workers 4 
+
+
+--event-handlers console_direct+ --executor parallel --parallel-workers 4 --build-base ./catkin_build/build --install-base ./catkin_build/install --merge-install --base-paths ./catkin_build/*
+
+colcon --log-level WARNING build --event-handlers console_direct+ --executor parallel --parallel-workers 4 --build-base ./catkin_build/build --install-base ./catkin_build/install --merge-install --base-paths ./module/*
+--cmake-force-configure
+
+简单来讲就是catkin_make是cmake的高级封装，很多路径是定义好的，用户只需要按照catkin_make的文件管理规则，使用catkin_make即可
+
+compile_options = -DCMAKE_BUILD_TYPE=Debug -DCATKIN_ENABLE_TESTING=ON -DDIAG_BUILD=false -DUT_LCOV=false -DCMAKE_TOOLCHAIN_FILE=/home/miao/caimiaomiao/work/code/integrate/devops/cmake/platform/x86_64_linux_toolchain.cmake
+
+--event-handlers console_direct+ 在生成时显示控制台输出 

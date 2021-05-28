@@ -1023,6 +1023,12 @@ alias c:='mount /dev/hda1 /mnt/c & cd /mnt/c' ;用 c: 命令代替命令序列�
  ^ 锚定行的开始 如：'^grep'匹配所有以grep开头的行。 
  $ 锚定行的结束 如：'grep$'匹配所有以grep结尾的行。
  grep -w   精确匹配
+ grep 命令加 -E参数，这一扩展允许使用扩展模式匹配。例如，要抽取城市代码为219或216，方法如下：
+ grep –E '219|216'
+ grep -q 用于if逻辑判断      安静模式，不打印任何标准输出。如果有匹配的内容则立即返回状态值0
+ grep -E：支持使用扩展的正则表达式元字符；
+ egrep：支持扩展的正则表达式实现类似grep文本过滤功能；grep -E
+
 
 140. tar zxvf output.tgz -C ./
 
@@ -1152,3 +1158,62 @@ netstat -n | grep tcp | grep 侦听端口 | wc -l
     input-file是转换文件名。虽然可以使用其他格式输入，但这种格式最常用
 
 150. cut  linux字符截取命令
+
+151. echo \c
+     我们也可以使用\c转义符，表示不换行输出，但是当”\c”后面仍然存在字符时，”\c”后面的字符将不会被输出，如果”\c”后面不存在任何字符时，
+     效果与使用”echo -n”相同,示例如下。
+
+152. grep是管道符的作用，相当于将前面的搜索内容传递给grep之后的命令，^d表示查找开头为字母d的文件或行
+
+153. Linux命令手动清除缓存  echo 3 > /proc/sys/vm/drop_caches
+
+154. kill -0 pid 不发送任何信号，但是系统会进行错误检查。
+     所以经常用来检查一个进程是否存在，存在返回0；不存在返回1
+
+155. 
+wc -c filename：显示一个文件的字节数
+wc -m filename：显示一个文件的字符数
+wc -l filename：显示一个文件的行数
+wc -L filename：显示一个文件中的最长行的长度
+wc -w filename：显示一个文件的字数
+
+156. sort是在Linux里非常常用的一个命令，管排序的
+        function version_lt() { test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)" != "$1"; }
+
+157.  wget  选项
+-O：下载并以指定的文件名保存；
+-nh：不查询主机名称；
+-v：显示详细执行过程；
+-V：显示版本信息；
+--passive-ftp：使用被动模式PASV连接FTP服务器；
+--follow-ftp：从HTML文件中下载FTP连接文件
+
+158.  
+-a ：相当于 -pdr 的意思（参数pdr分别为：保留权限，复制软链接本身，递归复制)
+-p ：连同档案的属性一起复制过去，而非使用预设属性；
+-d ：若来源文件为连结文件的属性(link file)，则复制连结文件属性而非档案本身；
+-f ：为强制 (force) 的意思，若有重复或其它疑问时，不会询问使用者，而强制复制；
+
+159. ip---给网卡配置多个IP地址（别名）以及删除
+格式：ip addr add CIDR dev 网卡名 label 网卡名:num
+例子：ip addr add 3.3.3.3/24 dev eth1 label eth1:2
+
+删除
+格式：ip addr del CIDR dev 网卡名
+例子： sudo ip addr del 192.168.1.15/24 dev eno1:1
+
+159. umount /dev/hda2  
+
+160. export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+
+161. grep -v 
+    cat test.log | grep "login"|grep -v "deviceType"
+    上面的命令的意思是：找出test.log中包含login信息的,且没有deviceType这个字段的
+
+162. chrony是一个开源的自由软件，它能保持系统时钟与时钟服务器（NTP）同步，让时间保持精确。它由两个程序组成：chronyd和chronyc。
+     chronyd是一个后台运行的守护进程，用于调整内核中运行的系统时钟和时钟服务器同步。它确定计算机增减时间的比率，并对此进行补偿。 
+     chronyc提供了一个用户界面，用于监控性能并进行多样化的配置。它可以在chronyd实例控制的计算机上工作，也可以在一台不同的远程计算机上工作。 
+
+     chronyc sources -v    查看时间同步源
+
+163. 

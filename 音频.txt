@@ -1,4 +1,5 @@
 1. wav格式  https://www.sohu.com/a/421421974_100109711
+   https://www.aconvert.com/cn/audio/m4a-to-wav/
    Waveform Audio File Format（WAVE，或者是WAV后缀而被大家所熟悉），它采用RIFF（Resource Interchange File Format）文件格式结构。
    通常用来保存PCM格式的原始音频数据，所以通常被称为无损音频。但是严格意义上来讲，WAV也可以存储其它压缩格式的音频数据。
 
@@ -50,4 +51,31 @@ If the blocking behaviour is selected and it is running, then routine waits unti
 The returned number of frames can be less only if a signal or underrun occurred.
 If the non-blocking behaviour is selected, then routine doesn't wait at all.
 
+5. sudo apt install sox 
+SoX（即 Sound eXchange）是一个跨平台（Windows，Linux，MacOS 等）的命令行实用程序，能够将各类格式的音频文件转换为须要的其余格式。
+SoX 还能够对输入的音频文件应用各类效果，也支持在大多数平台上播放和录制音频文件
 
+6. https://www.aconvert.com/cn/audio/m4a-to-wav/ 
+    比特率: 160k
+    采样率: 44100
+
+7. ALSA全称是Advanced Linux Sound Architecture，叫做Linux系统下的高级音频架构，它主要为声卡提供的驱动组件，以替代原先的 OSS。
+   这个项目最早始于1998年Gravis Ultrasound所开发的驱动，它一直作为一个单独的软件包开发，直到2002年他被引进入Linux内核的开发版本(2.5.4-2.5.5)。
+   自从2.6版本开始ALSA成为Linux内核中默认的标准音频驱动程序集，而OSS则被标记为废弃。所以，现在看来OSS被ALSA替代，闭源和商业化都只是外因，内因还是其设计的缺陷。
+   虽然2007年4Front又宣布OSSv4重新在GPL协议下重新开源，但已经人去楼空秋已暮了，现在ALSA对OSS的支持也比较好了，不知道OSS还能否王者归来。其实这些都不重要，对于开发者来说，
+   简单、便捷、高效、实用才是王道，优美的框架结构，完善的文档支持强过口水战百倍。
+   目前ALSA已经成为Linux系统里主流的音频系统框架，在2.6.21的内核里已经看不到OSS的影子了。在内核设备驱动层面，ALSA提供了alsa-driver，
+   同时在应用层，ALSA也为我们提供了alsa-lib，应用程序只要调用alsa-lib所提供的API，就可以完成对底层音频硬件的控制
+
+8.  /dev/snd 
+    alsa管理的声卡系统设备，简单来说就是处理输入输出数字音频信号的。Linux内核自带alsa，所以一定有两个，一个是seq，就是sequencer，音序器，
+    另外一个是timer，声卡计时器。剩下的就是你电脑上已经安装的声卡设备。
+
+9.  alsa的配置文件。alsa的配置文件是alsa.conf位于/usr/share/alsa目录下，通常还有/usr/share/alsa/card和/usr/share/alsa/pcm两个子目录用来设置card相关的参数，
+    别名以及一些PCM默认设置。以上配置文件，我等凡夫从不用修改，修改它们是大神的工作。还有两个配置文件/etc/asound.conf和~/.asoundrc，
+    它俩有效是因为它俩被alsa.conf引用
+
+10. 如果机器有多于一个声卡，可以用下面的命令显示出来：
+    $ cat /proc/asound/cards
+
+11. https://blog.csdn.net/keepingstudying/article/details/50674277

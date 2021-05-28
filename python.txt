@@ -58,3 +58,19 @@ print str2.strip();
 Runoob
 
 6.  python json.dump()   //indent = 4 , 对元素进行换行
+
+7.  splitlines() 按照行('\r', '\r\n', \n')分隔，返回一个包含各行作为元素的列表，如果参数 keepends 为 False，不包含换行符，如果为 True，则保留换行符
+
+8.  
+os.path.getatime(file)   #输出最近访问时间1318921018.0
+os.path.getctime(file)   #windows环境下是输出文件创建时间；如果是linux环境下ctime代表“状态时间”
+os.path.getmtime(file)   #输出最近修改时间
+time.gmtime(os.path.getmtime(file))   #以struct_time形式输出最近修改时间
+os.path.getsize(file)    #输出文件大小（字节为单位）
+os.path.abspath(file)    #输出绝对路径'/Volumes/Leopard/Users/Caroline/Desktop/1.mp4'
+os.path.normpath(file)   #输出'/Volumes/Leopard/Users/Caroline/Desktop/1.mp4'
+
+9.  arch = platform.machine()
+    if arch != "aarch64":
+
+10. 
