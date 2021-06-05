@@ -115,13 +115,16 @@ https://www.cnblogs.com/xindoo/p/13769299.html
 #define ZIP_STR_06B (0 << 6)        //-> 0
 #define ZIP_STR_14B (1 << 6)        //-> 64
 #define ZIP_STR_32B (2 << 6)        //-> 128
+
+#define ZIP_INT_8B   0xfe           //-> 254
 #define ZIP_INT_16B (0xc0 | 0<<4)   //-> 192           
 #define ZIP_INT_32B (0xc0 | 1<<4)   //-> 192 | 16 = 208
 #define ZIP_INT_64B (0xc0 | 2<<4)   //-> 192 | 32 = 224
 #define ZIP_INT_24B (0xc0 | 3<<4)   //-> 192 | 48 = 240
-#define ZIP_INT_8B 0xfe             //-> 254
-#define ZIP_INT_IMM_MIN 0xf1        //-> 241
-#define ZIP_INT_IMM_MAX 0xfd        //-> 253
+
+#define ZIP_INT_IMM_MIN   0xf1        //-> 241
+#define ZIP_INT_IMM_MAX   0xfd        //-> 253
+#define ZIP_INT_IMM_MASK  0x0f        //-> 
 
 typedef struct zlentry {
     unsigned int prevrawlensize; /* 内存中编码后的prevrawlen用了多少字节 */
@@ -137,3 +140,13 @@ typedef struct zlentry {
     摒弃了传统的链表设计(前后指针需要16字节的空间，而且会导致内存碎片化严重)，设计出了内存非常紧凑的存储格式。内存是省下来了，但操作复杂性也更新的复杂度上来了，
     当然Redis作者也考虑了这点，所以也设计出了ziplist和传统双向链表的折中——quicklist，我们将在下一篇博文中详细介绍quicklist
 
+    https://www.jianshu.com/p/c7104ed53e87?utm_campaign=maleskine&utm_content=note&utm_medium=seo_notes&utm_source=recommendation
+
+    https://www.zhihu.com/people/skyraincho/posts
+    
+    Redis中的ziplist，又名压缩列表，是一种经过特殊编码的双链接列表，极度节约内存的数据结构。
+    可以存储字符串和整数值，其中整数被编码为实际整数，而不是一系列字符。
+    它允许在 O(1) 时间内在列表的任一侧执行push和pop操作。
+    但是，由于每个操作都需要重新分配ziplist使用的内存，因此实际的复杂性与ziplist使用的内存量有关
+
+    buf[0] = ZIP_STR_06B | rawlen;

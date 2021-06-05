@@ -54,3 +54,5 @@ gcc -Wall -Wextra -Werror
     可以用于抑制将一个函数的名称被导出，对连接该库的程序文件来说，该函数是不可见的
 
 24  __builtin_unreachable
+    __builtin_unreachable的目的是帮助编译器删除死代码(程序员知道永远不会被执行)并通过让编译器知道路径是“冷”来线性化代码
+    https://www.zhihu.com/question/30498481?sort=created

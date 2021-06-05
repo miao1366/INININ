@@ -64,4 +64,6 @@ assert(newlen > len);   /* Catch size_t overflow */
 
 13.  memcpy(&v64,((int64_t*)is->contents)+pos,sizeof(v64));
 
-14.  
+14.    #define OUT_OF_RANGE(p) (unlikely((p) < zlfirst || (p) > zllast))
+        ZIP_DECODE_LENGTH  当前结点的长度
+        if (p >= zlfirst && p + 10 < zllast)
