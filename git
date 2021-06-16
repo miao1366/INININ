@@ -188,7 +188,7 @@ git submodule update --init --recursive
 45  git 获取 remote 的 url
    git remote get-url --push origin
 
-46. git comit --amend 
+46. git commit --amend 
     git push origin HEAD:refs/for/nvidia_develop
 
 47.  git pull = git fetch + git merge FETCH_HEAD 

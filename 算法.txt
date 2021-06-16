@@ -39,3 +39,7 @@
         return key;
     }
     
+9
+FIFO：   First In First Out    先进先出，这个没啥好讲的；
+LFU：    Least Frequently Used 从frequently可以看出这个策略是比较访问频率的。也就是在一定的时间内谁的访问次数最少将会被淘汰，这是一种比较合理的策略；
+LRU：    Least Recently Used   这个是比较最近的访问时间的。也就是在一定时间内，谁最早被访问将会被淘汰。可以看成是LFU的简化

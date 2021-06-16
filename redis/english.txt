@@ -51,3 +51,35 @@ n. 完整；正直；诚实；廉正
 
 15. validate
 vt. 证实，验证；确认；使生效
+
+16. leap year
+闰年
+
+17. Thursday
+n. 星期四
+
+18. sentinel
+n. 哨兵
+vt. 守卫，放哨
+
+19. role
+n. 角色；任务
+n. (Role)人名；(意、塞、赤几)罗莱
+
+20. replica
+n. 复制品，仿制品；模型；摹本
+
+21. representable
+adj. 能被代表的；能上演的；能被描绘的
+
+22. abort
+    v.使流产;流产;小产;(使)夭折，中止(尤指很可能失败的事情)
+
+23. verbosity
+n. 冗长；赘言；唠叨
+
+24. optimize
+vt. 使最优化，使完善
+vi. 优化；持乐观态度
+
+

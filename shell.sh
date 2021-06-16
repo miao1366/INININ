@@ -359,7 +359,17 @@ c 字符设备
      sed '2,$d' ab           #删除第二行到最后一行
      sed -n '1p' ab           #显示第一行 
      sed -ri '/^SELINUX=/cSELINUX' 文字替换  可以自己尝试敲一敲
-	 
+     去掉 “行首” 带“@”的首字母@
+     sed -i 's/^@//' file
+     特定字符串的行前插入新行
+     sed -i '/特定字符串/i 新行字符串' file
+     特定字符串的行后插入新行
+     sed -i '/特定字符串/a 新行字符串' file
+     特定字符串的删除
+     sed -i '/字符串/d' file
+
+
+
 78 数组  books= {linux shell awk } books[2]  ' `
       array2 = (`cat /etc/password`) 希望将该文件中的每一行作为一个元素赋值给数组  
 	  books[@]  数组所有元素 

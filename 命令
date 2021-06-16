@@ -1216,4 +1216,29 @@ wc -w filename：显示一个文件的字数
 
      chronyc sources -v    查看时间同步源
 
-163. 
+163. alsamixer   调节音量
+
+164. https://www.cnblogs.com/liulaolaiu/p/11744497.html
+举例说明：
+要将目录logs打包压缩并分割成多个1M的文件，可以用下面的命令：
+tar cjf - logs/ |split -b 1m - logs.tar.bz2.
+完成后会产生下列文件：
+-rw-r--r-- 1 httpd nobody 1048576 Oct 5 15:37 logs.tar.bz2.aa
+-rw-r--r-- 1 httpd nobody 1048576 Oct 5 15:37 logs.tar.bz2.ab
+-rw-r--r-- 1 httpd nobody 1048576 Oct 5 15:37 logs.tar.bz2.ac
+-rw-r--r-- 1 httpd nobody 1048576 Oct 5 15:38 logs.tar.bz2.ad
+-rw-r--r-- 1 httpd nobody 1048576 Oct 5 15:38 logs.tar.bz2.ae
+-rw-r--r-- 1 httpd nobody 829440 Oct 5 15:39 logs.tar.bz2.af
+这样存储压缩包的目的就达到了，可是当要解压的时候要怎么做呢？只要执行下面的命令就可以了：
+cat logs.tar.bz2.a* | tar xj
+这里对命令做一些讲解。
+压缩和分割命令行中红色部分的为命令对应的I/O文件名参数，其中-表示标准输入或输出。那么结合上面的例子，tar命令表示的意思就是将logs目录压缩，生成的结果直接输送到标准输出上；
+而split命令表示从标准输入获得文件内容进行分割，结果文件前缀为logs.tar.bz2.。二者再通过管道将各自的标准输入输出对接起来。
+这里再解释一下split命令的参数含义：
+-b SIZE 指定每个文件的大小，其单位可以为b（512字节）、k（1K）、m（1M）
+-d 使用数字而不是字母作为后缀名
+-a X 指定后缀名的长度，默认为2位
+这样上面的命令就可以变化为：
+tar cjf - logs/ |split -b 1m -d -a 1- logs.tar.bz2.
+
+165. 

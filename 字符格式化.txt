@@ -10,3 +10,14 @@ printf("%02X", 0x6); //打印出：06
 printf("%2X", 0x345);  //打印出：345
 printf("%2X", 0x6); //打印出：6
 
+2. 
+snprintf(s, 100, "%.*S", 3, "abcd");
+s的值为abc
+%.*s 表示有两项， 第一项指定了长度，第二项则是%s的内容，所以取前三位
+
+3. redis 
+    l = snprintf(buf,len,"%.17Lg",value);
+    l = snprintf(buf,len,"%La",value);
+    l = snprintf(buf,len,"%.17Lf",value);
+
+4.  

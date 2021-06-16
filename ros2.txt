@@ -54,3 +54,200 @@ colcon --log-level WARNING build --event-handlers console_direct+ --executor par
 compile_options = -DCMAKE_BUILD_TYPE=Debug -DCATKIN_ENABLE_TESTING=ON -DDIAG_BUILD=false -DUT_LCOV=false -DCMAKE_TOOLCHAIN_FILE=/home/miao/caimiaomiao/work/code/integrate/devops/cmake/platform/x86_64_linux_toolchain.cmake
 
 --event-handlers console_direct+ 在生成时显示控制台输出 
+
+
+
+/**************************************************************************
+*
+* Copyright (c) 2020 HaoMo.com, Inc. All Rights Reserved
+*
+**************************************************************************/
+/*
+ * @Description: 
+ * @Author: caimiaomiao
+ * @Date: 2021-05-28 18:37:43
+ * @LastEditors: caimiaomiao
+ * @LastEditTime: 2021-05-28 18:37:43
+ */
+
+
+#include <string.h>               // memset()
+#include <stdlib.h>               // malloc(), free()
+#include <unistd.h>               // sleep()
+
+#include "sound_common.h"         //MIN, SOUND_*, PLAY_BUFF_MIN_SIZE, ...
+#include "wave_audio.h"           //class WaveAudio
+#include "config_manager.h"       //ConfigManager::get_sound_warning_config()
+#include "data.h"                 //DiagnosisData
+#include "sound_warning_exec.h"   //
+
+#include <iostream>
+
+namespace haomo {
+namespace hidelivery {
+namespace guard {
+
+REGISTER_EXECUTER(SoundWarningExec)
+
+
+#define SOUND_WARNING                         sound_warning
+#define SOUND_WARNING_STR                     "sound_warning"
+#define SOUND_PLAY_SLEEP                       2
+
+SoundWarningExec::SoundWarningExec(const std::string& name, const std::string& type) : 
+                                                            ::haomo::hios::IExec(name, type) {
+
+}
+
+SoundWarningExec::~SoundWarningExec() {
+    release();
+}
+
+int SoundWarningExec::init(const std::string& config_dir) {
+    haomo::hios::Module::get_instance()->regist(SOUND_WARNING_STR);
+    MLOG(SOUND_WARNING, ERROR) << "init start";
+
+    SoundWarningInfos  sound_warning_infos;
+    if (!ConfigManager::get_sound_warning_config(sound_warning_infos, config_dir)) {
+        MLOG(SOUND_WARNING, ERROR) << "get config fail";
+        return SOUND_ERR;
+    }
+
+    if (sound_warning_infos.path().empty()) {
+        MLOG(SOUND_WARNING, ERROR) << " config  path size is 0";
+        return SOUND_ERR;
+    }
+    _path = sound_warning_infos.path();
+
+    for(int i = 0; i < sound_warning_infos.warning_infos().size(); ++i) {
+        const SoundWarningInfo & warning_info = sound_warning_infos.warning_infos()[i];
+        
+        if (warning_info.warning_name().empty() || warning_info.warning_file().empty()) {
+            MLOG(SOUND_WARNING, ERROR) << "config params error";
+            continue;
+        }
+        WarningFileInfo file_info;
+        file_info._warning_level = warning_info.warning_level();
+        file_info._warning_file  = warning_info.warning_file();
+        file_info._play_flag = false;
+        _warning_files_infos[warning_info.warning_name()] = file_info;
+    }
+    _stop_flag = false;
+    _thread    = std::thread(&SoundWarningExec::play_thread, this);
+    MLOG(SOUND_WARNING, ERROR) << "init end";
+    return SOUND_OK;
+}
+
+int SoundWarningExec::process(const ::haomo::hios::IData* const input, ::haomo::hios::IData* const output) {
+
+    MLOG(SOUND_WARNING, ERROR) << "process  start";
+    auto&& diagnosis_input = dynamic_cast<const DiagnosisData*>(input);
+    if (NULL == diagnosis_input) {
+        MLOG(SOUND_WARNING, ERROR) << "diagnosis_input is null";
+        return SOUND_ERR;
+    }
+
+    bool need_notify = false;
+    for (int i = 0; i < diagnosis_input->error_info().size(); ++i) {
+        const ErrInfo & err_info = diagnosis_input->error_info()[i];
+        if (_warning_files_infos.find(err_info.error()) == _warning_files_infos.end()) {
+            MLOG(SOUND_WARNING, ERROR) << err_info.error() << " not configed";
+            continue;
+        }
+        _warning_files_infos[err_info.error()]._play_flag = true;
+        need_notify = true;
+    }
+    
+    if (need_notify) {
+        _condition.notify_one();
+    } else {
+        MLOG(SOUND_WARNING, ERROR) <<" all warning not configed";
+    }
+
+    return SOUND_OK;
+}
+
+
+int SoundWarningExec::release(){
+    MLOG(SOUND_WARNING, ERROR) << "release start";
+    _stop_flag = true;
+    _condition.notify_one();
+    _thread.join();
+    MLOG(SOUND_WARNING, ERROR) << " release end";
+    return SOUND_OK;
+}
+
+void SoundWarningExec::play_thread(void) {
+
+    MLOG(SOUND_WARNING, ERROR) << "play thread start";
+    std::string  last_play_file;
+    if(FORWARD_ALASH != _path[_path.size() -1]) {
+        _path.append(sizeof(FORWARD_ALASH), FORWARD_ALASH);
+    }
+
+    void *play_buff;
+    if (NULL == (play_buff = malloc(PLAY_BUFF_MIN_SIZE))) {
+        MLOG(SOUND_WARNING, ERROR) << "malloc failed. ";
+        return;
+    }
+    while (!_stop_flag) {
+        std::string first_play_file;
+        std::string second_play_file;
+        std::map<std::string , WarningFileInfo>::iterator it = _warning_files_infos.begin();
+        for(; it != _warning_files_infos.end(); ++it) {
+            if (it->second._play_flag) {
+                if (first_play_file.empty()) {
+                    first_play_file = it->first;
+                } else {
+                    if (_warning_files_infos.at(it->first)._warning_level > _warning_files_infos.at(first_play_file)._warning_level) {
+                        if (second_play_file.empty()) {
+                            second_play_file = first_play_file;
+                        }else {
+                            //同等级别的告警，选择先发现的告警.
+                            second_play_file = _warning_files_infos.at(first_play_file)._warning_level == _warning_files_infos.at(second_play_file)._warning_level ? second_play_file : first_play_file;
+                        }
+                        first_play_file  = it->first;
+                    } else {
+                        if (second_play_file.empty() || _warning_files_infos.at(it->first)._warning_level > _warning_files_infos.at(second_play_file)._warning_level) {
+                            second_play_file = it->first;
+                        }
+                    }
+                }
+            }
+        }
+         MLOG(SOUND_WARNING, ERROR) << "first_play_file " << first_play_file;
+         MLOG(SOUND_WARNING, ERROR) << "last_play_file " << last_play_file;
+         MLOG(SOUND_WARNING, ERROR) << "second_play_file " << second_play_file;
+
+        if (first_play_file.empty()) {
+            MLOG(SOUND_WARNING, ERROR) << "no play file";
+            std::unique_lock<std::mutex> lock(_mutex);
+            _condition.wait(lock);
+        } else {
+            if (second_play_file.empty()) {
+                last_play_file = first_play_file;
+            } else {
+                last_play_file = (first_play_file == last_play_file) ? second_play_file : last_play_file;
+            }
+            _warning_files_infos.at(last_play_file)._play_flag = false;
+            std::string play_file = _path + _warning_files_infos.at(last_play_file)._warning_file;
+            MLOG(SOUND_WARNING, ERROR) << "ready play " << play_file;
+            WaveAudio wave_audio(play_file.c_str(), play_buff);
+            if(SOUND_OK == wave_audio.file_check() && SOUND_OK == wave_audio.prepare()) {
+                wave_audio.play();
+                sleep(SOUND_PLAY_SLEEP);
+            } else {
+                MLOG(SOUND_WARNING, ERROR) << "play " << play_file << " failed ";
+            }
+        }
+    }
+    free(play_buff);
+    MLOG(SOUND_WARNING, ERROR) << " play thread  end";
+    return;
+}
+
+
+
+}
+}
+}

@@ -1,0 +1,6 @@
+1. linux命令源码
+    https://zhuanlan.zhihu.com/p/41442571
+    https://github.com/coreutils/coreutils.git
+    http://ftp.gnu.org/pub/gnu/coreutils/
+    
+2.  
