@@ -1222,6 +1222,7 @@ wc -w filename：显示一个文件的字数
 举例说明：
 要将目录logs打包压缩并分割成多个1M的文件，可以用下面的命令：
 tar cjf - logs/ |split -b 1m - logs.tar.bz2.
+tar cjf - ./hibag_V71C001_default_22_20210615163800_20210615163840.bag |split -b 2040m - hibag.tar.bz2.
 完成后会产生下列文件：
 -rw-r--r-- 1 httpd nobody 1048576 Oct 5 15:37 logs.tar.bz2.aa
 -rw-r--r-- 1 httpd nobody 1048576 Oct 5 15:37 logs.tar.bz2.ab
@@ -1241,4 +1242,72 @@ cat logs.tar.bz2.a* | tar xj
 这样上面的命令就可以变化为：
 tar cjf - logs/ |split -b 1m -d -a 1- logs.tar.bz2.
 
-165. 
+165.   
+    mkdir /home/vehicle/
+    mount /dev/sda1 /home/vehicle/
+
+166. jq 
+
+[
+    {
+        "path" : "devops",
+        "branch" : "master"
+    },
+    {
+        "path" : "modules/common",
+        "branch" : "null"
+    },
+    {
+        "path" : "modules/data_source",
+        "branch" : "null"
+    },
+    {
+        "path" : "modules/infra",
+        "branch" : "null"
+    },
+    {
+        "path" : "modules/guard",
+        "branch" : "null"
+    },
+    {
+        "path" : "modules/dashboard",
+        "branch" : "null"
+    },
+    {
+        "path" : "modules/signal_manager",
+        "branch" : "null"
+    },
+    {
+        "path" : "modules/data_collect",
+        "branch" : "null"
+    },
+    {
+        "path" : "modules/map",
+        "branch" : "null"
+    }
+]
+
+cat ./branch.json |jq '[0]'|.path"    >> develop
+
+167.  ping  https://www.cnblogs.com/operationhome/p/9848138.html
+①　ping目标主机的域名和IP（ping会自动将域名转换为IP）
+②　不带包头的包大小和带包头的包大小（参考“-s”参数）
+③　icmp_seq：ping序列，从1开始；如果数字不是按顺序递增也就意味着丢包了
+　　ttl：剩余的ttl；见四TTL解释
+　　time: 响应时间,数值越小，联通速度越快；
+④　发出去的包数，返回的包数，丢包率，耗费时间；
+⑤　最小/最大/平均响应时间和本机硬件耗费时间；
+
+TTL解释:
+    当我们在使用ping命令时，返回结果里会带一个TTL值。这个东西的含义其实就是Time To Live，指的是报文在网络中能够‘存活’的限制。以前这个限制方式是设定一个时间
+    （Time To Live中的Time就是这样来的），当报文在网络中转发时，时间超过这个限制，最后一个收到报文的‘路由点’就会把它扔掉，而不继续转发。后来把时间限制改为了跳数限制，
+    就是当报文在网络中转发时，每经过一个‘路由点‘，就把预先设定的这个TTL数值减1，直到最后TTL=1时报文就被扔掉，不向下转发。
+    路由点：我这里是指完成路由功能的机器，因为并不是只有路由器才可以完成路由转发功能，比如主机可以配置路由转发。
+
+ping命令中的TTL
+    上边解释的TTL是基础，然后，我们这篇文章要说明的是ping中的TTL到底是什么意思。因为不管怎么想，返回了一个TTL这东西，是说被你ping的主机预设的报文TTL是这个值吗？
+    还是说你ping它的时候自己的报文自动设定了TTL是这个值？还是说你的报文经过了TTL跳到达被ping主机？。。。总之就是不能明确地说出这个TTL的意义。
+    其实这个TTL是指：被ping主机那里返回的报文，到了你这里，从它自己预设的TTL减小到还剩下多少。
+    有点绕口，举个例子就明白了
+
+168.  

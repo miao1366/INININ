@@ -3,4 +3,7 @@
     https://github.com/coreutils/coreutils.git
     http://ftp.gnu.org/pub/gnu/coreutils/
     
-2.  
+2.  网易有道开源EMLL：高性能端侧机器学习计算库，大幅提高计算性能
+    https://github.com/netease-youdao/EMLL.git
+
+3.  

@@ -67,3 +67,8 @@ assert(newlen > len);   /* Catch size_t overflow */
 14.    #define OUT_OF_RANGE(p) (unlikely((p) < zlfirst || (p) > zllast))
         ZIP_DECODE_LENGTH  当前结点的长度
         if (p >= zlfirst && p + 10 < zllast)
+
+15.     char buf[MAX_LONG_DOUBLE_CHARS];                      // #define MAX_LONG_DOUBLE_CHARS 5*1024
+        int len = ld2string(buf,sizeof(buf),d,LD_STR_HUMAN);  //
+
+16. sdigits10()

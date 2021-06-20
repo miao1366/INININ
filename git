@@ -201,5 +201,16 @@ git submodule update --init --recursive
       git rev-parse --short HEAD
       0996f0ac7
 
-49   git branch --contains 50089    #显示包含提交50089的分支
-     git branch -r                  #显示所有原创分支
+49.   git branch --contains 50089    #显示包含提交50089的分支
+      git branch -r                  #显示所有原创分支
+
+50.   git submodule update --init            可以下载工程里的一些子工程
+      git submodule update --init  devops    可以下载工程里的一些子工程
+      
+      git submodule update --init     //初始化版本     //并没有拉取最新的代码
+      git submodule update --remote   //更新到最新版本
+
+51.   git fetch是将远程主机的最新内容拉到本地，用户在检查了以后决定是否合并到工作本机分支中。
+      而git pull 则是将远程主机的最新内容拉下来后直接合并，即：git pull = git fetch + git merge，这样可能会产生冲突，需要手动解决
+
+52.   git submodule update --remote的时候，子项目会根据.gitmodule的版本进行更新
