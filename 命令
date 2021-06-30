@@ -1310,4 +1310,15 @@ ping命令中的TTL
     其实这个TTL是指：被ping主机那里返回的报文，到了你这里，从它自己预设的TTL减小到还剩下多少。
     有点绕口，举个例子就明白了
 
-168.  
+168.  tree -L 2  参数-L表示指定显示目录级数
+
+169. Linux mktemp命令用于建立暂存文件。mktemp建立的一个暂存文件，供shell script使用。
+     mktemp [-qu][文件名参数]
+     参数：
+     -q 　执行时若发生错误，不会显示任何信息。
+     -u 　暂存文件会在mktemp结束前先行删除。
+     [文件名参数] 　文件名参数必须是以"自订名称.XXXXXX"的
+
+     mktemp tmp.xxxx #生成临时文件    // tmp.3847  3847对应xxxx
+
+170   ssh-keygen -f "/home/miao/.ssh/known_hosts" -R "192.168.1.12"

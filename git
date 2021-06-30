@@ -214,3 +214,37 @@ git submodule update --init --recursive
       而git pull 则是将远程主机的最新内容拉下来后直接合并，即：git pull = git fetch + git merge，这样可能会产生冲突，需要手动解决
 
 52.   git submodule update --remote的时候，子项目会根据.gitmodule的版本进行更新
+
+53.   git查看某个commit属于哪个分支
+      git branch --contains 89eb2ac2838dde77dab032a8e3b82ae087fc30b0 --all
+
+54. 
+       git reset ef3dae98879d114e489ab88f65e5a46c089b793e
+       git status
+       git stash
+       git status
+       git pull origin --rebase
+       git status
+       git stash pop 
+       git status
+       git add -u
+       git status
+       git commit -s -m "1.merge from develop"
+       git branch -vv
+       git push origin HEAD:refs/for/collection
+       history
+
+55. git diff --cached 或 git diff --staged：显示暂存区(已add但未commit文件)和最后一次commit(HEAD)之间的所有不相同文件的增删改(git diff --cached和git diff –staged相同作用
+
+56. 一、开发分支（dev）上的代码达到上线的标准后，要合并到 master 分支
+      git checkout dev
+      git pull
+      git checkout master
+      git merge dev
+      git push -u origin master
+二、当master代码改动了，需要更新开发分支（dev）上的代码
+      git checkout master 
+      git pull 
+      git checkout dev
+      git merge master 
+      git push -u origin dev

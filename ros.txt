@@ -1,0 +1,99 @@
+1. ROS 全称 Robot Operating System，即机器人操作系统
+
+2. 因为ROS系统在自动驾驶领域存在缺陷，目前Apollo已经使用自己开发的中间件
+
+3. 因为ROS2.0目前还在开发之中，还不稳定。所以后续介绍会以ROS1.0为主。ROS1.0目前较新两个LTS版本分别是Kinetic Kame和Melodic Morenia，
+   前者支持到2021年4月，后者支持到2023年5月。后面介绍会以Kinetic为主，因为Melodic是2018年3月份发布，目前市面上还是以Kinetic为主的
+
+4. rosversion -d    // 输出ros版本
+
+5. 我们知道在ros 安装好后，首先要跑一下roscore命令，如果没有在这个命令的话，可能先调用source xx/ros/xx/setup.bash 初始化环境。
+   roscore其实是一个python脚本，其实现的路径在ros/ros_comm/blob/melodic-devel/tools/roslaunch/scripts/roscore
+    1，创建保存log的文件夹。
+    2，启动roslunch server
+    3，启动roscores master和resout
+
+    oscore其实是启动了三个进程 一个是roscore，一个是rosmaster，一个是rosout，roscore作为父进程，启动后面两个进程，rosmaster即为节点管理器，rosout是log输出管理
+
+6. roscore 启动roscore
+   rosrun turtlesim turtlesim_node 启动turtlesim_node节点
+   rosrun turtlesim turtle_teleop_key 启动turtle_teleop_key节点
+
+7. 节点是ros系统中两大基本组件之一，一个节点相当于一个处理单元，其本质上是一个进程
+
+8. rosnode list  查看目前有哪些节点运行
+
+9.  rosrun指令可以启动一个节点，其指令基本格式是：
+    rosrun package_name executable
+    package_name为包名，executable为可执行程序名。rosrun本质是一个shell脚本，位于/opt/ros/kinetic/bin/rosrun，既然是脚本，
+    就方便支持一系列参数，这个后续用到在做介绍
+
+10. pacakge即包，一个包可以包含多个节点，ros应用程序发布时，通常都是以包为单位，在我们小乌龟实例中，包即是turtlesim，那这个包中有几个节点呢，可以通过如下指令查看
+    rosrun turtlesim  然后按两次Tab键
+
+11. topic 即话题，话题和节点是ros系统中两大基本组件，节点是基本的处理单元，话题是基本的通信单元，实现节点之间的通信。和节点一样，话题也有一个专门的指令：rostopic，
+    查看目前系统有哪些话题，执行： rostopic list
+
+12. 消息可视为话题的数据类型，每一个话题都有一个类型，其规定了一个话题可以传送什么类型的数据，消息也有其专有的指令rosmsg。
+
+13. rosnode list 查看当前系统运行的ros节点
+    rosnode info /turtlesim 查看节点/turtlesim的信息
+        节点主要信息有以下几项，节点名，订阅的话题，发布的话题，提供的服务。前面我们提到过，
+        一个节点本质上也就是一个进程，所以在节点信息中也有进程Pid
+    rosnode ping /turtlesim  测试节点/turtlesim是否正常
+        ros系统被称为分布式系统，即可以将不同的节点运行不同的机器上面，如何实现这种分布式通信呢？通过网络，前面讲过，ros节点本质上是进程，
+        其实不太准确，更确切地说，应该是网络进程。所以这里可以使用ping指令测试节点是否运行正常
+    rosnode ping --all 测试系统所有节点运行是否正常
+    rosnode kill /turtlesim  关闭节点/turtlesim
+    rosnode kill --all  关闭所有节点
+    rostopic list  查看当前系统中存在的话题
+    rostopic info topic 查看当前系统中存在的话题
+    rostopic echo /turtle1/pose  查看话题/turtle1/pose内容
+    rostopic hz /turtle1/pose    查看话题/turtle1/pose通信频率
+    rostopic bw /turtle1/pose    average rate值即为平均频率值。与频率相关的是通信带宽：
+    rostopic pub /turtle1/cmd_vel geometry_msgs/Twist "linear    发布话题/turtle1/cmd_vel
+    rqt_graph  我们知道了节点是基本处理单元，话题是节点之间的通信渠道，那如何知道某个话题是些节点使用，或者一个节点使用的那些话题呢，
+               这可以通过rosnode info和rostopic info实现，但是这也能看到一个话题和一个节点的情况，如果想知道当前所有节点和话题的情况，该怎么办呢？
+               椭圆代表节点，矩形代表话题，连线代表关系，连线可以以节点为参考，输入的为该节点订阅话题，输出的为该节点发布的话题
+
+14. catkin_create_pkg beginner_tutorials std_msgs rospy roscpp
+    创建了一个ros包：beginner_tutorials。ros包需要在src目录下创建，其他目录不可以。创建指令是catkin_create_pkg，
+    后面三个是beginner_tutorials所依赖的包，这三包个也是ros程序三大基础依赖包
+
+    一个新创建的包，都会包含一个CMakeLists.txt和package.xml文件，前者用于编译包，后者是运行包所需要的配置文件
+
+15. rosls 查看消息文件路径
+    rosls std_msgs/msg/String.msg
+    rosls std_msgs/msg/    查看std_msgs/msg/下所有消息文件路径
+    roscat std_msgs String.msg  roscat 通过消息文件查看其具体实现
+    rosmsg show std_msgs/String  rosmsg 查看其具体实现：
+    rosls sensor_msgs/msg/Image.msg
+    rosmsg show sensor_msgs/Image
+
+    std_msgs/Header，此消息类型包含三项：序列号， 时间戳 以及 帧id， 帧id表示消息类别
+
+    <build_depend>message_generation</build_depend>
+    <build_export_depend>message_runtime</build_export_depend>
+    <exec_depend>message_runtime</exec_depend>
+    第一行表示编译时依赖，第二行导出依赖，即其他包中程序可以使用本消息，第三行表示运行时依赖
+
+    查看/reset服务数据类型
+    rosservice type /reset
+    rossrv show std_srvs/Empty
+
+    参数服务器
+    1. 概念
+    参数服务器是由 rosmaster维护，随着 roscore命令启动而创建，在节点启动时，节点将自己的参数注册到参数服务器，一旦注册到参数服务器，参数便一直存在，直至 rosmaster退出。
+    2. 创建参数
+    本例中通过节点启动时，创建参数，格式是 :_key:=value, key与程序中line15和line20对应，注意这种形式创建参数， key前需要加 下划线，具体格式参考第三步。
+    3. 获取参数
+    获取参数值，使用节点句柄的 getParam()函数，函数原型为：
+    bool getParam(const std::string& key, int& i) const;
+
+    可以通过 rosparam指令在节点运行时修改参数值，命令如下：
+    rosparam set /talker_para/avalue 100
+
+    参数不依赖于节点，节点退出时，参数仍可用，且保留上一次值。关闭节点，查看参数：
+    rosparam list
+    rosparam get /talker_para/avalue
+    rosparam get /talker_para/bvalue

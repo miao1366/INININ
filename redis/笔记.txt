@@ -170,3 +170,6 @@ typedef struct zlentry {
     #define OBJ_SHARED_REFCOUNT             INT_MAX     /* Global object never destroyed. */
     #define OBJ_STATIC_REFCOUNT             (INT_MAX-1) /* Object allocated in the stack. */
     #define OBJ_FIRST_SPECIAL_REFCOUNT      OBJ_STATIC_REFCOUNT
+
+7.  t_string
+    其中ll > server.proto_max_bulk_len是指解析的命令ll超过了redis配置的最大长度

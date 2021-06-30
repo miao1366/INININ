@@ -1,0 +1,15 @@
+cuda 函数前缀 host device global __noinline 和 forceinline 简介
+这些函数前缀在官方的文档里被称为函数执行环境标识符Function execution space specifiers，也就是他指明了这段函数是在哪里被调用的。
+
+global:
+    __global__修饰的函数是核函数，这些函数 在GPU上执行 ，但是需要 在CPU端调用
+    PS.计算能力3.5以上的引入了 CUDA Dynamic Parallelism机制可以才devices端调用核函数
+    __global__修饰的函数必须采用void返回值，并且需要在调用时制定 运行的参数 (也就是<<<>>>里的block数和线程数)
+    同时__global___函数是异步的，这也代表着函数没被执行完就返回了控制权，所以测量核函数的时间需要同步操作才能获得准确的结果。
+device
+    __device__函数是在GPU端调用且在GPU端执行的的函数__global___和__device__不能同时使用
+    __device__在编译器中会被编译为内联函数
+host
+    __host__定义了主机端的函数，就是在主机端执行，在主机端调用的函数，也就是我们正常的c/c++的函数，如果不加任何的修饰符，默认就是__host__ 函数，这些函数只为主机端编译
+    __global__和__host__不能同时使用，这是显而易见的
+    但是__device__和__host__可以同时使用，这个函数会同时为主机端和设备端编译。代码中可以用__CUDA_ARCH__这个宏来区分主机和设备端以及不同架构的代码
