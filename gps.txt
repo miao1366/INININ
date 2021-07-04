@@ -46,3 +46,31 @@ typedef struct _gps_raw_data {
     char msl[20];       "54.8"                
     char Altref[20];    ""                //两者相加等于高度
  }GGA;
+
+ void GpsDataSource::set_fd_newtio(int fd, struct termios &newtio, struct termios &oldtio) {
+
+    fcntl(fd, F_SETFL, 0); // 阻塞直到数据进入
+    tcgetattr(fd, &oldtio); //get the serial attribute;
+    bzero(&newtio, sizeof(newtio));
+
+    newtio.c_cflag |= (CLOCAL | CREAD);
+    newtio.c_lflag &= ~(ECHO | ICANON | ECHOE | ISIG); //3   IEXTEN
+    newtio.c_iflag &= ~(BRKINT | ICRNL | ISTRIP);      // | IXON
+    newtio.c_cflag &= ~(PARENB);                       //无奇偶校验
+    newtio.c_cflag &= ~(CSTOPB);                       //1 bit to stop
+    newtio.c_cflag &= ~(CSIZE);                        //| PARENB PARENB允许输出产生奇偶信息以及输入的奇偶校验
+    newtio.c_cflag |= CS8;                             //data bit:8;
+    newtio.c_oflag &= ~(OPOST);
+    newtio.c_iflag |= (IXOFF); //|  | IXANY IXON  | INLCR | IGNCR
+    newtio.c_cc[VMIN] = 100;   //++
+    newtio.c_cc[VTIME] = 0;    //只有设置为阻塞时这两个参数才有效，仅针对于读操作。//++
+    newtio.c_cc[VSTART] = 0x13; 
+    newtio.c_cc[VSTOP] = 0x19;
+
+    cfsetispeed(&newtio, B38400); // 設置輸入波特率
+    cfsetospeed(&newtio, B38400); // 設置輸出波特率
+
+    tcflush(fd, TCIFLUSH); // 函数刷清（扔掉）输入缓存（终端驱动法度已接管到，但用户法度尚未读）或输出缓存（用户法度已经写，但尚未发送）
+    tcsetattr(fd, TCSANOW, &newtio); // 设置该终端的属性
+
+}

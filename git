@@ -248,3 +248,13 @@ git submodule update --init --recursive
       git checkout dev
       git merge master 
       git push -u origin dev
+
+57 Git 合并时 submodule 冲突问题解决方法
+   假如当前在 branchA，在执行 git merge branchB 时，可能会遇到子仓库文件冲突
+   可以尝试一下命令：
+   git update-index --cacheinfo 160000 <commit-hash> "<子仓库path>"
+   其中 <commit-hash> 改为 branchA 对应子仓库的 commit 哈希值
+   其中 <子仓库path> 为在 .gitmodules 配置的子仓库 path
+   git update-index --cacheinfo 160000  293067988948b5c4a7206190d4df80e61cde6b2d  devops
+
+58.   git log -p filename    可以显示每次提交的diff

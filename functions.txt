@@ -1224,6 +1224,33 @@ typedef struct ucontext_t
     返回值：成功返回0，失败返回-1；
     ​参数：文件路径（名），struct stat 类型的结构体
 
+    struct stat {
+               dev_t     st_dev;         /* ID of device containing file */
+               ino_t     st_ino;         /* Inode number */
+               mode_t    st_mode;        /* File type and mode */
+               nlink_t   st_nlink;       /* Number of hard links */
+               uid_t     st_uid;         /* User ID of owner */
+               gid_t     st_gid;         /* Group ID of owner */
+               dev_t     st_rdev;        /* Device ID (if special file) */
+               off_t     st_size;        /* Total size, in bytes */
+               blksize_t st_blksize;     /* Block size for filesystem I/O */
+               blkcnt_t  st_blocks;      /* Number of 512B blocks allocated */
+
+               /* Since Linux 2.6, the kernel supports nanosecond
+                  precision for the following timestamp fields.
+                  For the details before Linux 2.6, see NOTES. */
+
+               struct timespec st_atim;  /* Time of last access */
+               struct timespec st_mtim;  /* Time of last modification */
+               struct timespec st_ctim;  /* Time of last status change */
+
+           #define st_atime st_atim.tv_sec      /* Backward compatibility */
+           #define st_mtime st_mtim.tv_sec
+           #define st_ctime st_ctim.tv_sec
+    };
+
+
+
 157  key_t ftok(const char *pathname, int proj_id);  //把从pathname导出的信息与id的低序8位组合成一个整数IPC键
     pathname：指定的文件，此文件必须存在且可存取
     proj_id：计划代号（project ID）
@@ -2229,3 +2256,197 @@ backtrace()函数返回通过buffer返回的地址个数，这个数目不会超
         x -- 代表分子的浮点值。
         y -- 代表分母的浮点值。
        9.200000 / 2 的余数是 1.200000      9.200000 / 3.700000 的余数是 1.800000
+
+248   time_t mktime(struct tm *timeptr) 
+      把 timeptr 所指向的结构转换为自 1970 年 1 月 1 日以来持续时间的秒数，发生错误时返回-1
+      struct tm {
+           int tm_sec;         /* 秒，范围从 0 到 59                */
+           int tm_min;         /* 分，范围从 0 到 59                */
+           int tm_hour;        /* 小时，范围从 0 到 23               */
+           int tm_mday;        /* 一月中的第几天，范围从 1 到 31       */
+           int tm_mon;         /* 月份，范围从 0 到 11               */
+           int tm_year;        /* 自 1900 起的年数                  */
+           int tm_wday;        /* 一周中的第几天，范围从 0 到 6        */
+           int tm_yday;        /* 一年中的第几天，范围从 0 到 365      */
+           int tm_isdst;       /* 夏令时                            */    
+      };
+
+249   
+    https://blog.csdn.net/naipeng/article/details/89918482
+    int io_setup(unsigned nr_events,  aio_context_t *ctxp);
+    int io_destroy(aio_context_t ctx);
+    int io_submit(aio_context_t ctx,  long nr,  struct iocb *cbp[]);
+    int io_cancel(aio_context_t ctx,  struct iocb *,  struct io_event *result);
+    int io_getevents(aio_context_t ctx, long min_nr, long nr, struct io_event *events, struct timespec *timeout);
+AIO系统调用总共五个，后面会一一介绍。
+
+int io_setup(unsigned nr_events,  aio_context_t *ctxp);
+int io_destroy(aio_context_t ctx);
+int io_submit(aio_context_t ctx,  long nr,  struct iocb *cbp[]);
+int io_cancel(aio_context_t ctx,  struct iocb *,  struct io_event *result);
+int io_getevents(aio_context_t ctx, long min_nr, long nr, struct io_event *events, struct timespec *timeout);
+
+2.1 异步IO上下文 aio_context_t
+#define _GNU_SOURCE     /* syscall() is not POSIX */
+#include <stdio.h>      /* for perror() */
+#include <unistd.h>     /* for syscall() */
+#include <sys/syscall.h>    /* for __NR_* definitions */
+#include <linux/aio_abi.h>  /* for AIO types and constants */
+inline int io_setup(unsigned nr, aio_context_t *ctxp)
+{
+    return syscall(__NR_io_setup, nr, ctxp);
+}
+inline int io_destroy(aio_context_t ctx)
+{
+    return syscall(__NR_io_destroy, ctx);
+}
+int main()
+{
+    aio_context_t ctx;
+    int ret;
+    ctx = 0;
+    ret = io_setup(128, &ctx);
+    if (ret < 0) {
+        perror("io_setup error");
+        return -1;
+    }
+    printf("after io_setup ctx:%Ld\n",ctx);
+    ret = io_destroy(ctx);
+    if (ret < 0) {
+        perror("io_destroy error");
+        return -1;
+    }
+    printf("after io_destroy ctx:%Ld\n",ctx);
+    return 0;
+}
+系统调用io_setup会创建一个所谓的"AIO上下文"(即aio_context，后文也叫‘AIO context’等)结构体到在内核中。aio_context是用以内核实现异步AIO的数据结构。它其实是一个无符号整形,位于头文件 /usr/include/linux/aio_abi.h。
+
+typedef unsigned long   aio_context_t;
+1
+每个进程都可以有多个aio_context_t。传入io_setup的第一个参数在这里是128，表示同时驻留在上下文中的IO请求的个数；第二个参数是一个指针，内核会填充这个值。
+io_destroy的作用是销毁这个上下文aio_context_t。
+上面的例子很简单，创建一个aio_context_t并销毁。
+
+2.2 提交并查询IO
+#define _GNU_SOURCE /* syscall() is not POSIX */ 
+#include <stdio.h> /* for perror() */ 
+#include <unistd.h> /* for syscall() */ 
+#include <sys/syscall.h> /* for __NR_* definitions */ 
+#include <linux/aio_abi.h> /* for AIO types and constants */ 
+#include <fcntl.h> /* O_RDWR */ 
+#include <string.h> /* memset() */ 
+#include <inttypes.h> /* uint64_t */ 
+inline int io_setup(unsigned nr, aio_context_t *ctxp) 
+{ 
+    return syscall(__NR_io_setup, nr, ctxp); 
+} 
+
+inline int io_destroy(aio_context_t ctx) 
+{ 
+	return syscall(__NR_io_destroy, ctx); 
+} 
+
+inline int io_submit(aio_context_t ctx, long nr, struct iocb **iocbpp) 
+{ 
+	return syscall(__NR_io_submit, ctx, nr, iocbpp); 
+}
+
+inline int io_getevents(aio_context_t ctx, long min_nr, long max_nr, struct io_event *events, struct timespec *timeout) 
+{ 
+	return syscall(__NR_io_getevents, ctx, min_nr, max_nr, events, timeout);
+} 
+
+int main() 
+{ 
+	aio_context_t ctx; 
+	struct iocb cb; struct iocb *cbs[1]; 
+	char data[4096]; 
+	struct io_event events[1]; 
+	int ret; 
+	int fd;
+	int i ; 
+	for(i=0;i<4096;i++) 
+	{ 
+		data[i]=i%50+60; 
+	} 
+	fd = open("./testfile", O_RDWR | O_CREAT,S_IRWXU);
+	if (fd < 0) 
+	{ 
+		perror("open error"); 
+		return -1; 
+	} 
+	
+    ctx = 0;
+    ret = io_setup(128, &ctx); 
+    printf("after io_setup ctx:%ld",ctx); 
+    if (ret < 0)
+    { 
+    	perror("io_setup error"); 
+    	return -1; 
+    } /* setup I/O control block */ 
+    memset(&cb, 0, sizeof(cb)); 
+    cb.aio_fildes = fd; 
+    cb.aio_lio_opcode = IOCB_CMD_PWRITE;/* command-specific options */ 
+    cb.aio_buf = (uint64_t)data; 
+    cb.aio_offset = 0; 
+    cb.aio_nbytes = 4096; 
+    cbs[0] = &cb;
+	ret = io_submit(ctx, 1, cbs);
+	if (ret != 1) 
+	{ 
+		if (ret < 0) 
+			perror("io_submit error"); 
+		else
+			fprintf(stderr, "could not sumbit IOs"); 
+		return -1; 
+	} /* get the reply */ 
+    
+    ret = io_getevents(ctx, 1, 1, events, NULL); 
+    printf("%d\n", ret); 
+    struct iocb * result = (struct iocb *)events[0].obj; 
+    printf("reusult:%Ld",result->aio_buf); 
+    ret = io_destroy(ctx); 
+    if (ret < 0)
+    { 
+    	perror("io_destroy error"); 
+    	return -1; 
+    } 
+    return 0;
+}
+
+每一个提交的IO请求用结构体struct iocb来表示。
+首先初始化这个结构体为全零： memset(&cb, 0, sizeof(cb));
+然后初始化文件描述符(cb.aio_fildes = fd)和AIO 命令(cb.aio_lio_opcode = IOCB_CMD_PWRITE)
+文件描述符对应上文所打开的文件。本例中是./testfile.
+内核当前支持的AIO 命令有
+IOCB_CMD_PREAD   	读; 对应系统调用pread().
+IOCB_CMD_PWRITE   	写，对应系统调用pwrite().
+IOCB_CMD_FSYNC   	同步文件数据到磁盘，对应系统调用fsync()
+IOCB_CMD_FDSYNC   	同步文件数据到磁盘，对应系统调用fdatasync()
+IOCB_CMD_PREADV  	读，对应系统调用readv()
+IOCB_CMD_PWRITEV    写，对应系统调用writev()
+IOCB_CMD_NOOP   	只是内核使用
+
+调用io_submit
+函数原型int io_submit(aio_context_t ctx, long nr, struct iocb *cbp[]);
+当一个IO控制块（struct iocb cb）初始化完毕，把这个指针放入一个数组中( cbs[0] = &cb)，因为io_submit系统调用需要接受一个二维指针。在io_submit(ctx, 1, cbs)中， 参数分别为IO上下文（aio_context_t）、数组（struct iocb）大小、数组地址(cbs).
+io_submit的返回值，可以是如下值：
+A. ret = (提交的iocb的数目)           表示所有的iocb都被接受并处理
+B. 0 < ret <  (提交的iocb的数目)      io_submit() 系统调用会从传入的cbs中一个一个处理iocb，如果提交的某个iocb失败，将停止并且返回iocb的索引号。没办法知晓错误的具体原因，但是如果第一个iocb提交失败，参看C条。
+C. ret < 0 							有两种原因：
+									1. 在io_submit()开始之前发生了某种错误(e.g.比如AIO context非法). 
+									2. 提交第一个iocb(cbx[0])失败
+
+调用io_getevents()
+当提交了iocb之后，可以不用等待IO完成去做其他的操作。对于每一个已经完成的IO请求(成功或失败），内核都会创建一个io_event结构。io_getevent()系统调用可以用来获取这一结构。这需要做以下操作。
+int io_getevents(aio_context_t ctx, long min_nr, long nr, struct io_event *events, struct timespec *timeout)
+1
+a) 使用哪一个AIO上下文(变量ctx)
+b) 内核把这个变量放入哪个内存位置 (变量events)
+c) events的最小个数(变量min_nr,)，如果完成的iocb的个数比这个值要小io_getevents会阻塞，直到达到这个值, 参看第e条查看阻塞时间。
+d) 想要获取的events的最大个数(变量nr)。
+e) 如果获取不到足够的events，而又不想永久等待。可以指定相对时间(timeout)到最后一个参数，
+如果timeout为NULL，表示永久等待。
+如果timeout为0，io_getevents()不阻塞 。
+
+250    

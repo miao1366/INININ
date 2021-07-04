@@ -1,0 +1,43 @@
+# interfaces(5) file used by ifup(8) and ifdown(8)
+auto lo
+iface lo inet loopback
+
+auto enp0s31f6
+iface enp0s31f6 inet static
+address 192.168.1.12
+netmask 255.255.255.0
+gateway 192.168.1.254
+dns-nameservers 192.168.1.1
+
+auto enp4s0
+iface enp4s0 inet static
+address 172.16.3.88
+netmask 255.255.255.0
+gateway 172.16.3.1
+
+
+#!/usr/bin/env bash
+
+default_route=`ip route | grep 'default via 172.16.3.1' | awk '{print $3}'`
+if [ "${default_route}" == "172.16.3.1" ]; then
+    sudo route del default gw 172.16.3.1
+    sudo route add default gw 192.168.1.254
+fi
+
+
+
+# interfaces(5) file used by ifup(8) and ifdown(8)
+auto lo
+iface lo inet loopback
+
+auto enp0s31f6
+iface enp0s31f6 inet static
+address 192.168.1.12
+netmask 255.255.255.0
+gateway 192.168.1.254
+dns-nameservers 192.168.1.254
+
+auto enp4s0
+iface enp4s0 inet static
+address 172.16.3.88
+netmask 255.255.255.0

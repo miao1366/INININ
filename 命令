@@ -1322,3 +1322,26 @@ ping命令中的TTL
      mktemp tmp.xxxx #生成临时文件    // tmp.3847  3847对应xxxx
 
 170   ssh-keygen -f "/home/miao/.ssh/known_hosts" -R "192.168.1.12"
+
+171   ip配置
+      https://blog.csdn.net/qq_43314560/article/details/112536010
+      https://blog.csdn.net/mountzf/article/details/52035499
+
+      没有 route del  一次ping 百度 ok  两次ok  第三次不行了 ip route 只有
+      route del  一次ping 百度 ok  两次ok  第三次不行了 ip route 只有
+
+      增加后可以ping百度  一次   ok 
+                        二次  192.168.1.254  ok
+                        三次    ok
+                        二次  192.168.1.254  ok
+      一次 OK 
+
+
+
+乘用车问题同步：
+1. V71C002工控机上执行ifconfig后，与mcu通信的网卡名字会变动，有时会是enp3s0,有时会是enp4s0,
+咨询了孙一，执行ifconfig enp4s0 172.16.3.88/24 后重启了三次，名字固定在了enp4s0， 但是应该
+没有根本上解决问题。
+2. V71C002有时会出现ping不同mcu的情况，魏少华判断是网口的问题。
+3. 下午集成了乘用车dashboard, 出现网页打不开的情况， run.sh单独启动模块后，网页也打不开，我还没有定位出原因，
+   麻烦金霍克下周一帮忙看看了。

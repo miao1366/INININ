@@ -1,2 +1,5 @@
 1. Request For Comments（RFC），是一系列以编号排定的文件。文件收集了有关互联网相关信息，以及UNIX和互联网社区的软件文件
 2. Workflow.cc  队列，可以push_back,也可以push_front
+3.  AIO  io_submit：Linux内核新加入的epoll替代方案
+    https://baijiahao.baidu.com/s?id=1662571571666384776&wfr=spider&for=pc
+    https://blog.csdn.net/naipeng/article/details/89918482
