@@ -49,3 +49,24 @@ LRU：    Least Recently Used   这个是比较最近的访问时间的。也就
     编码器和解码器都提高了速度，流式API已被改进，增加更多压缩质量级别。新版本还展现了跨平台的性能改进，以及减少解码所需的内存。与常见的通用压缩算法不同，Brotli使用一个预定义的120千字节字典。
     该字典包含超过13000个常用单词、短语和其他子字符串，这些来自一个文本和HTML文档的大型语料库。预定义的算法可以提升较小文件的压缩密度。
     使用brotli取代deflate来对文本文件压缩通常可以增加20%的压缩密度，而压缩与解压缩速度则大致不变
+
+11  struct rb_node
+{
+    unsigned long  rb_parent_color;
+#define RB_RED      0
+#define RB_BLACK    1
+    struct rb_node *rb_right;
+    struct rb_node *rb_left;
+} __attribute__((aligned(sizeof(long))));
+sizeof(long)：返回long类型的字节数n（32位机器n = 4, 64位机器n=8）；
+aligned(n)：指明结构体n字节对齐；
+__attribute__是GCC编译器的扩展，属性约束；
+这句话的含义：struct rb_node按照4字节(long)对齐!
+对于__attribute__和aligned详细说明和用法可以查阅gcc在线用户手册。
+为什么成员变量rb_parent_color既可以表示父节点指针，又可以表示颜色？
+首先，要搞清楚结构体对齐的机制，以 32 位机器举例，structrb_node结构体4字节对齐，那么它在内存中的基地址base一定是的4的倍数（base % 4 == 0）；
+由于指针在32位系统之上占用4B，则32bit基地址base的低两位一定为0（否则“base % 4 == 0”不成立，不再是4B对齐）。
+红黑树节点的颜色只有两个——红(0)和黑(1)，使用1bit就足够表示！而struct rb_node结构体基地址低2位“不使用”，那么可以使用最低位来存储节点的颜色，
+把基地址和颜色值或(|)运算整合成一个变量__rb_parent_color，这样就节省了一个存储颜色的变量。
+ 
+ 

@@ -173,3 +173,8 @@ errno132 :   Operation not possible due toRF-kill
 #define	ERANGE		34	/* Math result not representable */
 
 #endif
+
+
+1. ECONNRESET
+    a. Node.js提供的HttpServer默认设置了超时时间为2分钟，当一个请求的处理时间超过2分钟，HttpServer会自动将该请求的socket关闭掉，于是客户端便收到了 ECONNRESET 的错误信息了
+    b. 在服务器崩溃后重启的时候，因为之前的连接都无效了，所以服务器端会发送一个RST响应，此时客户端产生ECONNRESET错误！这就需要你在客户端重新连接了

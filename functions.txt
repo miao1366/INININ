@@ -247,11 +247,12 @@ to_string(x)
 
 60 int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, 
                                const struct timespec *restrict abstime)
-							 
-							 
-							 
- 61 int pthread_cond_wait(pthread_cond_t *restrict cond,
+    a value of zero shall be returned; otherwise, an error number shall be returned to indicate the error
+
+61 int pthread_cond_wait(pthread_cond_t *restrict cond,
            pthread_mutex_t *restrict mutex)
+
+    函数返回值：返回0表示成功，其他都表示失败
     3、wait：当前线程调用wait()后将被阻塞，直到另外某个线程调用notify_*唤醒当前线程；
 	当线程被阻塞时，该函数会自动调用std::mutex的unlock()释放锁，使得其它被阻塞在锁竞争上的线程得以继续执行。
 	一旦当前线程获得通知(notify，通常是另外某个线程调用notify_*唤醒了当前线程)，wait()函数也是自动调用std::mutex的lock()。wait分为无条件被阻塞和带条件的被阻塞两种
@@ -545,7 +546,7 @@ mapTest.erase(iter++);
 86 儒略历日数
      科普小知识：天文学把24小时算作一个周期，起始和结束都是正午，这种整周期数就是儒略历日数。儒略历日的0是很久很久以前。一个方便的参考点事儒略历日244000起始于1968年5月23日。
      如果知道历书中某天正午起始的儒略历日数，那么将其加1再对7求模，就可以知道该天是星期几。结果是0对应星期天，1对应星期一，由此类推
-	 
+
 87 gcc 原子操作 这些函数不需要头文件
   n++类 
 type __sync_fetch_and_add(type *ptr, type value, ...); // m+n
@@ -635,9 +636,9 @@ type __sync_val_compare_and_swap (type *ptr, type oldval, type newval, ...);
 		flags：参数flags（TFD_NONBLOCK(非阻塞模式)/TFD_CLOEXEC（表示当程序执行exec函数时本fd将被系统自动关闭,表示不传递）	
         
         O_CLOEXEC : 在进程执行exec系统调用时关闭此打开的文件描述符。防止父进程泄露打开的文件给子进程，即便子进程没有相应权限 
-		
-	 
+     
      int timerfd_settime(int fd, int flags, const struct itimerspec *new_value, struct itimerspec *old_value);
+     函数返回0代表设置成功
         
         struct itimerspec {
             struct timespec it_interval;
@@ -1499,7 +1500,16 @@ char * __strdup(const char *s) {
 197 int isalpha(int c)    检查参数c是否为英文字母
     相关函数 isalnum，islower，isupper
 
-198 IPv4中使用 gethostbyname()函数完成主机名到地址解析，这个函数仅仅支持IPv4，且不允许调用者指定所需地址类型的任何信息，
+198 #include <sys/socket.h>
+    #include <netdb.h>
+
+    int getaddrinfo(const char *restrict nodename, /* host 或者IP地址 */
+                const char *restrict servname, /* 十进制端口号 或者常用服务名称如"ftp"、"http"等 */
+                const struct addrinfo *restrict hints, /* 获取信息要求设置 */
+                struct addrinfo **restrict res); /* 获取信息结果 */
+    void freeaddrinfo(struct addrinfo *ai);
+
+    IPv4中使用 gethostbyname()函数完成主机名到地址解析，这个函数仅仅支持IPv4，且不允许调用者指定所需地址类型的任何信息，
     返回的结构只包含了用于存储IPv4地址的空间。IPv6中引入了getaddrinfo()的新API，它是协议无关的，既可用于IPv4也可用于IPv6。
     getaddrinfo函数能够处理名字到地址以及服务到端口这两种转换，返回的是一个addrinfo的结构（列表）指针而不是一个地址清单。
     这些addrinfo结构随后可由套接口函数直接使用。如此以来，getaddrinfo函数把协议相关性安全隐藏在这个库函数内部。
@@ -1554,6 +1564,30 @@ AI_FQDN getaddrinfo将返回名称最终解析为的完全限定域名。 完全
 这与AI_CANONNAME位标记不同，后者返回在DNS中注册的规范名称，该名称可能与平面名称解析为的完全限定域名不同。
 只能设置AI_FQDN和AI_CANONNAME位中的一个。 如果EAI_BADFLAGS同时存在这两个标志，getaddrinfo函数将失败。
 AI_FILESERVER 命名空间提供程序提示正在查询的主机名正在文件共享方案中使用。 命名空间提供程序可以忽略此提示。
+
+ai_flags
+
+   附加选项,多个选项可以使用或操作进行结合，具体取值范围请查看struct addrinfo , 常用的标志如下：
+
+AI_PASSIVE
+    如果设置了 AI_PASSIVE 标志,并且 nodename 是 NULL, 那么返回的socket地址可以用于的bind()函数，返回的地址是通配符地址(wildcard address, IPv4时是INADDR_ANY,IPv6时是IN6ADDR_ANY_INIT)，
+    这样应用程序(典型是server)就可以使用这个通配符地址用来接收任何请求主机地址的连接，如果 nodename 不是NULL，那么 AI_PASSIVE 标志被忽略；如果未设置AI_PASSIVE标志,返回的socket地址可以用于connect(), 
+    sendto(), 或者 sendmsg()函数。如果 nodename 是NULL，那么网络地址会被设置为lookback接口地址(IPv4时是INADDR_LOOPBACK,IPv6时是IN6ADDR_LOOPBACK_INIT)，这种情况下，
+    应用是想与运行在同一个主机上另一个应用通信。
+
+AI_CANONNAME
+ 　　请求canonical(主机的official name)名字。如果设置了该标志，那么 res 返回的第一个 struct addrinfo 中的 ai_canonname 域会存储official name的指针。
+
+AI_NUMERICHOST
+ 　　阻止域名解析，具体见 nodename 中的说明。
+
+AI_NUMERICSERV
+     阻止服务名解析，具体见 servname 中的说明。
+
+AI_V4MAPPED
+ 　当 ai_family 指定为AF_INT6(IPv6)时，如果没有找到IPv6地址，那么会返回IPv4-mapped IPv6 地址，也就是说如果没有找到AAAA record(用来将域名解析到IPv6地址的DNS记录),那么就查询A record(IPv4),将找到的IPv4地址映射到IPv6地址, IPv4-mapped IPv6 地址其实是IPv6内嵌IPv4的一种方式，地址的形式为"0::FFFF:a.b.c.d"，例如"::ffff:192.168.89.9"(混合格式)这个地址仍然是一个IPv6地址，只是"0000:0000:0000:0000:0000:ffff:c0a8:5909"(16机制格式)的另外一种写法罢了。当 ai_family 不是AF_INT6(IPv6)时，该标志被忽略。AI_ALL查询IPv4和IPv6地址AI_ADDRCONFIG只有当主机配置了IPv4地址才进行查询IPv4地址；只有当主机配置了IPv6地址才进行查询IPv6地址.
+
+
 
 ai_family: The address family.
 
@@ -2449,4 +2483,259 @@ e) 如果获取不到足够的events，而又不想永久等待。可以指定�
 如果timeout为NULL，表示永久等待。
 如果timeout为0，io_getevents()不阻塞 。
 
-250    
+250    getaddrinfo()
+
+#include <sys/socket.h>
+#include <netdb.h>
+
+int getaddrinfo(const char *restrict nodename, /* host 或者IP地址 */
+    const char *restrict servname, /* 十进制端口号 或者常用服务名称如"ftp"、"http"等 */
+    const struct addrinfo *restrict hints, /* 获取信息要求设置 */
+    struct addrinfo **restrict res); /* 获取信息结果 */
+
+void freeaddrinfo(struct addrinfo *ai); 
+复制代码
+Data Structure
+http://www.cnblogs.com/LubinLew/p/POSIX-DataStructure.html#struct_addrinfo
+
+Description
+IPv4中使用gethostbyname()函数完成主机名到地址解析，这个函数仅仅支持IPv4，
+
+且不允许调用者指定所需地址类型的任何信息，返回的结构只包含了用于存储IPv4地址的空间。
+
+IPv6中引入了新的API getaddrinfo()，它是协议无关的，既可用于IPv4也可用于IPv6。
+
+getaddrinfo() 函数能够处理名字到地址以及服务到端口这两种转换，返回的是一个 struct addrinfo 的结构体(列表)指针而不是一个地址清单。
+
+这些 struct addrinfo 结构体随后可由套接口函数直接使用。如此以来，getaddrinfo()函数把协议相关性安全隐藏在这个库函数内部。
+
+应用程序只要处理由getaddrinfo()函数填写的套接口地址结构。
+
+Parameter
+1) nodename
+主机名("www.baidu.com")或者是数字化的地址字符串(IPv4的点分十进制串("192.168.1.100")或者IPv6的16进制串("2000::1:2345:6789:abcd"))，
+
+如果 ai_flags 中设置了AI_NUMERICHOST 标志，那么该参数只能是数字化的地址字符串，不能是域名，
+
+该标志的作用就是阻止进行域名解析。
+
+nodename 和 servname 可以设置为NULL，但是同时只能有一个为NUL。
+
+2) servname
+服务名可以是十进制的端口号("8080")字符串，也可以是已定义的服务名称，如"ftp"、"http"等,详细请查看/etc/services 文件，
+
+最后翻译成对应服务的端口号。如果此参数设置为NULL，那么返回的socket地址中的端口号不会被设置。
+
+如果 ai_flags 设置了AI_NUMERICSERV 标志并且该参数未设置为NULL，那么该参数必须是一个指向10进制的端口号字符串，
+
+不能设定成服务名，该标志就是用来阻止服务名解析。
+
+ 
+
+3) hints
+该参数指向用户设定的 struct addrinfo 结构体，只能设定该结构体中 ai_family、ai_socktype、ai_protocol 和 ai_flags 四个域，
+
+其他域必须设置为0 或者 NULL, 通常是申请 结构体变量后使用memset()初始化再设定指定的四个域。
+
+该参数可以设置为NULL，等价于 ai_socktype = 0， ai_protocol = 0，ai_family = AF_UNSPEC， 
+
+ai_flags = 0 （在GNU Linux中ai_flag = AI_V4MAPPED | AI_ADDRCONFIG,可以看作是GNU的改进）。
+
+　① ai_family
+　　指定返回地址的协议簇，取值范围:AF_INET(IPv4)、AF_INET6(IPv6)、AF_UNSPEC(IPv4 and IPv6)
+
+   ② ai_socktype
+　　具体类型请查看struct addrinfo 中的 enum __socket_type 类型，用于设定返回地址的socket类型，
+
+　　常用的有SOCK_STREAM、SOCK_DGRAM、SOCK_RAW, 设置为0表示所有类型都可以。
+
+　③ ai_protocol
+　　具体取值范围请查看 Ip Protocol ，常用的有 IPPROTO_TCP、IPPROTO_UDP 等，设置为0表示所有协议。
+
+　④ ai_flags
+　　附加选项,多个选项可以使用或操作进行结合，具体取值范围请查看struct addrinfo , 常用的标志如下：
+
+AI_PASSIVE
+　　　　如果设置了 AI_PASSIVE 标志,并且 nodename 是 NULL, 那么返回的socket地址可以用于的bind()函数，
+
+     　　返回的地址是通配符地址(wildcard address, IPv4时是INADDR_ANY,IPv6时是IN6ADDR_ANY_INIT)，
+
+     　　这样应用程序(典型是server)就可以使用这个通配符地址用来接收任何请求主机地址的连接，
+
+     　　如果 nodename 不是NULL，那么 AI_PASSIVE 标志被忽略；
+
+　　　　如果未设置AI_PASSIVE标志,返回的socket地址可以用于connect(), sendto(), 或者 sendmsg()函数。
+
+　　　　如果 nodename 是NULL，那么网络地址会被设置为lookback接口地址(IPv4时是INADDR_LOOPBACK,IPv6时是IN6ADDR_LOOPBACK_INIT)，
+
+　　　　这种情况下，应用是想与运行在同一个主机上另一个应用通信。
+
+AI_CANONNAME
+ 　　　　请求canonical(主机的official name)名字。如果设置了该标志，那么 res 返回的第一个 struct addrinfo 中的 ai_canonname 域会存储official name的指针。
+
+AI_NUMERICHOST
+ 　　　　阻止域名解析，具体见 nodename 中的说明。
+
+AI_NUMERICSERV
+　　　　阻止服务名解析，具体见 servname 中的说明。
+
+AI_V4MAPPED
+ 　　　　当 ai_family 指定为AF_INT6(IPv6)时，如果没有找到IPv6地址，那么会返回IPv4-mapped IPv6 地址，
+
+　　　　也就是说如果没有找到AAAA record(用来将域名解析到IPv6地址的DNS记录),那么就查询A record(IPv4),
+
+　　　　将找到的IPv4地址映射到IPv6地址, IPv4-mapped IPv6 地址其实是IPv6内嵌IPv4的一种方式，
+
+　　　　地址的形式为"0::FFFF:a.b.c.d"，例如"::ffff:192.168.89.9"(混合格式)这个地址仍然是一个IPv6地址，
+
+           只是"0000:0000:0000:0000:0000:ffff:c0a8:5909"(16机制格式)的另外一种写法罢了。
+
+　　　　当 ai_family 不是AF_INT6(IPv6)时，该标志被忽略。
+
+AI_ALL
+ 　　　　查询IPv4和IPv6地址
+
+AI_ADDRCONFIG
+　　　　只有当主机配置了IPv4地址才进行查询IPv4地址；只有当主机配置了IPv6地址才进行查询IPv6地址.
+
+4) res
+ 该参数获取一个指向存储结果的 struct addrinfo 结构体列表，使用完成后调用 freeaddrinfo() 释放存储结果空间。
+
+ 
+
+Return Value
+如果 getaddrinfo() 函数执行成功，返回值为 0 ， 其他情况返回值表示错误种别。使用函数gai_strerror() 可以获取可读性的错误信息,用法用strerror()相同，
+
+错误种别如下：
+
+EAI_ADDRFAMILY
+　　　　指定的主机上没有请求的address family对应的网络地址.
+
+EAI_AGAIN
+　　　　DNS(name server)返回临时性错误. 可以稍后重试.
+
+EAI_BADFLAGS
+　　　　hints.ai_flags 包含了无效的标志; 或者 hints.ai_flags 包含了 AI_CANONNAME 标志但是 name 是 NULL.
+
+EAI_FAIL
+　　　　DNS(name server)返回永久性错误
+
+EAI_FAMILY
+　　　　不支持的 address family(hints.ai_family).
+
+EAI_MEMORY
+　　　　内存耗尽.
+
+EAI_NODATA
+　　　　指定的网络主机存在，但是其未定义任何网络地址.
+
+EAI_NONAME
+　　　　nodename 或者 servname 未知;或者两者都设置为NULL;
+
+　　　　或者设置了 AI_NUMERICSERV 标志但是 servname 不是一个数字化的端口名字符串。
+
+EAI_SERVICE
+　　　　请求的socket类型不支持请求的服务类型.例如服务类型是 "shell" (基于流的socket服务)，
+
+　　　　但是 hints.ai_protocol 是  IPPROTO_UDP 或者hints.ai_socktype 是 SOCK_DGRAM;
+
+　　　　或者 servname 不是NULL 但是 hints.ai_socktype 是 SOCK_RAW (原始套接字不支持服务的概念).
+
+EAI_SOCKTYPE
+　　　　不支持请求的socket类型. 例如, hints.ai_socktype 和 hints.ai_protocol 冲突 (例如分别是SOCK_DGRAM、IPPROTO_TCP).
+
+EAI_SYSTEM
+　　　　系统调用错误，检查 errno.
+
+Example
+man getaddrinfo 最后有客户端和服务器端2个例子。
+
+下面是一个获取google https 所有服务地址(IPv4 和 IPv6 的例子)
+
+ 
+
+复制代码
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <arpa/inet.h>
+
+#define BUF_SIZE 500
+
+int main(int argc, char *argv[])
+{
+    struct addrinfo hints;
+    struct addrinfo *result, *rp;
+    int sfd, s, j;
+    size_t len;
+    ssize_t nread;
+    char buf[BUF_SIZE];
+    struct sockaddr_in  *ipv4;
+    struct sockaddr_in6 *ipv6;
+
+    /* Obtain address(es) matching host/port */
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_ALL;
+    hints.ai_protocol = IPPROTO_TCP;
+
+    s = getaddrinfo("www.google.com", "https", &hints, &result);
+    if (s != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
+        exit(EXIT_FAILURE);
+    }
+
+    for (rp = result; rp != NULL; rp = rp->ai_next) {
+        switch (rp->ai_family) {
+        case AF_INET:
+            ipv4 = (struct sockaddr_in *)rp->ai_addr;
+            inet_ntop(rp->ai_family, &ipv4->sin_addr, buf, sizeof(buf));
+            break;
+        case AF_INET6:
+            ipv6 = (struct sockaddr_in6 *)rp->ai_addr;
+            inet_ntop(rp->ai_family, &ipv6->sin6_addr, buf, sizeof(buf));
+            break;
+        }
+        
+        printf("[IPv%d]%s\n", rp->ai_family==AF_INET?4:6, buf);
+    }
+
+    /* No longer needed */
+    freeaddrinfo(result);           
+
+    exit(EXIT_SUCCESS);
+}
+
+
+251. 每一个线程在任何情况，要么是可结合的状态（joinable），要么是可分离的状态（detached）。
+先将这两个函数的原型列一下
+int pthread_join(pthread_t tid, void ** pthread_return);
+int pthread_detach(pthread_t tid);
+当我们的线程运行结束后，最后显示的调用被回收。这样就出现两种回收方式。
+1. pthread_join是一个阻塞函数，调用方会阻塞到pthread_join所指定的tid的线程结束后才被回收，但是在此之前，调用方是霸占系统资源的。
+2. pthread_detach，不会阻塞，调用它后，线程运行结束后会自动释放资源。
+PS：一个可结合线程在运行结束后，若没有调用pthread_join，会进入一个类似zombie process的状态，也就是系统中还有一些资源没有回收。需要pthread_join来回收这些资源。
+（这就类似进程操作中的waitpid函数）线程在创建时默认的状态是joinable, 如果一个线程结束运行但没有被join,则它的状态类似于进程中的Zombie Process（僵尸进程）,
+即还有一部分资源没有被回收（退出状态码），所以创建线程者应该 pthread_join来等待线程运行结束，并可得到线程的退出代码，回收其资源（类似于wait,waitpid)，
+这样不会导致系统越用越慢的现象。
+但是 pthread_join(pthread_id)函数是阻塞函数，在 调用pthread_join(pthread_id)后，如果该 线程 没有运行结束，调用者会被阻塞，在有些情况下我们并不希望如此，
+比如在Web服务器中当 主线程 为每个新来的链接创建一个子线程进行处理的时候，主线程并不希望因为调用pthread_join而阻塞（因为还要继续处理之后到来的链接），这时可以在子线程中加入代码
+pthread_detach( pthread_self())
+或者父线程调用
+pthread_detach(thread_id)（非阻塞，可立即返回）
+这将该子线程的状态设置为detached,则该线程运行结束后会自动释放所有资源。 
+在嵌入式系统中，如果某些线程要伴随系统一直运行下去，该种情况下是否采用该该函数进行回收，没有什么价值。
+
+252. 定义函数：char * getcwd(char * buf, size_t size);
+     函数说明：getcwd()会将当前的工作目录绝对路径复制到参数buf 所指的内存空间，参数size 为buf 的空间大小。
+    注：
+    1、在调用此函数时，buf 所指的内存空间要足够大。若工作目录绝对路径的字符串长度超过参数size 大小，则返回NULL，errno 的值则为ERANGE。
+    2、倘若参数buf 为NULL，getcwd()会依参数size 的大小自动配置内存(使用malloc())，如果参数size 也为0，则getcwd()会依工作目录绝对路径的字符串程度来决定所配置的内存大小，
+       进程可以在使用完次字符串后利用free()来释放此空间。
+
+253. 

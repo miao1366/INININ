@@ -56,3 +56,39 @@
         }
         一个通过返回值，一个通过默认模板参数，都可以实现校验模板参数是整型的功能。
 
+4. constexpr
+对于修饰Object来说，
+const并未区分出编译期常量和运行期常量
+constexpr限定在了编译期常量
+
+5.  integral_constant
+    这个类是所有traits类的基类，分别提供了以下功能：
+    value_type 表示值的类型
+    value表示值
+    type 表示自己, 因此可以用::type::value来获取值
+
+    template<typename _Tp, _Tp __v>
+    struct integral_constant {
+      static constexpr _Tp                  value = __v;
+      typedef _Tp                           value_type;
+      typedef integral_constant<_Tp, __v>   type;
+      constexpr operator value_type() const noexcept { return value; }
+    };
+
+    /// is_enum
+    template<typename _Tp>
+    struct is_enum
+    : public integral_constant<bool, __is_enum(_Tp)>
+    { };
+
+    /// is_union
+    template<typename _Tp>
+    struct is_union
+    : public integral_constant<bool, __is_union(_Tp)>
+    { };
+
+    /// is_class
+    template<typename _Tp>
+    struct is_class
+    : public integral_constant<bool, __is_class(_Tp)>
+    { };

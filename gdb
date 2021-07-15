@@ -287,3 +287,25 @@ https://blog.csdn.net/lm409/article/details/80303709
         --ex: 执行gdb 命令
         "set height 0": 不对输出进行分页
         "thread apply all bt full": 打印所有线程堆栈
+
+26  gdb之watch命令】
+　什么是watchpoint？
+　　watchpoint，顾名思义，其一般用来观察某个变量/内存地址的状态(也可以是表达式），如可以监控该变量/内存值是否被程序读/写情况。
+　在gdb中可通过下面的几种方法来设置watchpoint：
+　　(gdb) watch 　
+　在指定变量/内存地址（表达式）expr设置一个watchpoint。一但expr值有变化时，将停住程序。
+　　(gdb) rwatch 
+　当expr被读时，停住程序。
+　　(gdb) awatch 
+　当expr被读或被写时，停住程序。
+　　(gdb) info watchpoints
+　列出当前所设置了的所有观察点。
+在使用watch时步骤如下：
+1. 使用break在要观察的变量所在处设置断电；
+2. 使用run执行，直到断点；
+3. 使用watch设置观察点；
+4. 使用continue观察设置的观察点是否有变化。
+
+疑问：
+1. 直接设置观察点是不行的，原因未知。
+2. 测试对于指针设置观察点，观察的为指针的值，还是指针所在的空间

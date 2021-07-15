@@ -20,4 +20,8 @@
 6. 帧率(Frame rate) = 帧数(Frames)/时间(Time)，单位为帧每秒(f/s, frames per second, fps)
    帧率是用于测量显示帧数的量度，测量单位为“每秒显示帧数”（ Frame per Second， FPS）或“赫兹”（ Hz），一般来说 FPS 用于描述视频、电子绘图或游戏每秒播放多少幀
 
-7.  
+7.  0  前相机
+    2  后广角
+    4  左广角
+    6  右广角
+     8 9 10 11 
