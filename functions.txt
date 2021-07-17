@@ -2738,4 +2738,5 @@ pthread_detach(thread_id)（非阻塞，可立即返回）
     2、倘若参数buf 为NULL，getcwd()会依参数size 的大小自动配置内存(使用malloc())，如果参数size 也为0，则getcwd()会依工作目录绝对路径的字符串程度来决定所配置的内存大小，
        进程可以在使用完次字符串后利用free()来释放此空间。
 
-253. 
+253. streamsize istream::gcount();
+函数gcount()用于输入流, 返回read最后一次非格式化读取的字符的个数

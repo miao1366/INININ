@@ -1329,7 +1329,7 @@ wc -w filename：显示一个文件的字数
 
      chronyc sources -v    查看时间同步源
 
-163. alsamixer   调节音量    pavucontrol
+163. alsamixer   调节音量    pavucontrol   audacity录制音频
 
 164. https://www.cnblogs.com/liulaolaiu/p/11744497.html
 举例说明：
@@ -1447,4 +1447,4 @@ ping命令中的TTL
     udevadm info -a -p $(udevadm info -q path -n /dev/video0)
     etc/udev/rules.d 目录下 我们主要修改下面的usb.rules
 
-175 
+175 ffplay -ar 16000 -channels 1 -f s16le -i ./sss.pcm

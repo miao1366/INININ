@@ -321,3 +321,10 @@ THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
 46  muduo的日志写的太快了, 一秒写的数据超过kRollSize了，不会新建日志文件了
 
 47   EventLoop：事件循环核心类，遵循per thread one loop的思想，一个线程一个事件循环，在循环中用IO多路复用，分发IO事件
+
+48    bool setMethod(const char* start, const char* end)
+  {
+    assert(method_ == kInvalid);
+
+49. https://blog.csdn.net/adkada1/article/details/54342275
+    https://zhuanlan.zhihu.com/p/85101271

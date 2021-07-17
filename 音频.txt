@@ -79,3 +79,152 @@ SoX 还能够对输入的音频文件应用各类效果，也支持在大多数�
     $ cat /proc/asound/cards
 
 11. https://blog.csdn.net/keepingstudying/article/details/50674277
+
+12. play -t raw -r 16000 -e signed -b 16 -c 1 ./16k-0.pcm    播放
+
+13. 
+样本长度(sample)：      样本是记录音频数据最基本的单位，常见的有8位和16位。
+通道数(channel)：      该参数为1表示单声道，2则是立体声。
+帧(frame)：            帧记录了一个声音单元，其长度为样本长度与通道数的乘积。
+采样率(rate)：         每秒钟采样次数，该次数是针对帧而言。
+周期(period)：         音频设备一次处理所需要的帧数，对于音频设备的数据访问以及音频数据的存储，都是以此为单位。
+交错模式(interleaved)： 是一种音频数据的记录方式，在交错模式下，数据以连续帧的形式存放，即首先记录完帧1的左声道样本和右声道样本（假设为立体声格式），再开始帧2的记录。
+                      而在非交错模式下，首先记录的是一个周期内所有帧的左声道样本，再记录右声道样本，数据是以连续通道的方式存储。不过多数情况下，我们只需要使用交错模式就可以了
+
+14 linux alsa 声音录播详解    http://blog.sina.com.cn/s/blog_6340cd9c0101ff4f.html
+# /dev/sequencer 通过google搜索在ubuntu中文论坛找到解决办法。执行gnome-volume-control-applet就可以在面板上看到音量控制
+目前大多数声卡驱动程序还会提供/dev/sequencer这一设备文件，用来对声卡内建的波表合成器进行操作，或者对MIDI总线上的乐器进行控制，一般只用于计算机音乐软件中。
+# /dev/mixer
+在声卡的硬件电路中，混音器（mixer）是一个很重要的组成部分，它的作用是将多个信号组合或者叠加在一起，对于不同的声卡来说，其混音器的作用可能各不相同。运行在Linux内核中的声卡驱动程序一般都会提供/dev/mixer这一设备文件，它是应用程序对混音器进行操作的软件接口。混音器电路通常由两个部分组成：输入混音器（input mixer）和输出混音器（output mixer）。
+输入混音器负责从多个不同的信号源接收模拟信号，这些信号源有时也被称为混音通道或者混音设备。模拟信号通过增益控制器和由软件控制的音量调节器后，在不同的混音通道中进行级别（level）调制，然后被送到输入混音器中进行声音的合成。混音器上的电子开关可以控制哪些通道中有信号与混音器相连，有些声卡只允许连接一个混音通道作为录音的音源，而有些声卡则允许对混音通道做任意的连接。经过输入混音器处理后的信号仍然为模拟信号，它们将被送到A/D转换器进行数字化处理。
+输出混音器的工作原理与输入混音器类似，同样也有多个信号源与混音器相连，并且事先都经过了增益调节。当输出混音器对所有的模拟信号进行了混合之后，通常还会有一个总控增益调节器来控制输出声音的大小，此外还有一些音调控制器来调节输出声音的音调。经过输出混音器处理后的信号也是模拟信号，它们最终会被送给喇叭或者其它的模拟输出设备。对混音器的编程包括如何设置增益控制器的级别，以及怎样在不同的音源间进行切换，这些操作通常来讲是不连续的，而且不会像录音或者放音那样需要占用大量的计算机资源。由于混音器的操作不符合典型的读/写操作模式，因此除了open和close两个系统调用之外，大部分的操作都是通过ioctl系统调用来完成的。与/dev/dsp不同，/dev/mixer允许多个应用程序同时访问，并且混音器的设置值会一直保持到对应的设备文件被关闭为止。
+为了简化应用程序的设计，Linux上的声卡驱动程序大多都支持将混音器的ioctl操作直接应用到声音设备上，也就是说如果已经打开了/dev/dsp，那么就不用再打开/dev/mixer来对混音器进行操作，而是可以直接用打开/dev/dsp时得到的文件标识符来设置混音器。
+
+
+作者：北京中科红旗软件技术有限公司 孔伟　
+Alsa是Linux高级音频接口。面对众多的音频设备，Alsa为Linux音频开发人员提供了一套标准的访问机制，使得音频开发变得十分容易。不信？下面我们就利用它编写一个简单的录音/播音程序，不过这需要你有一定的计算机语言基础。
+一个典型的音频程序应该具有以下结构：
+打开音频设备
+为设备设置读写参数
+向音频设备读/写音频数据
+关闭设备
+Alsa库为我们实现这些操作提供了丰富的接口。
+首先让我们封装一个打开音频设备的函数：
+1.  snd_pcm_t *pcm_handle;
+2.   
+3.  bool device_open(int mode){
+4.  if (snd_pcm_open (&pcm_handle, “default” , mode , 0) < 0)
+5.  return false;
+6.  return true;
+7.  }
+snd_pcm_open是Alsa库提供的打开设备调用函数，这里我们指定打开缺省的音频设备，并根据参数mode将设备置为录音或是播放状态，如果设备打开成功，pcm_handle便指向该设备句柄，我们用全局变量保存起来，方便以后使用。
+第二步是设置参数，参数设置不当将会导致音频设备无法正常工作。在设置参数前，我们需要了解一下各个参数的含义以及一些基本概念。
+样本长度(sample)：样本是记录音频数据最基本的单位，常见的有8位和16位。
+通道数(channel)：该参数为1表示单声道，2则是立体声。
+帧(frame)：帧记录了一个声音单元，其长度为样本长度与通道数的乘积。
+采样率(rate)：每秒钟采样次数，该次数是针对帧而言。
+周期(period)：音频设备一次处理所需要的帧数，对于音频设备的数据访问以及音频数据的存储，都是以此为单位。
+交错模式(interleaved)：是一种音频数据的记录方式，在交错模式下，数据以连续帧的形式存放，即首先记录完帧1的左声道样本和右声道样本（假设为立体声格式），再开始帧2的记录。而在非交错模式下，首先记录的是一个周期内所有帧的左声道样本，再记录右声道样本，数据是以连续通道的方式存储。不过多数情况下，我们只需要使用交错模式就可以了。
+明白了各参数含义及关系后，我们开始设置参数：
+1.  int bit_per_sample; //样本长度(bit)
+2.  int period_size; //周期长度(帧数)
+3.  int chunk_byte; //周期长度(字节数)
+4.  snd_pcm_hw_params_t *params; //定义参数变量
+5.   
+6.  bool device_setparams()
+7.  {
+8.  snd_pcm_hw_params_t *hw_params;
+9.  snd_pcm_hw_params_malloc (&hw_params); //为参数变量分配空间
+10.snd_pcm_hw_params_malloc (&params);
+11.snd_pcm_hw_params_any ( pcm_handle, hw_params ); //参数初始化
+12.snd_pcm_hw_params_set_access ( pcm_handle, hw_params,
+13. SND_PCM_ACCESS_RW_INTERLEAVED); //设置为交错模式
+14.snd_pcm_hw_params_set_format( pcm_handle, hw_params,
+15. SND_FORMAT_S16_LE); //使用用16位样本
+16.snd_pcm_hw_params_set_rate_near( pcm_handle, hw_params,
+17. 44100, 0); //设置采样率为44.1KHz
+18.snd_pcm_hw_params_set_channels( pcm_handle, hw_params, 2); //设置为立体声
+19.snd_pcm_hw_params_get_period_size( hw_params, &period_size); //获取周期长度
+20.bit_per_sample = snd_pcm_hw_format_physical_width( hw_params.format );
+21. //获取样本长度
+22.chunk_byte = period_size * bit_per_sample * hw_params.channels / 8;
+23.//计算周期长度（字节数(bytes) = 每周期的帧数 * 样本长度(bit) * 通道数 / 8 ）
+24.snd_pcm_hw_params( pcm_handle, hw_params); //设置参数
+25.params = hw_params; //保存参数，方便以后使用
+26.snd_pcm_hw_params_free( hw_params); //释放参数变量空间
+27.return true;
+28.
+29.}
+这里先使用了Alsa提供的一系列snd_pcm_hw_params_set_函数为参数变量赋值。最后才通过snd_pcm_hw_params将参数传递给设备。需要说明的是正式的开发中需要处理参数设置失败的情况，这里仅做为示例程序而未作考虑。
+设置好参数后便可以开始录音了。录音过程实际上就是从音频设备中读取数据信息并保存。
+1.  char *wave_buf;
+2.  int wave_buf_len;
+3.  bool device_capture( int dtime ){
+4.  　wave_buf_len = dtime * params.rate * bit_per_sample * params.channels / 8 ;
+5.   //计算音频数据长度（秒数 * 采样率 * 帧长度）
+6.  　char *data = wave_buf = (char*)malloc( wave_buf_len ); //分配空间
+7.   
+8.  int r = 0;
+9.  while ( data ?C wave_buf <= wave_buf_len ?C chunk_size ){
+10.r = snd_pcm_readi( pcm_handle, data , chunk_size);
+11.if ( r>0 ) data += r * chunk_byte;
+12.else
+13.return false
+14.}
+15.return true;
+16.}
+形参dtime用来确定录音时间，根据录音时间分配数据空间，再调用snd_pcm_readi从音频设备读取音频数据，存放到wave_buf中。
+同样的原理，我们再添加一个播放函数，向音频设备写入数据：
+1.  bool device_play(){
+2.  char *data = wave_buf;
+3.  int r = 0;
+4.  while ( data ?C wave_buf <= wave_buf_len ?C chunk_size ){
+5.  r = snd_pcm_writei( pcm_handle, data , chunk_size);
+6.  if ( r>0 ) data += r * chunk_byte;
+7.  else
+8.  return false
+9.  }
+10.return true;
+11.}
+最后我们给这个示例程序加上main函数
+1.  #include
+2.   
+3.  bool device_open( int mode);
+4.  bool device_setparams();
+5.  bool device_capture( int dtime );
+6.  bool device_play();
+7.  char *wave_buf;
+8.  int wave_buf_len;
+9.  int bit_per_sample;
+10.int period_size;
+11.int chunk_byte;
+12.int chunk_size;
+13.snd_pcm_hw_params_t *params;
+14.
+15.int main( int , char** ){
+16.//录音
+17.if (!device_open(SND_PCM_STREAM_CAPTURE ) return 1;
+18.if (!device_setparams()) return 2;
+19.if (!device_capture( 3 )) return 3; //录制3秒
+20.snd_pcm_close( pcm_handle );
+21.
+22.//播放
+23.if (!device_open( SND_PCM_STREAM_PLAYBACK ) return 4;
+24.if (!device_setparams()) return 5;
+25.if (!device_play()) return 6;
+26.snd_pcm_close( pcm_handle );
+27.
+28.return 0;        by-id  by-path controlC0  pcmC0D0c pcmC0D0p  timer
+29.}
+这样，我们便完成了一个具有录音，播音的功能的音频程序，因为使用了alsa库，如果你使用的是gcc编译器，最后链接时记得要带上参数——lasound 。
+限于篇幅，Alsa接口提供的强大功能不仅于此，有兴趣的读者可以参阅ALSA HOWTO，那上面你一定能够发现Alsa的强大之处
+
+https://blog.csdn.net/lile777/article/details/64439107?utm_medium=distribute.pc_relevant_download.none-task-blog-baidujs-1.nonecase&depth_1-utm_source=distribute.pc_relevant_download.none-task-blog-baidujs-1.nonecase
+https://github.com/nicktcl/alsa-record-on-raspberrypi
+https://github.com/Baidu-AIP/speech_realtime_api/blob/master/cpp-realtime-asr/mini/session.cpp
+https://www.cnblogs.com/ynxf/p/6285658.html?utm_source=itdadao&utm_medium=referral
+https://github.com/nicktcl/alsa-record-on-raspberrypi
+https://nicktcl.blog.csdn.net/article/details/87904582
+https://blog.csdn.net/lile777/article/details/64439107?utm_medium=distribute.pc_relevant_download.none-task-blog-baidujs-1.nonecase&depth_1-utm_source=distribute.pc_relevant_download.none-task-blog-baidujs-1.nonecase
+https://www.cnblogs.com/ynxf/p/6285658.html?utm_source=itdadao&utm_medium=referral
+https://github.com/qq2216691777/xf_voice
