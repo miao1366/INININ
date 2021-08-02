@@ -489,4 +489,14 @@ Oracle XDB FTP服务，默认的端口号为2100
 MS SQL*SERVER数据库server，默认的端口号为1433/tcp 1433/udp
 MS SQL*SERVER数据库monitor，默认的端口号为1434/tcp 1434/udp
 
-12  网络带宽  https://www.zhihu.com/question/40309762
+12.  网络带宽  https://www.zhihu.com/question/40309762
+
+13. 
+RTT(Round Trip Time)：一个连接的往返时间，即数据发送时刻到接收到确认的时刻的差值；
+RTO(Retransmission Time Out)：重传超时时间，即从数据发送时刻算起，超过这个时间便执行重传。
+RTT和RTO 的关系是：由于网络波动的不确定性，每个RTT都是动态变化的，所以RTO也应随着RTT动态变化。
+————————————————
+版权声明：本文为CSDN博主「whgtheone」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/whgtheone/article/details/80970292
+
+14. 

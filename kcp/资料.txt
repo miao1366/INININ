@@ -1,6 +1,7 @@
 1. https://blog.csdn.net/qq_36748278/article/details/80171575
    https://blog.csdn.net/yongkai0214/article/details/85156452
    https://blog.csdn.net/weixin_42639771/article/details/89355646
+   https://blog.csdn.net/lixiaowei16/article/details/90485157
 
 IKCPCB是KCP中最重要的结构，也是在会话开始就创建的对象，代表着这次会话，所以这个结构体体现了一个会话所需要涉及到的所有组件。其中一些参数在IKCPSEG中已经描述，不再多说。
 
@@ -125,3 +126,139 @@ data:用户数据
 9.
 https://blog.csdn.net/weixin_42639771/article/details/89355646
 https://blog.csdn.net/prsniper/article/details/6762145
+
+10. IP包包括TCP包,TCP包是IP包的一种 可以把IP包比作动物,TCP是哺乳动物,HTTP是灵长类
+
+11. 超时与重传
+超时重传指的是，发送数据包在一定的时间内没有收到相应的ACK，等待一定的时间，超时之后就认为这个数据包丢失，就会重新发送。这个等待时间被称为RTO，即重传超时时间
+
+12. 滑动窗口
+   TCP通过确认机制来保证数据传输的可靠性。在早期的时候，发送数据方在发送数据之后会启动定时器，在一定时间内，如果没有收到发送数据包的ACK报文，就会重新发送数据，直到发送成功为止。
+   但是这种停等的重传机制必须等待确认之后才能发送下一个包，传输速度比较慢。
+   为了提高传输速度，发送方不必在每发送一个包之后就进行等待确认，而是可以发送多个包出去，然后等待接收方一 一确认。但是接收方不可能同时处理无限多的数据，因此需要限制发送方往网络中发送的数据数量。
+   接收方在未收到确认之前，发送方在只能发送wnd大小的数据，这个机制叫做滑动窗口机制。TCP的每一端都可以收发数据。每个TCP活连接的两端都维护一个发送窗口和接收窗口结构。
+
+
+struct IKCPSEG
+{
+    struct IQUEUEHEAD node; // 双向链表定义的队列
+    IUINT32 conv;           // conversation, 会话序号: 接收到的数据包与发送的一致才接收此数据包
+    IUINT32 cmd;            // command, 指令类型: 代表这个Segment的类型
+    IUINT32 frg;            // fragment, 分段序号
+    IUINT32 wnd;            // window, 窗口大小
+    IUINT32 ts;             // timestamp, 发送的时间戳
+    IUINT32 sn;             // sequence number, segment序号
+    IUINT32 una;            // unacknowledged, 当前未收到的序号: 即代表这个序号之前的包均收到
+    IUINT32 len;            // length, 数据长度
+    IUINT32 resendts;       // 重发的时间戳
+    IUINT32 rto;            // 超时重传的时间间隔
+    IUINT32 fastack;        // ack跳过的次数，用于快速重传
+    IUINT32 xmit;           // 发送的次数(即重传的次数)
+    char data[1];
+};
+作者：Uyouii
+链接：https://zhuanlan.zhihu.com/p/56561293
+
+
+struct IKCPCB
+{
+    //conv:会话ID，mtu:最大传输单元，mss:最大分片大小，state:连接状态
+    IUINT32 conv, mtu, mss, state;          
+    //sun_una：第一个未确认的包，sen_nxt：待发送包的序号，rcv_nxt：待接收消息的序号
+    IUINT32 snd_una, snd_nxt, rcv_nxt;      
+    //ssthresh:拥塞窗口的阈值
+    IUINT32 ts_recent, ts_lastack, ssthresh;
+    //rx_rttval：ack接收rtt浮动值，rx_srtt：ack接收rtt平滑值(smoothed)，rx_rto：由ack接收延迟计算出来的复原时间，rx_minrto：最小复原时间
+    IINT32 rx_rttval, rx_srtt, rx_rto, rx_minrto;   
+    //sen_wnd：发送窗口大小，rcv_wnd：接收窗口大小，rmt_wnd：远端接收窗口大小，cwnd：拥塞窗口大小，probe  探查变量，IKCP_ASK_TELL表示告知远端窗口大小。IKCP_ASK_SEND表示请求远端告知窗口大小。
+    IUINT32 snd_wnd, rcv_wnd, rmt_wnd, cwnd, probe; 
+    //currunt：当前的时间戳，interval：内部flush刷新间隔，ts_flush：下次flush刷新时间戳
+    IUINT32 current, interval, ts_flush, xmit;
+    IUINT32 nrcv_buf, nsnd_buf;
+    IUINT32 nrcv_que, nsnd_que;
+    //nodelay：是否启动无延迟模式，update：是否调用过update函数的标识(kcp需要上层通过不断的ikcp_update和ikcp_check来驱动kcp的收发过程)
+    IUINT32 nodelay, updated;
+    //ts_probe：下次探查窗口的时间戳，probe_wait：探查窗口需要等待的时间
+    IUINT32 ts_probe, probe_wait;
+    //dead_link：最大重传次数，incr：可发送的最大数据量
+    IUINT32 dead_link, incr;
+    struct IQUEUEHEAD snd_queue;    //发送消息的队列
+    struct IQUEUEHEAD rcv_queue;    //接收消息的队列
+    struct IQUEUEHEAD snd_buf;      //发送消息的缓存
+    struct IQUEUEHEAD rcv_buf;      //接收消息的缓存
+    IUINT32 *acklist;               //待发送的ack的列表
+    IUINT32 ackcount;               //ack数量
+    IUINT32 ackblock;               //acklist的大小
+    void *user;
+    char *buffer;                   //储存消息字节流的内存
+    int fastresend;                 //触发快速重传的重复ack个数
+    int nocwnd, stream;             //nocwnd：取消拥塞控制，stream：是否采用流传输模式
+    int logmask;
+    int (*output)(const char *buf, int len, struct IKCPCB *kcp, void *user);    //发送消息的回调函数
+    void (*writelog)(const char *log, struct IKCPCB *kcp, void *user);
+};
+作者：Uyouii
+链接：https://zhuanlan.zhihu.com/p/56561293
+
+
+|<------------ 4 bytes ------------>|
++--------+--------+--------+--------+
+|               conv                | conv：Conversation, 会话序号，用于标识收发数据包是否一致
++--------+--------+--------+--------+ cmd: command，用于标识指令，例如：push，ack等
+|  cmd   |  frg   |       wnd       | frg: Fragment, 分段序号，序号从大到小
++--------+--------+--------+--------+ wnd: 接收窗口大小
+|                ts                 | ts: 发送的时间戳
++--------+--------+--------+--------+
+|                sn                 | sn: Segment序号
++--------+--------+--------+--------+
+|                una                | una: Unacknowledged, 当前未收到的序号，即代表这个序号之前的包均收到sn:序列号   una:下一个可接收的序列号。其实就是确认号，收到sn=10的包，una为11
++--------+--------+--------+--------+      
+|                len                | len: data数据的长度
++--------+--------+--------+--------+
+kcp包头总共占用了24个字节。给sn分配了4个字节，可以不用考虑序号越界的问题。
+作者：Uyouii
+链接：https://zhuanlan.zhihu.com/p/56561293
+
+13. KCP主要工作过程：
+把要发送的buffer分片成KCP的数据包格式，插入待发送队列中。
+当用户的数据超过一个MSS(最大分片大小)的时候，会对发送的数据进行分片处理。KCP采用的是流的方式进行分片处理。通过frg进行排序区分，
+frg即message中的segment分片ID，在message中的索引，由大到小，0表示最后一个分片。比如3,2,1,0。即把message分成了四个分片，
+分片的ID分别是4,3,2,1
+
+分片方式共有两种：
+消息方式: 将用户数据分片，为每个分片设置ID，将分片后的数据一个一个地存入发送队列，接收方通过id解析原来的包，消息方式一个分片的数据量可能不能达到MSS
+流方式:  检测每个发送队列里的分片是否达到最大MSS，如果没有达到就会用新的数据填充分片。
+网络速度：流方式 > 消息方式
+接收数据：流方式一个分片一个分片的的接收。消息方式kcp的接收函数会把自己原本属于一个数据的分片重组
+————————————————
+版权声明：本文为CSDN博主「Dannii_」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/qq_36748278/article/details/80171575
+注：流模式情况下，kcp会把两次发送的数据衔接为一个完整的kcp包。非流模式下，用户数据%MSS的包，也会作为一个包发送出去。
+
+
+
+14. KCP的配置模式
+
+这部分KCP文档有介绍，理解KCP协议无需过于关注。协议默认模式是一个标准的 ARQ，需要通过配置打开各项加速开关：
+1. 工作模式：
+int ikcp_nodelay(ikcpcb *kcp, int nodelay, int interval, int resend, int nc)
+    nodelay ：是否启用 nodelay模式，0不启用；1启用。
+    interval ：协议内部工作的 interval，单位毫秒，比如 10ms或者 20ms
+    resend ：快速重传模式，默认0关闭，可以设置2（2次ACK跨越将会直接重传）
+    nc ：是否关闭流控，默认是0代表不关闭，1代表关闭。
+    普通模式： ikcp_nodelay(kcp, 0, 40, 0, 0);
+    极速模式： ikcp_nodelay(kcp, 1, 10, 2, 1)
+
+2. 最大窗口
+int ikcp_wndsize(ikcpcb *kcp, int sndwnd, int rcvwnd);
+该调用将会设置协议的最大发送窗口和最大接收窗口大小，默认为32. 这个可以理解为 TCP的 SND_BUF 和 RCV_BUF，
+只不过单位不一样 SND/RCV_BUF 单位是字节，这个单位是包
+
+3. 最大传输单元：
+纯算法协议并不负责探测 MTU，默认 mtu是1400字节，可以使用ikcp_setmtu来设置该值。该值将会影响数据包归并及分片时候的最大传输单元。
+
+4. 最小RTO：
+不管是 TCP还是 KCP计算 RTO时都有最小 RTO的限制，即便计算出来RTO为40ms，由于默认的 RTO是100ms，协议只有在100ms后才能检测到丢包，快速模式下为30ms，可以手动更改该值：
+kcp->rx_minrto = 10;
+
+5. 

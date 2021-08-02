@@ -1,0 +1,18 @@
+1. 江湖传说永流传：谷歌技术有"三宝"，GFS、MapReduce和大表（BigTable）
+
+2. Hadoop实际上就是谷歌三宝的开源实现，Hadoop MapReduce对应Google MapReduce，
+   HBase对应BigTable，HDFS对应GFS
+
+3. 大型连续文件的读取和写入
+
+4. 容错、主从复制、自动故障恢复能力
+
+5. GFS 也就是 google File System，Google公司为了存储海量搜索数据而设计的专用文件系统。
+
+6. 块服务器 chunk server
+
+7. 在一个成熟的分布式系统中，存在大量的基础组件，比如一致性组件raft和paxos，服务发现组件、RPC组件、负载均衡组件、分布式kv，消息队列和分布式锁等等。
+
+8. primary-backup replication
+
+9. 容错 （fault tolerance）和 错误恢复 （fault recovery）

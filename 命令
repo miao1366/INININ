@@ -1448,3 +1448,22 @@ ping命令中的TTL
     etc/udev/rules.d 目录下 我们主要修改下面的usb.rules
 
 175 ffplay -ar 16000 -channels 1 -f s16le -i ./sss.pcm
+
+176 切换用户的命令为：su username
+
+177. 在Linux中用Kill-2和Kill-9都能够结束进程,他们之间的区别为:
+Kill-2:功能类似于Ctrl+C是程序在结束之前,能够保存相关数据,然后再退出。
+Kill -9 是强制杀掉，这个信号程序应该是无法捕捉的。
+LINUX的一个知识点：使用 kill -9 命令杀死程序，程序是无法主动释放资源的。操作系统从进程表中直接清除该程序，而不会给程序任何通知和反应时间。
+要使用其他的 kill 方式，会给程序一个通道信号和处理时机，程序才能在被强制清除前主动释放掉资源
+
+178. bluetoothctl
+    devices    列出设备
+    scan on    扫描设备
+    scan off   关闭扫描
+    pair 47:AC:24:AF:FF:5B         配对47:AC:24:AF:FF:5B
+    connected 47:AC:24:AF:FF:5B    连接设备47:AC:24:AF:FF:5B
+    disconnect 47:AC:24:AF:FF:5B   断开设备连接
+
+179. btmon    查看蓝牙通信报文
+    https://blog.csdn.net/u010659887/article/details/85329276
