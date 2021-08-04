@@ -1467,3 +1467,28 @@ LINUX的一个知识点：使用 kill -9 命令杀死程序，程序是无法主
 
 179. btmon    查看蓝牙通信报文
     https://blog.csdn.net/u010659887/article/details/85329276
+
+180. locate
+    命令用于查找符合条件的文档，他会去保存文档和目录名称的数据库内，查找合乎范本样式条件的文档或目录。
+    一般情况我们只需要输入 locate your_file_name 即可查找指定文件。
+
+181. vim /etc/bash.bashrc
+
+182. udev
+     udevadm info -a -p $(udevadm info -q path -n /dev/video1)
+     采集卡从上到下编号为ABCD，对应前鱼眼，后鱼眼，左鱼眼，右鱼眼。找到对应的video序号，比如video1，然后用 udevadm info -a -p $(udevadm info -q path -n /dev/video0)
+    f 这个命令 查下可用的规则
+
+
+
+
+
+
+
+
+
+
+
+
+
+

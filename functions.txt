@@ -114,6 +114,14 @@ to_string(x)
 35. void std::unique_ptr::reset (nullptr_t p) noexcept;  cplusplus.com/  deletes managed object, acquires new pointe
 
 36. FILE *fopen(const char *pathname, const char *mode); // 'a' appending
+        "r"           打开文字文件只读
+        "w"           创建文字文件只写
+        "a"           增补, 如果文件不存在则创建一个
+        "r+"          打开一个文字文件读/写
+        "w+"          创建一个文字文件读/写
+        "a+"          打开或创建一个文件增补
+        "b"           二进制文件(可以和上面每一项合用)
+        "t"           文这文件(默认项)
 
 37. void setbuffer(FILE * stream,char * buf,size_t size);
     打开文件流后，读取内容之前，调用setbuffer()可用来设置文件流的缓冲区。参数stream为指定的文件流，参数buf指向自定的缓冲区起始地址，参数size为缓冲区大小
@@ -2094,8 +2102,9 @@ EINVAL
 231  FILE *popen(const char *command, const char *type);
 函数说明：
 （1）popen()会调用fork()产生子进程，然后从子进程中调用/bin/sh -c来执行参数command的指令。
-（2）参数type可使用“r”代表读取，“w”代表写入。依照此type值，popen()会建立管道连到子进程的标准输出设备或标准输入设备，然后返回一个文件指针。随后进程便可利用此文件指针来读取子进程的输出设备或是写入到子进程的标准输入设备中。
-（3）此外，所有使用文件指针(FILE*)操作的函数也都可以使用，除了fclose()以外。
+（2）参数type可使用“r”代表读取，“w”代表写入。依照此type值，popen()会建立管道连到子进程的标准输出设备或标准输入设备，然后返回一个文件指针。
+    随后进程便可利用此文件指针来读取子进程的输出设备或是写入到子进程的标准输入设备中。
+（3）fclose()关闭文件指针
 （4）如果 type 为 r，那么调用进程读进 command 的标准输出。
 如果 type 为 w，那么调用进程写到 command 的标准输入。
 返回值：若成功则返回文件指针，否则返回NULL，错误原因存于errno中。
