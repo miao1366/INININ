@@ -1,0 +1,14 @@
+05.
+小车module版本。
+https://codeup.aliyun.com/5f02dcd86a575d7f23661142/hi_delivery/integrate/tree/9498d3142139562b1be149b7804dec2117656c58/modules
+./run.sh -g -m 
+gdb  程序  core文件
+ds info
+data hz
+data echo 
+
+06.  data echo rtk_data
+    df -h |grep /media/ |awk '{print $1}'
+    sudo hdparm -I /dev/sda1 |grep "Serial Number" |awk '{print $3}'
+
+07. 

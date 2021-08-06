@@ -309,3 +309,10 @@ https://blog.csdn.net/lm409/article/details/80303709
 疑问：
 1. 直接设置观察点是不行的，原因未知。
 2. 测试对于指针设置观察点，观察的为指针的值，还是指针所在的空间
+
+ gdb node ./ubuntu.core-CA_front_middle.20176.11.1628150049
+ sudo gdb /home/ubuntu/output/x86/hios/bin/node ./ubuntu.core-CA_front_middle.20176.11.1628150049
+
+27 core  文件操作
+gdb  程序   core文件
+ 

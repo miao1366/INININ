@@ -4,3 +4,15 @@
 
 2. https://blog.csdn.net/dianyun7150/article/details/101213486
     DH_set0_pqg();
+
+3. SSL_CTX *SSL_CTX_new(SSL_METHOD * method);   申请SSL会话环境.
+   
+4. 制定证书验证方式的函数是： int SSL_CTX_set_verify(SSL_CTX *ctx,int mode,int(*verify_callback),int(X509_STORE_CTX *));
+
+5. 为SSL会话环境加载CA证书的函数是： SSL_CTX_load_verify_location(SSL_CTX *ctx,const char *Cafile,const char *Capath);
+
+6. 为SSL会话加载用户证书的函数是： SSL_CTX_use_certificate_file(SSL_CTX *ctx, const char *file,int type);
+
+7. 为SSL会话加载用户私钥的函数是： SSL_CTX_use_PrivateKey_file(SSL_CTX *ctx,const char* file,int type);
+
+8.  
