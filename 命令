@@ -1479,9 +1479,12 @@ LINUX的一个知识点：使用 kill -9 命令杀死程序，程序是无法主
      采集卡从上到下编号为ABCD，对应前鱼眼，后鱼眼，左鱼眼，右鱼眼。找到对应的video序号，比如video1，然后用 udevadm info -a -p $(udevadm info -q path -n /dev/video0)
     f 这个命令 查下可用的规则
 
+183. top  -d 5 -Hp  4069    间隔5秒刷新数据
 
-
-
+184. 
+    52studyit.com
+    51studyit.com
+    www.51data.org
 
 
 

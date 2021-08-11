@@ -177,3 +177,20 @@ struct __msgqueue
     pthread_cond_t get_cond;
     pthread_cond_t put_cond;
 };
+
+this->resp.~RESP();
+new(&this->resp) RESP();
+
+20.  WFComplexClientTask<REQ, RESP, CTX>::dispatch()
+      ComplexMySQLTask::check_request
+       SubTask *WFComplexClientTask<REQ, RESP, CTX>::done()
+        WFResolverTask::dispatch()
+         SubTask *WFResolverTask::done()
+          void WFComplexClientTask<REQ, RESP, CTX>::dispatch()
+           void CommRequest::dispatch()
+            void WFComplexClientTask<REQ, RESP, CTX>::switch_callback(WFTimerTask *)
+             void CommRequest::handle(int state, int error)
+
+#include <iostream>
+std::coutt<< __
+

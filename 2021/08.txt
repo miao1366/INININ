@@ -11,4 +11,23 @@ data echo
     df -h |grep /media/ |awk '{print $1}'
     sudo hdparm -I /dev/sda1 |grep "Serial Number" |awk '{print $3}'
 
-07. 
+09  上午看srpc rpc_buffer.c 部分
+    下午 https://ai.baidu.com/ai-doc/SPEECH/2k5dllqxj
+        调试16000 单声道
+    晚上看srpc rpc_buffer.c部分.
+
+10. 早上看srpc rpc_buffer.c部分。 看源码时需要仔细认真点。看源码时增加日志，看流程
+    不要引入太多的变量，简单设计就新。代码要简单易读，要精简。
+
+    front_long_camera      //前长焦
+    front_middle_camera    //前中距
+    front_short_camera     //前短距
+    rear_middle_camera     //后中距
+    front_right_camera     //右前广角
+    front_left_camera      //左前广角
+    rear_right_camera      //右后广角
+    rear_left_camera       //左后广角
+    https://data.haomoai.com/admin/release/carui
+    下午: 沟通dashboard事项， rtk出版本。采集标签
+
+11. 

@@ -1,0 +1,8 @@
+1. is_nocopy 数据不需要申请内存.
+
+2.  if (sz > piece_max_size_)
+        sz = piece_max_size_;
+    if (sz < piece_min_size_)
+        sz = piece_min_size_;
+
+3. 

@@ -1,0 +1,16 @@
+base，通用代码，基础组件，包含字符串、文件、线程、消息队列等工具类集合。
+cc，Chromium compositor 的缩写，负责渲染合成。
+chrome，Chromium 浏览器外壳实现。
+content，多进程沙盒浏览器的核心代码，管理进程架构和线程架构。
+gpu，OpenGL 封装代码，包含 CommandBuffer 和 OpenGL 兼容性支持等。
+net，网络栈实现。
+ipc，进程间消息通信实现。
+media，多媒体封装代码，包含了媒体内容捕获和播放的组件集合。
+mojo，类似于 Android 的 AIDL，提供了跨语言（C++ / Java / JavaScript）跨平台的进程间对象（Object）通信机制；。
+skia，图形库，这里存放的是 Chromium 对 skia 的 配置和扩展代码，另有 third_party/skia 目录存放原生的 skia 代码。
+third_party，网页排版引擎。第三方库
+ui，UI 框架。
+v8，V8 JavaScript 引擎库。
+
+作者：龙泉寺扫地僧
+链接：https://www.zhihu.com/question/290767285/answer/1200063036

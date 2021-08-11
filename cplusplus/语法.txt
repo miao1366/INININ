@@ -1,0 +1,33 @@
+1. streams
+流(streams)是STL里一个很重要的概念，例如std::cin std::cout用于终端的输入/输出。而实际上，真正的读/写操作并不是stream完成的，而是由stream调用stream buffer完成
+streambuf实际上是一个模板类
+typedef basic_streambuf<char> streambuf;
+typedef basic_streambuf<wchar_t> wstreambuf;
+两个类都是虚基类，因此没法直接创建。可以派生自己的子类，以便提供其他设备/数据输入的接口。
+STL标准库实现了两个子类，分别是filebuf 和 stringbuf
+
+每个流(cout/cin/clog/ifstream/ofstream)都有自己的流缓冲区(streambuf)。通过rdbuf接口可以获取当前的streambuf，也可以设置新的streambuf。
+例如我们可以修改std::cout和std::stringstream使用同一块缓冲区
+#include <stdio.h>
+#include <iostream>
+#include <sstream>
+
+int main() {
+    std::stringstream ss;
+    std::streambuf* cout_buf = std::cout.rdbuf();
+    std::cout.rdbuf(ss.rdbuf());
+    //使用了新的缓冲区后，字符串不会输出到屏幕，而是由stringstream管理
+    std::cout << "std::cout hello world";
+    //printf std::cout hello world
+    printf("printf %s\n", ss.str().c_str());
+    std::cout.rdbuf(cout_buf);
+    return 0;
+}
+
+不得不说streambuf的接口命名上太简化了，从这三个指针函数的命名上可见一般。
+    pbase(): put base，输出缓冲流的首指针。
+    pptr(): put pointer，当前可写位置
+    epptr(): end put pointer，输出缓冲流的尾指针+1，即one past the last character。
+
+ 当pptr != epptr时，数据默认行为是顺序更新到缓冲区，直到pptr == epptr，表示当前缓冲区已满(overflow)，此时会调用overflow方法。
+ 这是一个虚函数接口，在这个函数里我们更新到外部设备并且重置缓冲区可用即可

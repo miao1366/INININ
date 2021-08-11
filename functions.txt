@@ -2756,4 +2756,8 @@ pthread_detach(thread_id)（非阻塞，可立即返回）
     返回值：成功则返回实际传送出去的字符数, 失败返回－1, 错误原因存于errno 中.
     int recvfrom(int s, void *buf, int len, unsigned int flags, struct sockaddr *from, int *fromlen);
 
-255. 
+255. 迭代器
+    begin() 返回一个迭代器，它指向容器c的第一个元素
+    end() 返回一个迭代器，它指向容器c的最后一个元素的下一个位置
+    rbegin() 返回一个逆序迭代器，它指向容器c的最后一个元素
+    rend() 返回一个逆序迭代器，它指向容器c的第一个元素前面的位置
