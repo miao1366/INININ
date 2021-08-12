@@ -1486,6 +1486,7 @@ LINUX的一个知识点：使用 kill -9 命令杀死程序，程序是无法主
     51studyit.com
     www.51data.org
 
+185. cat /proc/1431/maps   #查看1431进程的内存地址
 
 
 
