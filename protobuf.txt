@@ -13,3 +13,22 @@
 5.  protobuf mutable_* 函数
     从该函数的实现上来看，该函数返回指向该字段的一个指针。同时将该字段置为被设置状态。
     若该对象存在，则直接返回该对象，若不存在则新new 一个
+
+6. 序列化
+    int size = person.ByteSize();
+    void *buffer = malloc(size);
+    person.SerializeToArray(buffer, size);
+   反序列化
+    tutorial::Person person3;
+    bool ret3 = person3.ParseFromString(str3);
+
+7. ZeroCopyStream ZeroCopyOutputStream  ZeroCopyOutputStream 
+   
+   virtual bool Next(void ** data, int * size) = 0;    // 获得（分配）一个用于写入数据的 Buffer 给调用者
+   virtual void BackUp(int count) = 0;                 // 由于调用 Next 请求 stream 分配了一块 Buffer 给调用者使用 在最后一次 Next 调用时可能分配的 Buffer 大小大于需要的大小
+                                                       // BackUp 接口用于归还多余的内存
+   virtual int64 ByteCount() const = 0;                // 返回总的被写入的字节数
+   Next 接受两个参数 data 和 size，data 和 size 保证不为 NULL，data 用于获取 Buffer 的地址，size 用于获取 Buffer 的长度。
+   此函数被调用意在获取一个可以用来写入数据的连续的 Buffer。函数返回 false 表示调用失败。
+   BackUp 的意义在于，调用了 Next 之后获取到一块大小为 size 的 Buffer 用于写入数据，但有可能出现数据全部写入完了 Buffer 还未使用完，
+   这时候需要调用 BackUp 把未使用的内存归还

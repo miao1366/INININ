@@ -5,4 +5,24 @@
     if (sz < piece_min_size_)
         sz = piece_min_size_;
 
-3. 
+3. static const std::map<const std::string, int, CaseCmp> SogouHttpHeadersCode
+   struct CaseCmp
+{
+	bool operator()(const std::string& lhs, const std::string& rhs) const
+	{
+		return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
+	}
+};
+
+4. NewTypeResolverForDescriptorPool
+
+5. 在protobuf中存在多种类型的元数据描述类：
+    1.   FileDescriptor：对一个proto文件的描述，它包含文件名、包名、选项（如java_package、java_outer_classname等）、文件中定义的所有message、文件中定义的所有enum、文件中定义的所有service、文件中所有定义的extension、文件中定义的所有依赖文件（import）等。在FileDescriptor中还存在一个DescriptorPool实例，它保存了所有的dependencies(依赖文件的FileDescriptor)、name到GenericDescriptor的映射、字段到FieldDescriptor的映射、枚举项到EnumValueDescriptor的映射，从而可以从该DescriptorPool中查找相关的信息，因而可以通过名字从FileDescriptor中查找Message、Enum、Service、Extensions等。
+    2.   Descriptor：对一个message定义的描述，它包含该message定义的名字、所有字段、内嵌message、内嵌enum、关联的FileDescriptor等。可以使用字段名或字段号查找FieldDescriptor。
+    3.   FieldDescriptor：对一个字段或扩展字段定义的描述，它包含字段名、字段号、字段类型、字段定义(required/optional/repeated/packed)、默认值、是否是扩展字段以及和它关联的Descriptor/FileDescriptor等。
+    4.   EnumDescriptor：对一个enum定义的描述，它包含enum名、全名、和它关联的FileDescriptor。可以使用枚举项或枚举值查找EnumValueDescriptor。
+    5.   EnumValueDescriptor：对一个枚举项定义的描述，它包含枚举名、枚举值、关联的EnumDescriptor/FileDescriptor等。
+    6.   ServiceDescriptor：对一个service定义的描述，它包含service名、全名、关联的FileDescriptor等。
+    7.   MethodDescriptor：对一个在service中的method的描述，它包含method名、全名、参数类型、返回类型、关联的FileDescriptor/ServiceDescriptor等。
+
+6. 

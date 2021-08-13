@@ -117,5 +117,7 @@ camera: [
       #{ name : "right_fisheye_camera",  type : "yuyv",  device : "/dev/camera_right_fisheye",     height : 1080, width : 1920, channel : 2},
       #{ name : "left_fisheye_camera",  type : "yuyv",  device : "/dev/camera_left_fisheye",     height : 1080, width : 1920, channel : 2}
 ]
+    [12:24:54.0568][INFO][ ..aimiaomiao/work/dataCollect/speech_realtime/speech_realtime_api/cpp-realtime-asr/mini/session.cpp:304 ][139814575033792] recieve data size: 139; {"err_msg":"OK","err_no":0,"log_id":1487336673,"result":"今天心情","sn":"f8702fca-edf6-4f6c-98f2-ac3fb112efe8_ws_0","type":"MID_TEXT"}
+    g++ ./main.cpp  -I/build_env/x86/thirdparty/boost/include -L/build_env/x86/thirdparty/boost/lib -lboost_system -lcrypto
 
 13. 
