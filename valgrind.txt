@@ -1,0 +1,26 @@
+1. 利用Valgrind进行内存泄漏检查
+
+2. RunningOnValgrind()
+
+3. Valgrind包括以下工具：
+Memcheck
+Memcheck 工具主要检查下面的程序错误：
+使用未初始化的内存(Use of uninitialised memory)
+使用已经释放了的内存(Reading/writing memory after it has been free'd)
+使用超过malloc分配的内存空间(Reading/writing off the end of malloc'd blocks)
+对堆栈的非法访问(Reading/writing inappropriate areas on the stack)
+申请的空间是否有释放(Memory leaks – where pointers to malloc'd blocks are lost forever)
+malloc/free/new/delete申请和释放内存的匹配(Mismatched use of malloc/new/new [] vs free/delete/delete [])
+src和dst的重叠(Overlapping src and dst pointers in memcpy() and related functions)
+Callgrind
+Callgrind收集程序运行时的一些数据，函数调用关系等信息，还可以有选择地进行cache 模拟。在运行结束时，它会把分析数据写入一个文件。callgrind_annotate可以把这个文件的内容转化成可读的形式
+Cachegrind
+它模拟CPU中的一级缓存I1,D1和L2二级缓存，能够精确地指出程序中cache的丢失和命中。如果需要，它还能够为我们提供cache丢失次数，内存引用次数，以及每行代码，每个函数，每个模块，整个程序产生的指令数。这对优化程序有很大的帮助
+Helgrind
+它主要用来检查多线程程序中出现的竞争问题。Helgrind 寻找内存中被多个线程访问，而又没有一贯加锁的区域，这些区域往往是线程之间失去同步的地方，
+而且会导致难以发掘的错误。Helgrind实现了名为" Eraser" 的竞争检测算法，并做了进一步改进，减少了报告错误的次数
+Massif
+堆栈分析器，它能测量程序在堆栈中使用了多少内存，告诉我们堆块，堆管理块和栈的大小。Massif能帮助我们减少内存的使用，在带有虚拟内存的现代系统中，
+它还能够加速我们程序的运行，减少程序停留在交换区中的几率
+
+4. 

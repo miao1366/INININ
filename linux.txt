@@ -47,3 +47,15 @@ journalctl -xb | egrep -i 'killed process'
 
 9. SELinux是「Security-Enhanced Linux」的简称，是美国国家安全局「NSA＝The National Security Agency」 和SCC（Secure Computing Corporation）
    开发的 Linux的一个扩张强制访问控制安全模块
+
+10. Linux I/O 原理和 Zero-copy 
+    https://zhuanlan.zhihu.com/p/296207162
+
+11. There is no silver bullet
+    在欧洲中世纪的传说中，有一种叫“人狼”的妖怪，就是人面狼身。它们会讲人话，专在月圆之夜去袭击人类。而且传说中对“人狼”用一般的枪弹是不起作用的，
+    普通子弹都伤不到也打不死它，只有一种用银子作成的特殊子弹才能把它杀死。Brooks在他最著名的随笔文章《No Silver Bullet》里引用了这个典故 ，
+    说明在软件开发过程里是没有万能的终杀性武器的，只有各种方法综合运用，才是解决之道。而各种声称如何如何神奇的理论或方法，都不是能杀死“软件危机”这头人狼的银弹。
+    他当时大胆声称并预言方法学家们10年之内绝找不到什么好的的神奇银弹。他的文章发表后，被广泛引用，后来他的随笔结集成书，《人月神话》。
+    从此，在软件界，银弹（Silver Bullet）成了一个通用的比拟流行开来。1975年所出版的《人月神话》—被称为软件工程圣经。
+
+12. 

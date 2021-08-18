@@ -1,0 +1,69 @@
+1. 谈到bthread，就不得不提协程。首先要强调的一点是，bthread不是协程。一般上我们说的协程的概念是M:1线程库，多个协程跑在一个底层pthread上，
+   一个协程阻塞就会导致协程所在的pthread阻塞，进而该pthread上的其他协程都无法被调度执行。因此协程中不能执行长时间阻塞操作，只能搭配异步I/O，典型的使用场景是http server，
+   这也是golang这种对协程支持较好的语言作为web server开发语言选型越来越流行的一个因素。brpc常用于大规模在线服务的后端server，特点是任务执行时间不确定，
+   常出现少量任务延迟高的情况，在协程模型下就会导致卡住进程造成糟糕的性能表现。与协程最大的区别是，一个bthread被卡住不会影响其他bthread调度，
+   原因是bthread基于butex实现了一套同步机制，这个在后文针对butex的源码分析中会做详细解剖
+   https://blog.csdn.net/kdb_viewer/article/details/115913785?spm=1001.2014.3001.5501
+
+2. 内存顺序（Memory Order）    https://zhuanlan.zhihu.com/p/45566448
+   Memory Order
+   内存顺序描述了计算机 CPU 获取内存的顺序，内存的排序既可能发生在编译器编译期间，也可能发生在 CPU 指令执行期间。
+   为了尽可能地提高计算机资源利用率和性能，编译器会对代码进行重新排序， CPU 会对指令进行重新排序、延缓执行、各种缓存等等，以达到更好的执行效果。当然，
+   任何排序都不能违背代码本身所表达的意义，并且在单线程情况下，通常不会有任何问题。
+   但是在多线程环境下，比如无锁（lock-free）数据结构的设计中，指令的乱序执行会造成无法预测的行为。所以我们通常引入内存栅栏（Memory Barrier）
+   这一概念来解决可能存在的并发问题
+   Memory Barrier
+   内存栅栏是一个令 CPU 或编译器在内存操作上限制内存操作顺序的指令，通常意味着在 barrier 之前的指令一定在 barrier 之后的指令之前执行。
+   在 C11/C++11 中，引入了六种不同的 memory order，可以让程序员在并发编程中根据自己需求尽可能降低同步的粒度，以获得更好的程序性能。这六种 order 分别是：
+   relaxed, acquire, release, consume, acq_rel, seq_cst
+   memory_order_relaxed: 只保证当前操作的原子性，不考虑线程间的同步，其他线程可能读到新值，也可能读到旧值。比如 C++ shared_ptr 里的引用计数，我们只关心当前的应用数量，而不关心谁在引用谁在解引用。
+   memory_order_release:（可以理解为 mutex 的 unlock 操作）
+   对写入施加 release 语义（store），在代码中这条语句前面的所有读写操作都无法被重排到这个操作之后，即 store-store 不能重排为 store-store, load-store 也无法重排为 store-load
+   当前线程内的所有写操作，对于其他对这个原子变量进行 acquire 的线程可见
+   当前线程内的与这块内存有关的所有写操作，对于其他对这个原子变量进行 consume 的线程可见
+   memory_order_acquire: （可以理解为 mutex 的 lock 操作）
+对读取施加 acquire 语义（load），在代码中这条语句后面所有读写操作都无法重排到这个操作之前，即 load-store 不能重排为 store-load, load-load 也无法重排为 load-load
+在这个原子变量上施加 release 语义的操作发生之后，acquire 可以保证读到所有在 release 前发生的写入，举个例子：
+c = 0;
+thread 1:
+{
+  a = 1;
+  b.store(2, memory_order_relaxed);
+  c.store(3, memory_order_release);
+}
+thread 2:
+{
+  while (c.load(memory_order_acquire) != 3)
+    ;
+  // 以下 assert 永远不会失败
+  assert(a == 1 && b == 2);
+  assert(b.load(memory_order_relaxed) == 2);
+}
+memory_order_consume:
+对当前要读取的内存施加 release 语义（store），在代码中这条语句后面所有与这块内存有关的读写操作都无法被重排到这个操作之前
+在这个原子变量上施加 release 语义的操作发生之后，consume 可以保证读到所有在 release 前发生的并且与这块内存有关的写入，举个例子：
+a = 0;
+c = 0;
+thread 1:
+{
+  a = 1;
+  c.store(3, memory_order_release);
+}
+thread 2:
+{
+  while (c.load(memory_order_consume) != 3)
+    ;
+  assert(a == 1); // assert 可能失败也可能不失败
+}
+memory_order_acq_rel:
+对读取和写入施加 acquire-release 语义，无法被重排
+可以看见其他线程施加 release 语义的所有写入，同时自己的 release 结束后所有写入对其他施加 acquire 语义的线程可见
+memory_order_seq_cst:（顺序一致性）
+如果是读取就是 acquire 语义，如果是写入就是 release 语义，如果是读取+写入就是 acquire-release 语义
+同时会对所有使用此 memory order 的原子操作进行同步，所有线程看到的内存操作的顺序都是一样的，就像单个线程在执行所有线程的指令一样
+通常情况下，默认使用 memory_order_seq_cst，所以你如果不确定怎么这些 memory order，就用这个。
+以上就是这六种 memory_order 的简单介绍，除此之外还有些重要的概念，比如 sequence-before, happens-before 等等
+
+3. 内存池
+    从内存分配的角度来看，相对于内存池，对象池管理的是定长内存，所以无需考虑内存碎片的问题，在内存管理策略上也更加的简单。我们的系统中存在的大量对象需要频繁地创建和销毁，
+    产生了大量的耗时开销，因此需要对象池提供对象复用的方式来避免构造析构产生的开销，或者是通过对象的重置来减少创建销毁对象的开销

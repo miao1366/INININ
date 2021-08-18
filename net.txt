@@ -499,4 +499,4 @@ RTT和RTO 的关系是：由于网络波动的不确定性，每个RTT都是动�
 版权声明：本文为CSDN博主「whgtheone」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
 原文链接：https://blog.csdn.net/whgtheone/article/details/80970292
 
-14. 
+14. Websocket 通过HTTP/1.1 协议的101状态码进行握手

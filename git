@@ -190,6 +190,7 @@ git submodule update --init --recursive
 
 46. git commit --amend 
     git push origin HEAD:refs/for/nvidia_develop
+    git push origin HEAD:refs/for/collection
 
 47.  git pull = git fetch + git merge FETCH_HEAD 
      git pull --rebase =  git fetch + git rebase FETCH_HEAD 

@@ -45,3 +45,310 @@ https://blog.csdn.net/qq_37803406/article/details/103332748?utm_medium=distribut
 
 10.  linux 
     http://qiankunli.github.io/2019/04/08/interest_linux_note.html
+
+11. 高性能对象池实现  https://www.sohu.com/a/463147035_187948
+2021-04-26 20:43
+作者：jaeyang，腾讯WXG后台研发工程师
+
+|导语 内存池用于对频繁申请的内存进行管理进而提升分配效率，但缺乏对一些创建和销毁开销比较大的对象的复用手段，因此对象池应运而生。而当系统中存在大量对象需要频繁创建和销毁时，如何减少大量的耗时开销是对象池构建的关键点之一，本文以此出发，与大家共同探讨高性能对象池的实现。文章作者：杨哲，腾讯WXG后台研发工程师。
+
+一、背景
+
+内存池用于对频繁申请的内存进行管理，通过合理的分配策略和内存布局来减少内存的碎片化以及提高内存的分配效率。但是对于一些创建和销毁开销大的对象，内存池缺乏对这些对象进行复用的手段，因此出现了对象池。
+
+从内存分配的角度来看，相对于内存池，对象池管理的是定长内存，所以无需考虑内存碎片的问题，在内存管理策略上也更加的简单。我们的系统中存在的大量对象需要频繁地创建和销毁，产生了大量的耗时开销，因此需要对象池提供对象复用的方式来避免构造析构产生的开销，或者是通过对象的重置来减少创建销毁对象的开销。
+
+另一方面相对于目前的内存分配器，对象内存的管理更加简单，因此相对于现有的内存分配器在内存分配和释放的效率有一定的提升空间。
+
+二、目标
+
+对象可复用：通过复用对象来避免频繁地调用 malloc 和 free 函数，或者是减少构造析构产生的开销，从而提升性能；
+高性能：高性能是设计这个对象池最主要的目标，这里的高性能指的是内存分配和释放的开销足够低；
+线程安全：对象池可能会被多个线程同时访问，因此要保证对象池的线程安全；
+对象的容量支持动态扩展；
+优先分配使用过的对象。
+三、方案调研
+
+1. 对象池
+
+（1）brpc object pool
+
+brpc object pool 通过批量分配和归还内存以避免全局竞争，从而降低单次分配、释放的开销。brpc object pool 每个线程的分配流程如下：
+
+查看 thread-local free block 或者空闲对象数组。如果还有 free 的对象，返回。没有的话步骤2。
+尝试从全局资源池取一块空闲的空间，若取到的话回到步骤1，否则步骤3。
+从全局资源池从系统申请一大块内存，返回其中第一个对象。
+释放流程为将对象回收到 thread-local 的空闲对象数组中，攒够数量后回收到全局资源池。
+
+（2）go对象池
+
+Pool 会为每个协程维护一个本地池，本地池分为私有池 private 和共享池 shared。私有池中的元素只能本地协程使用，共享池中的元素可能会被其他协程偷走，所以使用私有池 private 时不用加锁，而使用共享池 shared 时需加锁。
+
+通过对象池获取对象时会优先查找本地 private 池，再查找本地 shared 池，最后查找其他协程的 shared 池，如果以上全部没有可用元素，最后会调用 New 函数获取新元素。详细的分配过程如下图所示：
+
+
+
+回收对象时优先把元素放在 private 池中。如果 private 不为空，则放在 shared 池中。
+
+（3）Netty recycler
+
+每个线程都拥有 thread-local 的 Stack, 在 Stack 中维护对象数组以及 WeakOrderQueue 的相关指针。对于全局资源分配机制，当本线程 thread1 回收本线程产生的对象时, 会将对象以 DefaultHandle 的形式存放在 Stack 中。其它线程 thread2 也可以回收 thread1 产生的对象，thread2 回收的对象不会立即放回 thread1 的 Stack 中，而是保存在 thread2 内部的一个 WeakOrderQueue 中。这些外部线程的 WeakOrderQueue 以链表的方式和 Stack 关联起来。
+
+默认情况下一个线程最多持有 2*核数个 WeakOrderQueue，也就是说一个线程最多可以帮 2*核数个外部线程的对象池回收对象。WeakOrderQueue 内部有以 Link 来管理对象。每个 Link 存放的对象是有限的，一个 Link 最多存放16个对象。如果满了则会再产生一个Link 继续存放。
+
+当前线程从对象池中拿对象时, 首先从 Stack中获取，若没有的话，将尝试从 cursor 指向的 WeakOrderQueue 中回收一个 Link 的对象,。如果回收到了就继续从Stack中获取对象；如果没有回收到就创建对象。一个对象池中最多存放 4K 个对象 , Link节点中每个 DefaultHandle 数组默认长度 16，这两个参数可以控制。
+
+
+
+2. 内存池
+
+虽然内存池使用的场景和对象池有区别，除了分配的速度外内存池还需要考虑内存碎片的问题，但是内存池在应对多线程访问时的减少锁竞争思路是可以借鉴的。
+
+（1）tcmalloc
+
+在 tcmalloc 中每个线程都有一个线程局部的 ThreadCache，按照对象的大小进行分类维护对象的链表。如果 ThreadCache 的对象不够了，就从 CentralCache 进行批量分配。如果 CentralCache 没有可分配的对象，就从 PageHeap 申请 Span。如果 PageHeap 没有合适的 Page，就从操作系统申请。
+
+在释放内存的时候，ThreadCache 依然遵循批量释放的策略，对象积累到一定程度就释放给 CentralCache。CentralCache 发现一个 Span 的内存完全释放了，就可以把这个 Span 归还给 PageHeap；PageHeap 发现一批连续的 Page 都释放了，就可以归还给操作系统。
+
+
+
+（2）jemalloc
+
+虚拟内存被逻辑上分割成 chunks（默认是4MB，1024个4k页），访问线程通过 round-robin 算法在第一次 malloc 的时候分配 arena，每个 arena 都是相互独立的，维护自己的 chunks， chunk 切割 pages 到 small/large 对象。free() 的内存总是返回到所属的 arena 中，而不管是哪个线程调用 free()。通过 arena 分配的时候需要对 arena bin（每个 small size-class 一个，细粒度）加锁，或 arena 本身加锁。并且线程 cache 对象也会通过垃圾回收指数退让算法返回到 arena 中。
+
+
+
+四、整体设计
+
+从上面的对内存分配系统的调研来看，在应对多线程访问时为了减少锁竞争的方式大体上一致，都是通过分区减小锁的粒度以及使用 TLS 来实现每个线程独享的资源池来避免大部分的锁竞争。所以本文中对象池在保存空闲对象时使用 freelist + TLS + 多资源池的组合，使用 freelist 可以节省指针部分的内存，而且在交换资源时只需对队头指针进行修改，速度非常快而且减少了在临界区中的耗时，缓解了公共资源池中的锁竞争。对象池的整体结构图如下：
+
+
+
+一个 Object Pool 中主要有两个部分：
+
+1. Local Pool
+
+每个访问对象池的线程都会独自拥有一个 Local Pool，使用 TLS(Thread-Local Storage) 实现，Object Pool 中使用了一个 thread_local 指针指向一个 Local Pool，访问对象池的线程与 Local Pool 直接交互，申请的对象直接从 Local Pool 中获取，释放的对象也直接归还到 Local Pool 中。
+
+Local Pool 维护一个 Block 指针和空闲队列(FreeSlots)，其中 Block 只负责分配对象，对象只会回收到空闲队列中而不会回收到 Block 中，Local Pool 中的空闲队列达到一定长度就会回收到 Global Pool 中。当 Local Pool 对象不足时就会从 Global Pool 中申请对象资源，Global Pool 会把空闲的链表或者 Block 给 Local Pool。
+
+2. Global Pool
+
+负责整体的内存资源申请。Global Pool 中维护了 BlockManager 和 FreeslotsManager 两个数据结构，其中 BlockManager 用于管理 BlockChunk，每个 BlockChunk 中包含多个 Block，如果当前 BlockChunk 耗尽，那么会 Global Pool 会 new 一个新的 BlockChunk。
+
+FreeSlotsManager 用于管理 Global Pool 中的空闲链表，如果 FreeSlots 中的空闲链表都回收自 Local Pool，当 Local Pool 中的空闲链表的长度到达 kFreeslotsSize 时，就会将该空闲链表回收到 Global Pool 的 FreeSlotsManager 中，所以 FreeSlotsManager 中每条空闲链表的长度都是 kFreeSlotsSize。
+
+Global Pool 的数量可以是多个，这个参数是可以设置的，设置多个 Global Pool 可以缓解 Global Pool 的锁竞争问题从而减少耗时，但可能会带来一定的内存膨胀，可以根据访问线程个数等因素来通过合理设置 Global Pool 的数量在速度与内存之间进行平衡。
+
+这种将对象池分离成 Local Pool 和 Global Pool 的设计有利于避免激烈的锁竞争，只有涉及到 Global Pool 与 Local Pool 的资源交换时才会出现锁竞争，大部分情况下线程只和 Local Pool 进行交互就可以完成资源的申请、释放，所以大大地提高了性能。
+
+五、实现
+
+下面是对象池中的数据结构：（设对象池中需要分配的对象为T）
+
+1. Slot
+
+unionSlot {Slot*next_ = NULL;Tval_;};
+
+Slot都是一个对象的内存单位，使用 union 的原因是：Slot 有两种状态，一种是作为分配出去的对象使用，另一种是未分配时作为空闲链表中的一个结点。
+
+2. Block
+
+structBlock{Slot slots_[kBlockSize];size_tidx_ = 0;};
+
+Local Pool 向 Global Pool 申请资源的基本单位，每个 Local Pool 中会维护一个 Block，当空闲链表用光时，对象内存从 Block 中获取。
+
+3. BlockChunk
+
+structBlockChunk{Block blocks_[kBlockChunkSize];size_tidx_ = 0;};
+
+Global Pool 申请资源的基本单位，每个 BlockChunk 中包含了 kBlockChunkSize 个 Block。
+
+4. FreeSlots
+
+structFreeSlots{Slot *head_ = NULL;size_tlength_ = 0;};
+
+空闲链表，这里维护了空闲链表的队头指针，以及目前链表的长度。
+
+5. BlockManager
+
+structBlockManager{std::vector<BlockChunk*> block_chunks_;};
+
+Global Pool 中管理 BlockChunk 的数据结构，便于最后释放整个对象池的资源。
+
+6. FreeSlotsManager
+
+structFreeSlotsManager{size_tfree_num_ = 0;std::vector<Slot*> freeslots_ptrs;};
+
+Global Pool 中管理空闲链表的数据结构，freeslots_ptrs 中的每个非空指针对应一条长度为 kFreeSlotsSize 的空闲链表。
+
+7. Local Pool
+
+LocalPool 的数据结构定义如下：主要有3个成员变量，global_pool_ 用于在要和 Global Pool 进行资源交换时调用 Global Pool 的对应接口，block_ 用于维护一块可用的 Block，作为当 Local Pool 和 Global Pool 中所有的空闲链表都消耗完时的备用内存，freeslots_ 为 Local Pool 中维护的空闲链表。
+
+class GlobalPool {GlobalPool<T>*global_pool_;Block<T>*block_;FreeSlots<T>freeslots_;}
+
+（1）分配对象流程
+
+如果 Local Pool 的 freeslots 中存在空闲对象，直接从 freeslots 中分配一个 Slot 出去；
+
+如果 Local Pool 的 freeslots 分配完了，那么从 Global Pool 的 FreeSlotsManager 中查看是否有可用的空闲链表，如果有那么分配一条空闲链表到 Local Pool 的 freeslots 中，然后从 freeslots 中分配一个 Slot 出去；
+
+如果 Global Pool 的 FreeSlotsManager 中的空闲链表分配完了，那么从 Local Pool 的 block_ 分配一个 Slot 出去；
+
+如果 Local Pool 中的 block_ 用光了，从 Global Pool 中申请一个 Block，然后从这个 Block 中分配一个 Slot 出去；
+
+如果 Global Pool 中的 Block 用光了，new 一个新的 BlockChunk，然后将其中一个 Block 分配给 Local Pool。
+T* GetObject() {// 如果freeslots还有可用空间if(freeslots_.head_ != NULL) {Slot<T> *res = freeslots_.head_;freeslots_.head_ = res->next_;freeslots_.length_--;return(T*)res;}// 如果global pool中有可用的freeslotselseif(global_pool_->PopFreeSlots(freeslots_)) {Slot<T> *res = freeslots_.head_;freeslots_.head_ = res->next_;freeslots_.length_--;return(T*)res;}// 如果local pool的block还有可用空间elseif(block_->idx_ < kBlockSize) {return(T*)&block_->slots_[block_->idx_++];}// 如果global pool还有可用的blockelseif(block_ = global_pool_->PopBlock()) {return(T*)&block_->slots_[block_->idx_++];}
+
+// 没有可用的空间returnNULL;}
+
+（2）回收对象流程
+
+所有回收的内存都是回收到 Local Pool 的 freeslots 中，回收的内存插入到空闲链表的头部，如果插入后 freeslots 的长度达到 kFreeSlotsSize，那么将这条 Local Pool 中的空闲链表回收到 Global Pool 中。
+
+voidReturnObject(T *obj){// 如果freeslots还剩最后一个slot的回收空间((Slot<T>*)obj)->next_ = freeslots_.head_;freeslots_.head_ = (Slot<T>*)obj;freeslots_.length_++;
+
+// 如果freeslots_中的长度满足条件，回收到global pool中if(freeslots_.length_ == kFreeSlotsSize) {global_pool_->PushFreeSlots(freeslots_);}}
+
+8. Global Pool
+
+GlobalPool 的数据结构定义如下：主要有4个成员变量，block_manager_ 为 BlockChunk 管理单元，freeslots_manager_ 为空闲链表，其中可以维护多条空闲链表。由于在 Global Pool 中会存在多个线程同时进行资源交换，因此需要对 block_manager_ 和 freeslots_manager_ 进行操作时需要上锁，为了减少锁的粒度分别对两个资源管理单元使用不同的锁，其中 freeslots_lck_ 对应 freeslots_manager_，block_mtx_ 对应 block_manager。
+
+classGlobalPool{BlockManager<T> block_manager_;FreeSlotsManager<T> freeslots_manager_;
+
+pthread_spinlock_tfreeslots_lck_;pthread_mutex_tblock_mtx_;}
+
+（1）Global Pool 中的资源操作
+
+从 FreeSlotsManager 中取出空闲链表，如果 freeslots_manager_ 存在可用的空闲链表，取出空闲链表给 Local Pool。
+boolPopFreeSlots(FreeSlots<T> &freeslots){pthread_spin_lock(&freeslots_lck_);// 如果Global Pool中有可用的空闲链表if(freeslots_manager_.free_num_ > 0) {freeslots.head_ = freeslots_manager_.freeslots_ptrs[--freeslots_manager_.free_num_];pthread_spin_unlock(&freeslots_lck_);// Global Pool中每条空闲链表的长度都为kFreeSlotsSizefreeslots.length_ = kFreeSlotsSize;returntrue;}pthread_spin_unlock(&freeslots_lck_);returnfalse;}
+将 LocalPool 中的空闲链表回收到 Global Pool。
+boolPushFreeSlots(FreeSlots<T> &freeslots){pthread_spin_lock(&freeslots_lck_);// 如果freeslots_manager中存储的空闲链表的指针位置不够用，增加1000个位置if(freeslots_manager_.free_num_ >= freeslots_manager_.freeslots_ptrs.size()) {freeslots_manager_.freeslots_ptrs.resize(freeslots_manager_.freeslots_ptrs.size() + 1000);}
+// 将Local Pool的空闲链表的队头指针存储到freeslots_manager中freeslots_manager_.freeslots_ptrs[freeslots_manager_.free_num_++] = freeslots.head_;pthread_spin_unlock(freeslots_lck_);// 重置Local Pool中空闲链表的信息freeslots.head_ = NULL;freeslots.length_ = 0;returntrue;}
+
+分配 Block 给 Local Pool，如果 BlockManager 中当前 BlockChunk 存在空闲的 Block，那么直接分配给 Local Pool；如果 BlockManager 中的 Block 已经用完那么申请一个新的 BlockChunk，并从 BlockChunk 中划分出 Block 给 Local Pool。
+// 申请空间bool NewBlockChunk() {BlockChunk<T> *new_block_chunk = new(std::nothrow) BlockChunk<T>;if(unlikely(new_block_chunk == NULL))returnfalse;
+block_manager_.block_chunks_.push_back(new_block_chunk);returntrue;}
+
+Block<T>* PopBlock() {pthread_mutex_lock(&block_mtx_);BlockChunk<T>* block_chunk = block_manager_.block_chunks_.back();// 如果当前BlockChunk已耗尽，申请一个新的BlockChunkif(block_chunk == NULL|| block_chunk->idx_ >= kBlockChunkSize) {if(NewBlockChunk()) {block_chunk = block_manager_.block_chunks_.back();size_t res_idx = block_chunk->idx_;block_chunk->idx_++;pthread_mutex_unlock(&block_mtx_);return&block_chunk->blocks_[res_idx];}else{pthread_mutex_unlock(&block_mtx_);returnNULL; }}// 如果有空闲的Block那么直接分配else{size_t res_idx = block_chunk->idx_;block_chunk->idx_++;pthread_mutex_unlock(&block_mtx_);return&block_chunk->blocks_[res_idx];}pthread_mutex_unlock(&block_mtx_);returnNULL;}
+
+（2）对象池释放资源流程
+
+在 Global Pool 的析构函数中，遍历 BlockChunk 数组，将所有的 BlockChunk 释放掉，这样做的优点是对象池中的资源统一管理不会出现内存泄露的问题，即便存在没有回收的对象。缺点是在整个过程中对象池所占用的内存都没有释放，如果出现分配对象数量峰值高但后面并不需要这么多对象时会出现较多的内存浪费。
+
+~GlobalPool() {pthread_spin_destroy(&freeslots_mtx_);pthread_mutex_destroy(&block_mtx_);
+
+for(inti = 0; i < block_manager_.block_chunks_.size(); i++) {deleteblock_manager_.block_chunks_[i];}}
+
+9. Object Pool
+
+在 Object Pool 中提供了访问对象池的接口，其中维护了 Global Pool 和 Local Pool，在新建 Local Pool 时使用 round-robin 算法给 Local Pool 分配对应的 Global Pool。
+
+classObjectPool{GlobalPool<T> global_pool_[kGlobalPoolNum];thread_localstaticLocalPool<T> *local_pool_;std::atomic pool_idx_;｝
+
+实现过程中涉及到的一些问题：
+
+（1）内存对齐
+
+使用 __attribute ((aligned(64)))与 cacheline 进行对齐，内存对齐可以避免 cacheline 的伪共享。伪共享是什么？现在的 CPU 一般有三级缓存，其中在 CPU 中 L1 cache 和 L2 cache 为每个核独有，L3 则所有核共享，因此产生了 cache 的一致性问题。为了解决 cache 的一致性问题，一个核在写入自己的 L1 cache 后，另一个核对在同一个 cacheline 上的变量进行访问/修改时需要根据 MESI 协议把对应的 cacheline 同步到其他核，从而保证 cache 的一致性。但是在多线程程序中有可能发生下图中的现象：被不同线程访问、修改的变量被加载到同一 cacheline 中。
+
+
+
+当多核要操作的不同变量处于同一 cacheline，其中一个核心更新缓存行中的某个变量时，这个 cacheline 会被标为失效，如果其他核心需要访问这个 cacheline 时需要从内存中重新加载，这种现象被称为伪共享。
+
+如果在伪共享的情况下对该 cacheline 上的变量频繁读写，会产生大量的 cache 同步开销。为了避免伪共享，可以通过 cacheline 填充使得该 cacheline 是专属于某个核的。在对象池中的数据结构类如 Local Pool、Global Pool 都使用了 cacheline 对齐，防止在访问这些数据时被其他的变量所影响，这是一种用空间换时间的方法。下面是对象池中对 Local Pool 和 Global Pool 进行内存对齐的例子：
+
+struct __attribute__((aligned(64))) LocalPool {GlobalPool<T>*global_pool_;Block<T>*block_;FreeSlots<T>freeslots_;};
+
+class__attribute__((aligned(64))) GlobalPool{BlockManager<T> block_manager_;FreeSlotsManager<T> freeslots_manager_;
+
+pthread_spinlock_tfreeslots_mtx_;pthread_mutex_tblock_mtx_;};
+
+由于 Local Pool 和 Global Pool 中的成员变量在对象池进行分配和释放的过程中会被频繁访问，如果不进行内存对齐有可能会发生伪共享产生较大的性能损失，因此这里通过内存对齐来避免伪共享。
+
+进行内存对齐后耗时减少约 5%。
+
+（2）锁优化
+
+锁优化的手段一般有这几种：
+
+减少锁持有的时间
+
+减少锁粒度
+除了这两种手段外当然最好就是能避开锁，thread local 的资源池就是比较典型的例子。减少锁持有的时间就是缩短临界区，尽量将可以不在临界区中进行操作的语句移到上锁的区域之外。减少锁的粒度就是一把大锁划分为多个小锁，这样就可以使得加锁的成功率得到提高，达到优化性能的目的。
+
+在实现的对象池中主要是将对 Global Pool 的锁划分为对 FreeSlotsManager 以及 BlockManager 这两把锁，但是具体用什么锁呢？这需要根据 FreeSlotsManager 和 BlockManager 中操作的临界区特点来决定，首先看下 Mutex 和 SpinLock 的区别：
+
+对 Mutex：尝试获取锁，如果可得到就占有，如果不能就进入睡眠等待，缺点是会产生 context switch 和 scheduling 开销；
+
+Spin Lock: 尝试获取锁.如果可得到就占有，如果不能持续尝试直到获取，spin lock 的 lock/unlock 性能更好(花费更少的 CPU 指令)，缺点是在获取到锁前线程不做任何事情，相当于 CPU 一直在空转，造成了算力的浪费。
+由上面的特点可知：Spin Lock 适用于临界区运行时间很短的场景，Mutex 适合运用于临界区运行时间较长的场景，对于 Global Pool 中的 FreeSlotsManager 更适合使用 Spin Lock，因为在发生资源交换时临界区操作比较轻量级，只涉及到简单整型数值的比较以及加法。而 BlockManager 部分有可能需要申请一大片内存，临界区消耗大使用 Mutex 比较合适，根据临界区耗时使用不同类型锁后耗时降低9%。
+
+（3）分支预测优化
+
+使用 __builtin_expect控制分支预测结果，__builtin_expect()是 GCC 提供给开发人员使用的一种将分支转移的信息提供给编译器的手段，这样编译器可以根据所提供的分支转移信息可以对代码进行优化，以减少指令跳转带来的性能下降。
+
+下面是 __builtin_expect的使用方法：
+
+__builtin_expect((x),1) 表示 x 的值为真的可能性更大；
+__builtin_expect((x),0) 表示 x 的值为假的可能性更大。
+因此可以在一些 if 语句中嵌入 __builtin_expect来对分支预测进行优化，如在 Global Pool 中，当 Block 用光时需要 new 一个新的 BlockChunk，分配失败的概率是非常小的，因此可以这样写：
+
+BlockChunk<T> *new_block_chunk = new(std::nothrow) BlockChunk<T>;if(unlikely(new_block_chunk == NULL))returnfalse;
+
+分支预测优化后耗时减少约2%，效果一般，原因可能是分支预测器已经做得很好了，所以手动提供分支转移的信息提升的也不多。
+
+（4）如何在复用的内存上调用对象的构造和析构函数
+
+可以结合可变模板参数、placement new、std::forward 这几个特性来实现在复用的内存上调用对象的构造和析构函数，通过可变模板参数和 std::forward 来传递参数，通过 placement new 在固定的内存上调用构造函数，析构函数直接通过指针直接调用即可，代码如下：
+
+template<class... Args>voidConstruct(T*p, Args&&... args) {new(p) T (std::forward<Args>(args)...);}
+
+voidDestory(T *p){p->~T();}
+
+template<class... Args>T* New(Args&&... args) {T *p = Allocate();Construct(p, std::forward<Args>(args)...);returnp;}
+
+voidDelete(T *p){if(p) {p->~T();Free(p);}}
+
+六、测试
+
+1. 如何证明对象的内存被有效分配了？
+
+对所分配出来的对象进行读写，最后在所有对象分配结束后验证对象的值是否发生改变。
+
+2. 如何证明对象被成功复用？
+
+先批量分配 n 个对象，然后回收这 n 个对象，检查此时的进程使用的内存使用量，下一次继续分配 n 个对象，如果此时的进程内存使用量没有改变，那么说明这些对象是成功复用的。
+
+3. 内存泄露测试
+
+使用 valgrind 工具进行内存泄露测试：
+
+valgrind--tool=memcheck --leak-check=full ./object_pool_test
+
+4. 操作开销定位
+
+使用 perf 工具进行记录，函数开销图如下：
+
+
+
+5. 耗时测试
+
+耗时测试是从内存分配效率的角度来进行测试，测试的对象是 POD，因为相同类型的对象的构造析构的成本在不同的对象池中是相同的，在测试过程中需要降低对象的构造和析构对内存分配结果的影响。耗时测试主要与 brpc obejct pool、glibc malloc/free、jemalloc 的内存分配、释放效率进行对比。
+
+测试场景：每个对象的大小为 64 Byte，使用 thread_num 个线程访问对象池，每个线程每轮分配 10w 个对象，打乱对象后进行回收，重复 50 轮。比较的对象为 glibc malloc/free, jemalloc, brpc object pool，设置的 global pool 的数量为4。
+
+下图是线程数量为 1-4 时各个分配器的耗时对比图，其中在线程的数量为(1-4)时较其他三个分配器都有较大的优势，相对于其他分配器都有超过 50% 的耗时减少。
+
+
+
+下图是访问线程数量为 1-16 时各个分配器的耗时曲线图，在线程数较多的情况下 object pool 与 jemalloc 较 glibc malloc/free 以及 brpc object pool 都有较为明显的优势，其中 object pool 相对 glibc malloc/free 耗时减少 60%，相对 brpc object pool 耗时减少 69%。object pool 在线程较少时相较于 jemalloc 有明显优势，但是随着访问的线程逐渐变多这种差距逐渐缩小了。
+
+另外还需要说明的是在 brpc 官方文档中称：brpc object pool 稳定好于 glibc malloc/free，根据实测在分配的轮次较少的情况下的确是这样的，但是在复用轮次变多时性能变差，个人认为的原因是：brpc object pool 在 thread local 的资源池的实现中，对于那些空闲的对象使用了一个指针数组来保存，在进行资源交换时使用 memcpy 来拷贝空闲对象的指针使得效率非常低，这种劣势在复用轮次变多时被放大了。
+
+在内存上相对于与 brpc object pool 的内存消耗大致在同一水平，使用 16 个线程访问对象池，每个线程分配 10w 个对象，然后进行回收，然后查看进程的 VmRSS， object pool 使用的内存为 120M，brpc object pool 使用 132M。
+
+
+12. https://blog.csdn.net/xiaofei_hah0000
+

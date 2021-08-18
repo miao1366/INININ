@@ -119,4 +119,9 @@ http://www.doc88.com/p-3167132011758.html
    ones32(33)   -> 2
    log2(33)     -> 6
 
-27 
+27 对象池
+
+28  resource_pool_inl.h    resource_pool.h    butil atomicops.h
+    https://blog.csdn.net/yockie/article/details/111425457
+
+29  https://zhuanlan.zhihu.com/p/296207162

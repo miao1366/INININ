@@ -120,4 +120,51 @@ camera: [
     [12:24:54.0568][INFO][ ..aimiaomiao/work/dataCollect/speech_realtime/speech_realtime_api/cpp-realtime-asr/mini/session.cpp:304 ][139814575033792] recieve data size: 139; {"err_msg":"OK","err_no":0,"log_id":1487336673,"result":"今天心情","sn":"f8702fca-edf6-4f6c-98f2-ac3fb112efe8_ws_0","type":"MID_TEXT"}
     g++ ./main.cpp  -I/build_env/x86/thirdparty/boost/include -L/build_env/x86/thirdparty/boost/lib -lboost_system -lcrypto
 
-13. 
+13. g++ ./main.cpp  -I/build_env/x86/thirdparty/boost/include -I/build_env/x86/thirdparty/jsoncpp/include/ -L/build_env/x86/thirdparty/boost/lib -L /build_env/x86/thirdparty/jsoncpp/lib/ -ljsoncpp -lboost_system -lcrypto -lpthread -lasound
+    cp /build_env/x86/thirdparty/jsoncpp/lib/*.so* /usr/lib/x86_64-linux-gnu/
+    cp /build_env/x86/thirdparty/boost/lib/*.so* /usr/lib/x86_64-linux-gnu/
+
+
+    /var/lib/docker/overlay2/4fca0f91c0e065be8c06c75676ea5a33eb715e20346f0c01e97d0aefa84c719e/diff/build_env/x86/thirdparty/jsoncpp/lib/libjsoncpp.so.1.9.4
+    /var/lib/docker/overlay2/4fca0f91c0e065be8c06c75676ea5a33eb715e20346f0c01e97d0aefa84c719e/diff/build_env/x86/thirdparty/jsoncpp/lib/libjsoncpp.so
+    /var/lib/docker/overlay2/4fca0f91c0e065be8c06c75676ea5a33eb715e20346f0c01e97d0aefa84c719e/diff/build_env/x86/thirdparty/jsoncpp/lib/libjsoncpp_static.a
+    /var/lib/docker/overlay2/4fca0f91c0e065be8c06c75676ea5a33eb715e20346f0c01e97d0aefa84c719e/diff/build_env/x86/thirdparty/jsoncpp/lib/libjsoncpp.so.24
+发送start 后
+[18:12:39.0954][INFO][ ..aimiaomiao/work/dataCollect/speech_realtime/speech_realtime_api/cpp-realtime-asr/mini/session.cpp:175 ][140449735073216] try to resolve: vop.baidu.com:80
+[18:12:39.1013][INFO][ ..aimiaomiao/work/dataCollect/speech_realtime/speech_realtime_api/cpp-realtime-asr/mini/session.cpp:228 ][140449735073216] URI: vop.baidu.com/realtime_asr?sn=ffdc52a9-0571-4d67-bf37-079eb9da0357
+[18:12:39.1279][INFO][ ..aimiaomiao/work/dataCollect/speech_realtime/speech_realtime_api/cpp-realtime-asr/mini/session.cpp:252 ][140449735073216] try to send START Frame :{"data":{"appid":24385874,"appkey":"Ate0I0FHPloPn8hZNGHtKE3T","cuid":"your_self_defined_user_id","dev_pid":15372,"format":"pcm","sample":16000},"type":"START"}
+[18:12:39.1280][DEBUG][ ..aimiaomiao/work/dataCollect/speech_realtime/speech_realtime_api/cpp-realtime-asr/mini/session.cpp:266 ][140449735073216] 159 writen 
+[18:12:49.1281][ERROR][ ..aimiaomiao/work/dataCollect/speech_realtime/speech_realtime_api/cpp-realtime-asr/mini/session.cpp:303 ][140449735073216] read: 1: The socket was closed due to a timeout
+[18:12:49.1285][INFO][ ..o/caimiaomiao/work/dataCollect/speech_realtime/speech_realtime_api/cpp-realtime-asr/mini/main.cpp:57 ][140449735073216] FINISHED
+
+{"data":{"appid":24385874,"appkey":"Ate0I0FHPloPn8hZNGHtKE3T","cuid":"your_self_defined_user_id","dev_pid":15372,"format":"pcm","sample":16000},"type":"START"}
+
+14. https://github.com/core1011/websocket.git
+    https://github1s.com/dhbaird/easywsclient/blob/HEAD/easywsclient.hpp
+    https://github.com/dhbaird/easywsclient
+
+    https://datatracker.ietf.org/doc/html/rfc6455#section-5.5.2
+
+15. srpc_generator [protobuf|thrift] [proto_file|thrift_file] out_dir
+    #define PARSER_ST_BLOCK_MASK			0x01
+    #define PARSER_ST_OUTSIDE_BLOCK			0x00
+    #define PARSER_ST_INSIDE_BLOCK			0x01
+    #define PARSER_ST_OUTSIDE_BLOCK_MASK	0xFFFE	
+    
+    #define PARSER_ST_COMMENT_MASK			0x10
+    #define PARSER_ST_INSIDE_COMMENT		0x10
+    #define PARSER_ST_OUTSIDE_COMMENT_MASK	0xFFFD
+    #define PARSER_ST_INSIDE_COMMENT_MASK	0xFFFF
+    https://blog.csdn.net/kdb_viewer/article/details/115913785?spm=1001.2014.3001.5501
+
+    RUN apt-get update && apt-get install -y --no-install-recommends curl apt-utils openssl ca-certificates
+    RUN apt-get update && apt-get install -y --no-install-recommends git g++ make libssl-dev libgflags-dev libprotobuf-dev libprotoc-devprotobuf-compiler libleveldb-dev libsnappy-dev && apt-get clean -y
+
+16. mkdir build && cd build && cmake -DBUILD_UNIT_TESTS=ON .. && make && make test
+
+17. 整天都在编写语音落盘功能。
+    下午六点开始看brpc对象池。
+
+18. https://zhuanlan.zhihu.com/p/69555454
+    https://zhuanlan.zhihu.com/p/296207162
+    

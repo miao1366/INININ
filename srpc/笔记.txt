@@ -25,4 +25,13 @@
     6.   ServiceDescriptor：对一个service定义的描述，它包含service名、全名、关联的FileDescriptor等。
     7.   MethodDescriptor：对一个在service中的method的描述，它包含method名、全名、参数类型、返回类型、关联的FileDescriptor/ServiceDescriptor等。
 
-6. 
+6.  
+    protocol buffer的proto文件定义的service编译后生成相应的服务接口
+    cc_generic_services = true
+    配置option xx_generic_service=true即可，其中xx表示的是不同的语言
+    // java配置这个
+    option java_generic_services = true;
+    // python 配置这个
+    option py_generic_services = true;
+    // c++ 配置这个
+    option cc_generic_services = true;
