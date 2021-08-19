@@ -157,4 +157,41 @@ http://www.doc88.com/p-3167132011758.html
 
 31. variable
 
+32. type_traits.h    build_config.h
 
+33. template <size_t ITEM_SIZE_IN,   // size of an item
+          size_t BLOCK_SIZE_IN,  // suggested size of a block
+          size_t MIN_NITEM = 1>  // minimum number of items in one block
+class SingleThreadedPool {
+public:
+    union Node {
+        Node* next;
+        char spaces[ITEM_SIZE_IN];
+    };
+    struct Block {
+        static const size_t INUSE_SIZE =
+            BLOCK_SIZE_IN - sizeof(void*) - sizeof(size_t);
+        static const size_t NITEM = (sizeof(Node) <= INUSE_SIZE ? (INUSE_SIZE / sizeof(Node)) : MIN_NITEM);
+        size_t nalloc;
+        Block* next;
+        Node nodes[NITEM];
+    };
+    static const size_t BLOCK_SIZE = sizeof(Block);
+    static const size_t NITEM = Block::NITEM;
+    static const size_t ITEM_SIZE = ITEM_SIZE_IN;
+}
+    SingleThreadedPool<sizeof(Bucket), 1024, 16> _pool;    (24, 1024, 16)
+    struct Block {
+        static const size_t INUSE_SIZE = BLOCK_SIZE_IN - sizeof(void*) - sizeof(size_t);
+                                       = 1024 - 8 - 8
+                                       = 1008
+        static const size_t NITEM = (sizeof(Node) <= INUSE_SIZE ? (INUSE_SIZE / sizeof(Node)) : MIN_NITEM);
+                                  = (24 + 8) <= 1008 ? (1008 / 32) : 16
+                                  = 31
+        size_t nalloc;
+        Block* next;
+        Node nodes[NITEM];
+    };
+    static const size_t BLOCK_SIZE = sizeof(Block);
+    static const size_t NITEM = Block::NITEM;
+    static const size_t ITEM_SIZE = ITEM_SIZE_IN;
