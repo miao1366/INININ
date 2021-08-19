@@ -1,0 +1,44 @@
+1. 
+google-gflags
+gflags是google的一个开源的处理命令行参数的库，使用c++开发，具备python接口，可以替代getopt。
+gflags使用起来比getopt方便，但是不支持参数的简写（例如getopt支持--list缩写成-l，gflags不支持）。
+1.类型
+定义gflags的宏：DEFINE_xxxxx(变量名，默认值，help-string) 定义在文件当中（使用全局）
+DEFINE_bool: boolean
+DEFINE_int32: 32-bit integer
+DEFINE_int64: 64-bit integer
+DEFINE_uint64: unsigned 64-bit integer
+DEFINE_double: double
+DEFINE_string: C++ string
+声明：DECLARE_xxxxx(变量)
+2.参数传递
+<1>在命令行指定参数，都可以使用“”引起，如果是字符串中间有空格一定得使用“”,
+前面使用“--”或者使用“-”
+--languages="chinese,        japanese,korean"
+-languages="chinese,        japanese,korean"
+-languages="chinese"
+-languages=chinese
+-languages chinese
+-languages "chinese"
+--languages=chinese
+<2>使用文件传递参数--flagfile
+--flagfile 从文件读取参数值，--flagfile=my.conf表明要从my.conf文件读取参数的值。在配置文件中指定参数值与在命令行方式类似，另外在flagfile里可进一步通过--flagfile来包含其他的文件。my.conf每一个命令参数为一行.
+<3>对于bool类型，则可通过如下几种方式指定参数
+--big_menu
+--nobig_menu
+--big_menu = true
+--big_menu = false
+<4>特殊参数
+--help 打印定义过的所有参数的帮助信息
+--version 打印版本信息 通过google::SetVersionString()指定
+--nodefok  但命令行中出现没有定义的参数时，并不退出（error - exit）
+--fromenv 从环境变量读取参数值 --fromenv=foo, bar表明要从环境变量读取foo，bar两个参数的值。通过export FLAGS_foo = xxx; export FLAGS_bar = yyy 程序就可读到foo，bar的值分别为xxx，yyy。如果想使用更通用的方法使用getenv()
+--tryfromenv 与--fromenv类似，当参数的没有在环境变量定义时，不退出（fatal - exit）
+<5>检验输入参数是否合法：gflags库支持定制自己的输入参数检查的函数，
+bool RegisterFlagValidator(const bool*  flag, bool (*validate_fn)(const char*, bool));
+bool RegisterFlagValidator(const int32* flag, bool (*validate_fn)(const char*, int32));
+bool RegisterFlagValidator(const uint32* flag, bool (*validate_fn)(const char*, uint32));
+bool RegisterFlagValidator(const int64*  flag, bool (*validate_fn)(const char*, int64));
+bool RegisterFlagValidator(const uint64*  flag, bool (*validate_fn)(const char*, uint64));
+bool RegisterFlagValidator(const double*  flag, bool (*validate_fn)(const char*, double));
+bool RegisterFlagValidator(const std::string* flag, bool (*validate_fn)(const char*, const std::string&));

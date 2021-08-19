@@ -1493,7 +1493,9 @@ LINUX的一个知识点：使用 kill -9 命令杀死程序，程序是无法主
 
 187. ldconfig 刷新动态库文件
 
+188. /proc/sys/vm/max_map_count 
 
+189. 
 
 
 

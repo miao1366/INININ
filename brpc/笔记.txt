@@ -125,3 +125,36 @@ http://www.doc88.com/p-3167132011758.html
     https://blog.csdn.net/yockie/article/details/111425457
 
 29  https://zhuanlan.zhihu.com/p/296207162
+
+30 .  stack.cpp  56    int stacksize_in = 512
+      PAGESIZE       4096    1  0000  0000  0000  00
+      PAGESIZE_M1    4095       1111  1111  1111  11
+      MIN_STACKSIZE  8192   10  0000  0000  0000  00
+      MIN_GUARDSIZE  4096    1  0000  0000  0000  00
+    
+    const int stacksize = (std::max(stacksize_in, MIN_STACKSIZE) + PAGESIZE_M1) & ~PAGESIZE_M1;
+                        = (std::max(512, 8192) + 4095) & ~ 1111  1111  1111  11)
+                        = ( ) & (1 0000 0000 0000 00)  
+                        =  8192
+    
+    stack.cpp  56    int guardsize_in = 512
+    const int guardsize = (std::max(guardsize_in, MIN_GUARDSIZE) + PAGESIZE_M1) & ~PAGESIZE_M1;
+                        = (std::max(512, 4096) + 4095) & ~ (1111  1111  1111  11)
+                        = () & (1 0000 0000 0000 00)
+                        = 4096
+
+    void* aligned_mem   = (void*)(((intptr_t)mem + PAGESIZE_M1) & ~PAGESIZE_M1);
+                        = (0 + 4095) &~(1111  1111  1111  11)
+                        = 0
+
+    void* const   mem = mmap(NULL, memsize, (PROT_READ | PROT_WRITE), (MAP_PRIVATE | MAP_ANONYMOUS), -1, 0);    //memsize = 8192
+                  mem = 0x7febf413e000
+    void* aligned_mem = (void*)(((intptr_t)mem + PAGESIZE_M1) & ~PAGESIZE_M1);
+          aligned_mem = (0x7febf413e000 + 4095) $ ~(4095)
+                      = 
+                    
+    aligned_mem = ()
+
+31. variable
+
+

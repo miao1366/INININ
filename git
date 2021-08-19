@@ -262,3 +262,5 @@ git submodule update --init --recursive
 
 59 https://github1s.com/Rubik90/websocket/
    https://github.com/Rubik90/websocket/
+
+60. ssh-keygen -t rsa -C "账户地址" 
