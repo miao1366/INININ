@@ -199,4 +199,23 @@ public:
 34. __gnu_cxx::hash<K>
 
 35. std::equal_to
-     
+    thread_local.h  thread_local.cpp  flat_map.h
+    std::find()
+    template <class InputIterator, class T> InputIterator find (InputIterator first, InputIterator last, const T& val);
+    std::vector<>
+    iterator erase (const_iterator position);
+    iterator erase (const_iterator first, const_iterator last);
+
+    find_cstr.h
+
+36. template <typename T>    resource_pool.h
+class ResourcePoolBlockItemNum {
+    static const size_t N1 = ResourcePoolBlockMaxSize<T>::value / sizeof(T);
+    static const size_t N2 = (N1 < 1 ? 1 : N1);
+public:
+    static const size_t value = (N2 > ResourcePoolBlockMaxItem<T>::value ?
+                                 ResourcePoolBlockMaxItem<T>::value : N2);
+};
+    N1 = (64 * 1024) / sizeof(T);    //sizeof(T) = 32
+    N2 = (N1 < 1 ? 1 : N1) = 2048
+    value = (N2 > 256 ? 256: 2048) = 256

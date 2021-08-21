@@ -230,3 +230,18 @@ vt.
 英 [spɑːs]   美 [spɑːrs]  
 adj.
 稀少的;稀疏的;零落的
+
+219. urgent
+英 [ˈɜːdʒənt]   美 [ˈɜːrdʒənt]  
+adj.
+紧急的;迫切的;紧迫的;催促的;急切的
+派生词： urgency n. urgently adv.
+
+220. concurrent
+英 [kənˈkʌrənt]   美 [kənˈkɜːrənt]  
+adj.
+同时发生的;并存的
+
+221. sched
+n.
+<口>（无线电）固定播送（或收听）时间

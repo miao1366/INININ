@@ -268,4 +268,52 @@ int main(int argc, char **argv)
 9.  原来在C++语言中的确规定了空结构体和空类所占内存大小为1，而C语言中空类和空结构体占用的大小是0（在gcc中测试为0，其他编译器不一定）。
     原来，C++语言标准中规定了这样一个原则：“no object shall have the same address in memory as any other variable”，即任何不同的对象不能拥有相同的内存地址。如果空类对象大小为0，那么此类数组中的各个对象的地址将会一致，明显违反了此原则。
 
-10. 
+10. 显示调用主动调用析构函数
+
+11. const_cast 简单地说, 修改const对象会导致未定义的行为. 因此上述代码中, 无论出现什么结果, 都是'未定义行为'的一种. 只不过刚好一个成功一个失败
+
+12. new 
+
+class Element {
+public:
+    Element(/* args */):a(0),b(0){}
+    ~Element(){}
+    int a;
+    int b;
+};
+class Bucket {
+public:
+    Bucket() {
+        new (element_space) Element();
+    }
+    Element& element() {
+        void* spaces = element_space; // Suppress strict-aliasing
+        return *reinterpret_cast<Element*>(spaces);
+    }
+private:
+    char element_space[sizeof(Element)];
+};
+
+int main(void) {
+    Bucket b;
+    b.element().a = 1;
+    return 0;
+}
+
+13.     std::string* temp_string = (std::string*)temp->buf;
+        temp_string->~basic_string();
+
+14.  <cdefs.h>
+#ifdef	__cplusplus
+# define __BEGIN_DECLS	extern "C" {
+# define __END_DECLS	}
+#else
+# define __BEGIN_DECLS
+# define __END_DECLS
+#endif
+
+15. GCC 原子操作中 Acquire/Release/Consume/Relaxed 内存模型
+
+16. c++函数重载可以重载 int int64_t char等等多种重载。
+
+17. 
