@@ -42,3 +42,9 @@ bool RegisterFlagValidator(const int64*  flag, bool (*validate_fn)(const char*, 
 bool RegisterFlagValidator(const uint64*  flag, bool (*validate_fn)(const char*, uint64));
 bool RegisterFlagValidator(const double*  flag, bool (*validate_fn)(const char*, double));
 bool RegisterFlagValidator(const std::string* flag, bool (*validate_fn)(const char*, const std::string&));
+
+3. DEFINE_bool  DEFINE_int32 DEFINE_int64 这些定义变量应该最后应该是通过引用来改变这些变量的值。
+
+4. #include <gflags/gflags_declare.h>    DECLARE_bool(quote_vector);
+
+5. 

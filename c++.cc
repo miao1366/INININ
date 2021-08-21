@@ -316,4 +316,51 @@ int main(void) {
 
 16. c++函数重载可以重载 int int64_t char等等多种重载。
 
-17. 
+17. 区域锁(Scoped locking) std::lock_guard<std::mutex> lck(mtx);
+    RAII(Resource Acquisition Is Initialization)翻译成中文叫“资源获取即初始化”
+
+18. 函数模板
+#include <iostream>
+using namespace std;
+template <typename T1, typename T2, typename T3>
+T1 add(T2 a, T3 b) {
+    T1 ret;
+    ret = static_cast<T1>(a + b);
+    return ret; 
+}
+void main() {
+    int c = 12;
+    float d = 23.4;
+    //cout << add(c, d) << endl;	//error，无法自动推导函数返回值
+    cout << add<float>(c, d) << endl;	//返回值在第一个类型参数中指定
+    cout << add<int, int, float>(c, d) << endl;
+    system("pause");
+}
+
+19. std::remove_reference    std::boolalpha    //引用移除
+#include <iostream> // std::cout
+#include <type_traits> // std::is_same
+template<class T1, class T2>
+void print_is_same() {
+    std::cout << std::is_same<T1, T2>() << '\n';
+}
+int main() {
+  std::cout << std::boolalpha;
+  print_is_same<int, int>();
+  print_is_same<int, int &>();
+  print_is_same<int, int &&>();
+  print_is_same<int, std::remove_reference<int>::type>();
+  print_is_same<int, std::remove_reference<int &>::type>();
+  print_is_same<int, std::remove_reference<int &&>::type>();
+}
+Output:
+true false false true true true
+引用折叠规则
+  A& & 折叠成 A&
+  A& && 折叠成 A&
+  A&& & 折叠成 A&
+  A&& && 折叠成 A&&
+
+20. 这里有个有意思的地方，就是如果T是POD类型，new T()和 new T是不同的，例如，new int()和new int是不同的，前者值是0，后者未初始化
+
+21. 

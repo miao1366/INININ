@@ -219,3 +219,10 @@ public:
     N1 = (64 * 1024) / sizeof(T);    //sizeof(T) = 32
     N2 = (N1 < 1 ? 1 : N1) = 2048
     value = (N2 > 256 ? 256: 2048) = 256
+
+std::lock_guard<std::mutex> lck(mtx)
+
+37. scoped_lock.h
+    #define BAIDU_SCOPED_LOCK(ref_of_lock)                                  \
+    decltype(::butil::detail::get_lock_guard<decltype(ref_of_lock)>()) \
+    BAIDU_CONCAT(scoped_locker_dummy_at_line_, __LINE__)(ref_of_lock)
