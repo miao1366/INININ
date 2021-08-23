@@ -226,3 +226,40 @@ std::lock_guard<std::mutex> lck(mtx)
     #define BAIDU_SCOPED_LOCK(ref_of_lock)                                  \
     decltype(::butil::detail::get_lock_guard<decltype(ref_of_lock)>()) \
     BAIDU_CONCAT(scoped_locker_dummy_at_line_, __LINE__)(ref_of_lock)
+
+38. const T& operator[](int index) const { return _data[index]; }
+
+39. inline ostream& operator<<(ostream &os, const ::bvar::Variable &var) {
+    var.describe(os, false);
+    return os;
+}
+
+40. variable    //variable.cpp 
+英 [ˈveəriəbl]   美 [ˈveriəbl]  
+n.
+变量;可变情况;可变因素
+adj.
+可变的;多变的;易变的;变化无常的;可更改的
+复数： variables
+派生词： variably adv.
+
+41. pthread_mutexattr_init() pthread_mutexattr_settype()    //设置锁的属性
+
+    pthread_mutex_t mutex;
+    pthread_mutexattr_t attr;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&mutex, &attr);
+    pthread_mutexattr_destroy(&attr);
+
+PTHREAD_MUTEX_TIMED_NP，这是缺省值，也就是普通锁。当一个线程加锁以后，其余请求锁的线程将形成一个等待队列，并在解锁后按优先级获得锁。这种锁策略保证了资源分配的公平性。
+PTHREAD_MUTEX_RECURSIVE_NP，嵌套锁，允许同一个线程对同一个锁成功获得多次，并通过多次unlock解锁。如果是不同线程请求，则在加锁线程解锁时重新竞争。
+PTHREAD_MUTEX_ERRORCHECK_NP，检错锁，如果同一个线程请求同一个锁，则返回EDEADLK，否则与PTHREAD_MUTEX_TIMED_NP类型动作相同。这样保证当不允许多次加锁时不出现最简单情况下的死锁。
+PTHREAD_MUTEX_ADAPTIVE_NP，适应锁，动作最简单的锁类型，仅等待解锁后重新竞争。
+
+42. string_splitter.h
+    bvar是Brpc使用的多线程环境下的计数器类库，作为一个完善的rpc框架，在实际生产环境中统计诸如qps、连接数等各种数值是必须的，也是服务监控的很重要的一部分，但在多线程环境下，
+    计数器被多线程访问，容易出现cache bouncing影响性能，bvar最核心的思想就是利用thread local变量来减少cache bouncing，本质上是将写的竞争转移到了读，
+    但在诸如监控这种场景下，通常读是远远小于写的，因此这种转移的正向效果是显著的。
+
+43. call_op_returning_void.h

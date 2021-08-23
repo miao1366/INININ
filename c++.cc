@@ -314,7 +314,7 @@ int main(void) {
 
 15. GCC 原子操作中 Acquire/Release/Consume/Relaxed 内存模型
 
-16. c++函数重载可以重载 int int64_t char等等多种重载。
+16. c++函数重载可以重载 int int64_t char等等多种重载。  void *也能重载。
 
 17. 区域锁(Scoped locking) std::lock_guard<std::mutex> lck(mtx);
     RAII(Resource Acquisition Is Initialization)翻译成中文叫“资源获取即初始化”
@@ -361,6 +361,20 @@ true false false true true true
   A&& & 折叠成 A&
   A&& && 折叠成 A&&
 
-20. 这里有个有意思的地方，就是如果T是POD类型，new T()和 new T是不同的，例如，new int()和new int是不同的，前者值是0，后者未初始化
+20. 这里有个有意思的地方，就是如果T是POD类型，new T()和 new T是不同的，例如，new int()和 new int 是不同的，前者值是0，后者未初始化
 
-21. 
+21. unique_lock是个类模板，工作中，一般lock_guard(推荐使用)；lock_guard取代了mutex的lock()和unlock();
+    unique_lock比lock_guard灵活很多，效率上差一点，内存占用多一点
+
+22. 
+    通配符是一种特殊语句，主要有星号(*)和问号(?)，用来模糊搜索文件。当查找文件夹时，可以使用它来代替一个或多个真正字符；当不知道真正字符或者懒得输入完整名字时，
+    常常使用通配符代替一个或多个真正的字符。 实际上用“*Not?pad”可以对应Notepad\MyNotepad【*可以代表任何字符串；?仅代表单个字符串，但此单字必须存在】
+
+23. std::ifstream
+    C++对文件操作相关：
+    ifs.is_open()         判断文件是否打开
+    ifs.get()             获取文件的一个字符
+    ifs.good()            判断文件是否结束
+    std::ifstream::in     以只读的方式打开
+
+24. 
