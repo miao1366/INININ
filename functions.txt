@@ -2882,3 +2882,13 @@ template <class InputIterator1, class InputIterator2, class OutputIterator, clas
      fdatasync()的功能与fsync()类似，只是它只强制传送用户已写出的数据至物理存储设备，不包括文件本身的特征数据。这样可以适当减少文件刷新时的数据传送量。
      不过有的系统并不支持fdatasync()，在这种系统上，fdatasync()等价于fsync()。
 
+262. 头文件：#include <stdio.h>
+     remove()函数用于删除指定的文件，其原型如下：
+     int remove(char * filename);
+     【参数】filename为要删除的文件名，可以为一目录。如果参数filename 为一文件，则调用unlink()处理；若参数filename 为一目录，则调用rmdir()来处理。
+     【返回值】成功则返回0，失败则返回-1，错误原因存于errno。
+
+263.  #include <unistd.h>
+       int rmdir(const char *pathname);
+       RETURN VALUE
+       On success, zero is returned.  On error, -1 is returned, and errno is set appropriately.

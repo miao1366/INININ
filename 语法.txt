@@ -1273,4 +1273,9 @@ printf("%.*s\n", 1, "abc");        // 输出a
 printf("%.*s\n", 2, "abc");        // 输出ab
 printf("%.*s\n", 3, "abc");        // 输出abc >3是一样的效果 因为输出类型type = s，遇到'\0'会结束
 
-213. 
+213. uninitialized_var    变量没有初始化。
+这个宏的定义如下：
+#define uninitialized_var(x) x = x
+可以看到是将自己赋值给自己，这样就消除了没有初始化的警告
+
+214. 

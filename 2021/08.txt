@@ -186,3 +186,8 @@ camera: [
 
 20.  看brpc对象池实现
 21.  看brpc对象池实现
+
+23. /etc/bash.bashrc    增加qt安装目录
+    ～/.bashrc
+
+24. 
