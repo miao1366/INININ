@@ -56,3 +56,25 @@ gcc -Wall -Wextra -Werror
 24  __builtin_unreachable
     __builtin_unreachable的目的是帮助编译器删除死代码(程序员知道永远不会被执行)并通过让编译器知道路径是“冷”来线性化代码
     https://www.zhihu.com/question/30498481?sort=created
+
+25 __asm__ __volatile__("": : :"memory")
+   memory 强制gcc编译器假设RAM所有内存单元均被汇编指令修改，这样cpu中的registers和cache中已缓存的内存单元中的数据将作废。cpu将不得不在需要的时候重新读取内存中的数据。
+   这就阻止了cpu又将registers，cache中的数据用于去优化指令，而避免去访问内存。
+    The GCC manual says using 'asm volatile' prevents the asm instruction from being 'movedsignificantly' and adding 'memory' to the clobber 
+    list prevents GCC from keeping memory values cached in registers across the assembler instruction, but also says 'GCC will perform some 
+    optimizations across a volatile asm instruction' but doesn't explain what.
+    1）   __asm__用于指示编译器在此插入汇编语句。
+    2）  __volatile__用于告诉编译器，严禁将此处的汇编语句与其它的语句重组合优化。即：原原本本按原来的样子处理这这里的汇编。
+    3）  memory强制gcc编译器假设RAM所有内存单元均被汇编指令修改，这样cpu中的registers和cache中已缓存的内存单元中的数据将作废。cpu将不得不在需要的时候重新读取内存中的数据。
+         这就阻止了cpu又将registers，cache中的数据用于去优化指令，而避免去访问内存。
+    4）   "":::表示这是个空指令。barrier()不用在此插入一条串行化汇编指令。
+
+26. rdtsc指令返回的是自开机始CPU的周期数，返回的是一个64位的值EDX：EAX（高32在EDX，低32位在EAX）
+    unsigned int lo = 0;
+    unsigned int hi = 0;
+    // We cannot use "=A", since this would use %rax on x86_64
+    __asm__ __volatile__ (
+        "rdtsc"
+        : "=a" (lo), "=d" (hi)
+        );
+    return ((uint64_t)hi << 32) | lo;

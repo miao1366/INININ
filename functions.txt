@@ -2892,3 +2892,10 @@ template <class InputIterator1, class InputIterator2, class OutputIterator, clas
        int rmdir(const char *pathname);
        RETURN VALUE
        On success, zero is returned.  On error, -1 is returned, and errno is set appropriately.
+
+264. 函数原型：extern void *memmem(const void *haystack, size_t haystacklen, const void *needle, size_t needlelen);
+     功能：memmem - locate a
+     substring，用于在一块内存中寻找匹配另一块内存的内容的第一个位置
+     返回值：返回该位置的指针，如找不到，返回空指针
+
+265. 

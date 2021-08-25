@@ -263,3 +263,9 @@ PTHREAD_MUTEX_ADAPTIVE_NP，适应锁，动作最简单的锁类型，仅等待�
     但在诸如监控这种场景下，通常读是远远小于写的，因此这种转移的正向效果是显著的。
 
 43. call_op_returning_void.h  
+
+44. series.h    class SeriesBase{}
+    struct DivideOnAddition
+    C++11的可变模版参数（variadic templates）是C++11新增的最强大的特性之一，它对参数进行了高度泛化，它能表示0到任意个数、任意类型的参数
+
+45. const int fd = open("/proc/cpuinfo", O_RDONLY);

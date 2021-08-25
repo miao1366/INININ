@@ -190,4 +190,76 @@ camera: [
 23. /etc/bash.bashrc    增加qt安装目录
     ～/.bashrc
 
-24. 
+24.         
+path:        /media/miao/USBDisk1-1/icu30_V71C018_20210823182948/bag/V71C018_20210823145820/hibag_V71C018_default_000_20210823145822_20210823145958.bag
+version:     2.0
+duration:    01:36s (96s)
+start:       2021-08-23 14:58:21 (1629701901.900)
+end:         2021-08-23 14:59:57 (1629701997.357)
+size:        4001.07 MB (4195428569 Byte)
+messages:    165716
+compression: none [1627/1627 chunks]
+types:                                                [*]
+             haomo.hidelivery.CameraCompressDataPb    [*]
+             haomo.hidelivery.LidarScanPb             [*]
+             haomo.hidelivery.RtkInfoPb               [*]
+             haomo.hidelivery.lidarDifopPb            [*]
+             haomo.hios.BrakeInfoPb                   [*]
+             haomo.hios.ChassisStatusPb               [*]
+             haomo.hios.GearBoxInfoPb                 [*]
+             haomo.hios.LightInfoPb                   [*]
+             haomo.hios.MiscellaneousInfoPb           [*]
+             haomo.hios.MobileEyeInfoPb               [*]
+             haomo.hios.MotorInfoPb                   [*]
+             haomo.hios.ProtoFileDes                  [*]
+             haomo.hios.RadarInfoPb                   [*]
+             haomo.hios.SteeringInfoPb                [*]
+             haomo.hios.ThrottleInfoPb                [*]
+             haomo.hios.TirePressureInfoPb            [*]
+             haomo.hios.TracingMsgGroupPb             [*]
+             haomo.hios.VehicleAccelerationPb         [*]
+             haomo.hios.VehicleAngularRatesPb         [*]
+             haomo.hios.VehicleSpeedPb                [*]
+             haomo.hios.VersionInfos                  [*]
+             haomo.hios.WheelSpeedPb                  [*]
+topics:     break_rx                          9415 msgs    : haomo.hios.BrakeInfoPb                              :               513072    
+            camera_eq4_data                   4682 msgs    : haomo.hios.MobileEyeInfoPb                          :              4547011    
+            center_128_lidar_difop_data         93 msgs    : haomo.hidelivery.lidarDifopPb                       :               119691
+            center_128_lidar_scan_data         954 msgs    : haomo.hidelivery.LidarScanPb                        :            625952675    656134
+            chassis_rx                        9415 msgs    : haomo.hios.ChassisStatusPb                          :               404817
+            cr_left_data                      4708 msgs    : haomo.hios.RadarInfoPb                              :              1732900
+            cr_right_data                     4708 msgs    : haomo.hios.RadarInfoPb                              :              1582416
+            front_long_camera_record           488 msgs    : haomo.hidelivery.CameraCompressDataPb               :            535863652     1098081
+            front_middle_camera_record         493 msgs    : haomo.hidelivery.CameraCompressDataPb               :            666345648     1351618
+            front_short_camera_record          454 msgs    : haomo.hidelivery.CameraCompressDataPb               :            415110280      914339
+            gear_rx                           9415 msgs    : haomo.hios.GearBoxInfoPb                            :               442477
+            heartbeat_ping_data                 95 msgs    :                                                     :                 2090
+            left_bp_lidar_difop_data           880 msgs    : haomo.hidelivery.lidarDifopPb                       :              1133326
+            left_bp_lidar_scan_data            954 msgs    : haomo.hidelivery.LidarScanPb                        :            170369459
+            lf_wide_camera_record              477 msgs    : haomo.hidelivery.CameraCompressDataPb               :            141350284    296331
+            light_rx                          9415 msgs    : haomo.hios.LightInfoPb                              :               404817
+            lr_wide_camera_record              477 msgs    : haomo.hidelivery.CameraCompressDataPb               :            152169346    319013
+            miscell_rx                        9415 msgs    : haomo.hios.MiscellaneousInfoPb                      :               404817
+            motor_rx                          9415 msgs    : haomo.hios.MotorInfoPb                              :               593117
+            mrr_radar_data                    4708 msgs    : haomo.hios.RadarInfoPb                              :             11233379
+            proto_file_des                      95 msgs    : haomo.hios.ProtoFileDes                             :              6109070
+            rear_middle_camera_record          454 msgs    : haomo.hidelivery.CameraCompressDataPb               :            793028369     1747758
+            rf_wide_camera_record              477 msgs    : haomo.hidelivery.CameraCompressDataPb               :            221862734     465121
+            right_bp_lidar_difop_data          860 msgs    : haomo.hidelivery.lidarDifopPb                       :              1107564
+            right_bp_lidar_scan_data           954 msgs    : haomo.hidelivery.LidarScanPb                        :            170695497
+            rr_wide_camera_record              477 msgs    : haomo.hidelivery.CameraCompressDataPb               :            242594357     508583
+            rsds_left_data                    4708 msgs    : haomo.hios.RadarInfoPb                              :              1893817
+            rsds_right_data                   4708 msgs    : haomo.hios.RadarInfoPb                              :              1893817
+            rtk_data                          4769 msgs    : haomo.hidelivery.RtkInfoPb                          :               786778
+            steer_rx                          9415 msgs    : haomo.hios.SteeringInfoPb                           :               489435
+            throttle_rx                       9415 msgs    : haomo.hios.ThrottleInfoPb                           :               564670
+            tire_pressure_data                9415 msgs    : haomo.hios.TirePressureInfoPb                       :               404817
+            tracing_msg                       1553 msgs    : haomo.hios.TracingMsgGroupPb                        :              8289964
+            vehicle_angular_rates_data        9415 msgs    : haomo.hios.VehicleAngularRatesPb                    :               508382
+            vehicleaccel_rx                   9415 msgs    : haomo.hios.VehicleAccelerationPb                    :               611947
+            vehiclespeed_rx                   9415 msgs    : haomo.hios.VehicleSpeedPb                           :               490094
+            version_info                        95 msgs    : haomo.hios.VersionInfos                             :               442130
+            wheelspeed_rx                     9415 msgs    : haomo.hios.WheelSpeedPb                             :               849994
+
+
+25.
