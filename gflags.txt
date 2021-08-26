@@ -47,4 +47,9 @@ bool RegisterFlagValidator(const std::string* flag, bool (*validate_fn)(const ch
 
 4. #include <gflags/gflags_declare.h>    DECLARE_bool(quote_vector);
 
-5. 
+5. 判断flags变量是否被用户使用
+   在gflags.h中，还定义了一些平常用不到的函数和结构体。这里举一个例子，判断参数port有没有被用户设定过。
+   1 google::CommandLineFlagInfo info;
+   2 if(GetCommandLineFlagInfo("port" ,&info) && info.is_default) {
+   3     FLAGS_port = 27015;
+   4 }

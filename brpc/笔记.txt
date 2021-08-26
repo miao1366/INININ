@@ -269,3 +269,7 @@ PTHREAD_MUTEX_ADAPTIVE_NP，适应锁，动作最简单的锁类型，仅等待�
     C++11的可变模版参数（variadic templates）是C++11新增的最强大的特性之一，它对参数进行了高度泛化，它能表示0到任意个数、任意类型的参数
 
 45. const int fd = open("/proc/cpuinfo", O_RDONLY);
+
+46. try_lock_for    try_lock_until
+
+47. #ifdef  BAIDU_INTERNAL

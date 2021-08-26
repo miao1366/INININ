@@ -1511,6 +1511,12 @@ LINUX的一个知识点：使用 kill -9 命令杀死程序，程序是无法主
 190. readelf -w test1
      g++ -Wl,-Map=test.map -g test.cpp -o test
 
+191. .ifexists module-echo-cancel.so
+load-module module-echo-cancel aec_method=webrtc source_name=mic source_properties=device.description=MicHD
+set-default-source "mic"
+.endif
+
+
 
 
 

@@ -378,3 +378,27 @@ true false false true true true
     std::ifstream::in     以只读的方式打开
 
 24. 
+       defer_lock_t     不获得互斥的所有权
+       try_to_lock_t    尝试获得互斥的所有权而不阻塞
+       adopt_lock_t     假设调用方线程已拥有互斥的所有权
+
+25. namespace std {
+
+// Specialize lock_guard and unique_lock
+template <typename Mutex>
+class lock_guard<bvar::MutexWithRecorder<Mutex> >
+    : public ::bvar::detail::
+                LockGuardBase< ::bvar::MutexWithRecorder<Mutex> > {
+public:
+    typedef ::bvar::detail::
+            LockGuardBase<bvar::MutexWithRecorder<Mutex> > Base;
+    explicit lock_guard(::bvar::MutexWithRecorder<Mutex> &mutex) 
+        : Base(mutex)
+    {}
+};
+
+26.   try_lock
+        上锁操作，调用它所管理的 Mutex 对象的 try_lock 函数，如果上锁成功，则返回 true，否则返回 false
+      try_lock_for
+      
+      try_lock_until
