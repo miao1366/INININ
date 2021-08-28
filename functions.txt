@@ -2898,4 +2898,7 @@ template <class InputIterator1, class InputIterator2, class OutputIterator, clas
      substring，用于在一块内存中寻找匹配另一块内存的内容的第一个位置
      返回值：返回该位置的指针，如找不到，返回空指针
 
-265. 
+265. 自旋锁    spin_lock    
+     spin的开销对系统来说太大, 一直在请求锁
+
+266. 

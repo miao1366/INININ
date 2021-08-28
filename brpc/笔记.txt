@@ -273,3 +273,23 @@ PTHREAD_MUTEX_ADAPTIVE_NP，适应锁，动作最简单的锁类型，仅等待�
 46. try_lock_for    try_lock_until
 
 47. #ifdef  BAIDU_INTERNAL
+
+48.     
+    union Node {
+        Node* next;
+        char spaces[ITEM_SIZE_IN];
+    };
+
+49. inline size_t flatmap_round(size_t nbucket);
+
+50. bit_array.h
+
+51. element().value_ref();
+
+52.     
+        // ++ it
+    FlatMapIterator& operator++();
+        // it ++
+    FlatMapIterator operator++(int);
+
+53. 

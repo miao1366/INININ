@@ -1,0 +1,21 @@
+1. 高效位运算 __builtin_系列函数
+int main() {
+    unsigned int a = 0B00010010;
+    printf("%ld\n", sizeof(a));              //8 
+    // 返回x的最后一位1的是从后向前第几位
+    printf("%d\n", __builtin_ffs(a));         //2
+    // 返回前导的0的个数
+    printf("%d\n", __builtin_clz(a));         // 27
+    // 返回后面的0个个数，和__builtin_clz相对。
+    printf("%d\n", __builtin_ctz(a));         // 1
+    // 返回二进制表示中1的个数
+    printf("%d\n", __builtin_popcount(a));    //2
+    // 返回x的奇偶校验位，也就是x的1的个数模2的结果
+    printf("%d\n", __builtin_parity(a));       // 0
+    return 0;
+}
+
+2. 二进制表示方法
+    二进制：0Bxxxxx
+
+3. 

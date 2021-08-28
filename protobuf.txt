@@ -32,3 +32,11 @@
    此函数被调用意在获取一个可以用来写入数据的连续的 Buffer。函数返回 false 表示调用失败。
    BackUp 的意义在于，调用了 Next 之后获取到一块大小为 size 的 Buffer 用于写入数据，但有可能出现数据全部写入完了 Buffer 还未使用完，
    这时候需要调用 BackUp 把未使用的内存归还
+
+8.    //可以通过返回值直接给passwd对象赋值。在调用该函数之后has_passwd将返回true。
+      inline ::std::string* mutable_passwd();
+      //释放当前对象对passwd字段的所有权，同时返回passwd字段对象指针。调用此函数之后，passwd字段对象
+      //的所有权将移交给调用者。此后再调用has_passwd函数时将返回false。
+      inline ::std::string* release_passwd()
+
+9. 

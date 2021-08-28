@@ -211,4 +211,5 @@ __inline与inline等同。inline和__inline通知编译器将该函数的内容�
 40  WSS 是 Web Socket Secure 的简称, 它是 WebSocket 的加密版本. 我们知道 WebSocket 中的数据是不加密的, 但是不加密的数据很容易被别有用心的人窃取, 因此为了保护数据安全, 
     人们将 WebSocket 与 SSL 结合, 实现了安全的 WebSocket 通信, 即 WebSocket Secure. 所以说 WSS 是使用 SSL 进行加密了的 WebSocket 通信技术
 
-41  
+41  NUMA 全称 Non-Uniform Memory Access，译为“非一致性内存访问”。这种构架下，不同的内存器件和CPU核心从属不同的 Node，
+    每个 Node 都有自己的集成内存控制器（IMC，Integrated Memory Controller）

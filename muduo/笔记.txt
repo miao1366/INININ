@@ -328,3 +328,8 @@ THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
 
 49. https://blog.csdn.net/adkada1/article/details/54342275
     https://zhuanlan.zhihu.com/p/85101271
+
+50. mapped_type *p = &operator[](key);
+
+51. https://zhuanlan.zhihu.com/p/95514207
+    uint64_t* _thumbnail;// 用bit存放，每个下标表示桶是否有效

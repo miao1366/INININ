@@ -402,3 +402,54 @@ public:
       try_lock_for
       
       try_lock_until
+
+27. std :: fill()
+    fill()函数是算法标头的库函数，用于将值分配给容器给定范围内的所有元素，它接受指向容器中开始和结束位置的迭代器以及要分配的值给定范围内的元素，并分配值
+    std::fill(iterator start, iterator end, value);
+
+28. atomic<T>提供了常见且容易理解的方法：
+    store
+    load
+    exchange
+    compare_exchange_weak
+    compare_exchange_strong
+    store是原子写操作，而load则是对应的原子读操作。
+    exchange允许2个数值进行交换，并保证整个过程是原子的。
+
+    1. compare_exchange_weak和compare_exchange_strong则是著名的CAS（compare and set）。参数会要求在这里传入期待的数值和新的数值。
+       它们对比变量的值和期待的值是否一致，如果是，则替换为用户指定的一个新的数值。如果不是，则将变量的值和期待的值交换
+    2. weak版和strong版的区别：
+       weak版本的CAS允许偶然出乎意料的返回（比如在字段值和期待值一样的时候却返回了false），不过在一些循环算法中，这是可以接受的。通常它比起strong有更高的性能
+
+template< class T>
+struct atomic<T*>
+{
+public:
+bool compare_exchange_weak( T& expected, T desired,
+                            std::memory_order success,
+                            std::memory_order failure );
+bool compare_exchange_weak( T& expected, T desired,
+                            std::memory_order success,
+                            std::memory_order failure ) volatile;
+bool compare_exchange_weak( T& expected, T desired,
+                            std::memory_order order =
+                                std::memory_order_seq_cst );
+bool compare_exchange_weak( T& expected, T desired,
+                            std::memory_order order =
+                                std::memory_order_seq_cst ) volatile;
+bool compare_exchange_strong( T& expected, T desired,
+                              std::memory_order success,
+                              std::memory_order failure );
+bool compare_exchange_strong( T& expected, T desired,
+                              std::memory_order success,
+                              std::memory_order failure ) volatile;    
+bool compare_exchange_strong( T& expected, T desired,
+                              std::memory_order order =
+                                  std::memory_order_seq_cst );
+bool compare_exchange_strong( T& expected, T desired,
+                              std::memory_order order =
+                                  std::memory_order_seq_cst ) volatile;
+...
+}
+当前值与期望值(expect)相等时，修改当前值为设定值(desired)，返回true
+当前值与期望值(expect)不等时，将期望值(expect)修改为当前值，返回false
