@@ -1278,4 +1278,5 @@ printf("%.*s\n", 3, "abc");        // 输出abc >3是一样的效果 因为输�
 #define uninitialized_var(x) x = x
 可以看到是将自己赋值给自己，这样就消除了没有初始化的警告
 
-214. 
+214.  如果需要在一个线程内部的各个函数调用都能访问、但其它线程不能访问的变量（被称为static memory local to a thread 线程局部静态变量），
+      就需要新的机制来实现。这就是TLS。

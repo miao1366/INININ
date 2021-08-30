@@ -410,7 +410,9 @@ public:
 28. atomic<T>提供了常见且容易理解的方法：
     store
     load
-    exchange
+    exchange    T exchange (A* obj, T val) noexcept
+    exchange 会将 val 指定的值替换掉之前该原子对象封装的值，并返回之前该原子对象封装的值，整个过程是原子的(因此exchange 操作也称为 read-modify-write 操作)
+
     compare_exchange_weak
     compare_exchange_strong
     store是原子写操作，而load则是对应的原子读操作。
@@ -453,3 +455,11 @@ bool compare_exchange_strong( T& expected, T desired,
 }
 当前值与期望值(expect)相等时，修改当前值为设定值(desired)，返回true
 当前值与期望值(expect)不等时，将期望值(expect)修改为当前值，返回false
+
+29. __cxa_demangle()    //
+    C/C++语言在编译以后，函数的名字会被编译器修改，改成编译器内部的名字，这个名字会在链接的时候用到。
+    将C++源程序标识符(original C++ source identifier)转换成C++ ABI标识符(C++ ABI identifier)的过程称为mangle；相反的过程称为demangle。
+
+30. typeid
+
+31. 

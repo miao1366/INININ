@@ -1505,7 +1505,9 @@ char * __strdup(const char *s) {
    return (char *)memecpy(new,s,len);
 }
 
-197 int isalpha(int c)    检查参数c是否为英文字母
+197 int isalpha(int c)    检查参数c是否为英文字母  
+    A  65
+    a  97
     相关函数 isalnum，islower，isupper
 
 198 #include <sys/socket.h>
@@ -2901,4 +2903,16 @@ template <class InputIterator1, class InputIterator2, class OutputIterator, clas
 265. 自旋锁    spin_lock    
      spin的开销对系统来说太大, 一直在请求锁
 
-266. 
+266. std::string replace
+  /*用法一： 
+     *用str替换指定字符串从起始位置pos开始长度为len的字符 
+     *string& replace (size_t pos, size_t len, const string& str); 
+     */  
+    int main()  
+    {  
+        string line = "this@ is@ a test string!";  
+        line = line.replace(line.find("@"), 1, ""); //从第一个@位置替换第一个@为空  
+        cout << line << endl;     
+        return 0;  
+    } 
+    https://blog.csdn.net/yinhe888675/article/details/50920836

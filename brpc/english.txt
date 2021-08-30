@@ -314,3 +314,28 @@ v. （使）初始化；预置传授；（常通过特殊仪式）（使）加�
 
 237. sparse
 adj. 稀疏的；稀少的
+
+238. compatible
+adj. 兼容的；能共处的；可并立的
+
+239. namely
+adv. 也就是；即是；换句话说
+
+240. simultaneously
+adv. 同时地
+
+241. implement
+vt. 实施，执行；实现，使生效
+n. 工具，器具；手段
+
+242. restore
+vt. 恢复；修复；归还
+vi. 恢复；还原
+
+243. troublesome
+adj. 麻烦的；讨厌的；使人苦恼的
+
+244. combine
+vt. 使化合；使联合，使结合
+vi. 联合，结合；化合
+n. 联合收割机；联合企业
