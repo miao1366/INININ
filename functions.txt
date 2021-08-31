@@ -2916,3 +2916,9 @@ template <class InputIterator1, class InputIterator2, class OutputIterator, clas
         return 0;  
     } 
     https://blog.csdn.net/yinhe888675/article/details/50920836
+
+267. 
+       char *getlogin(void);
+       int getlogin_r(char *buf, size_t bufsize);
+
+268. 

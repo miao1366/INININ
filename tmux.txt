@@ -1,5 +1,5 @@
 1. ctrl + b + [ + 上下方向键 -> 上下滚动
 2. ctrl + 鼠标  来拷贝文字
 3. crtl + b  -> shift +5   左右分屏
-4. crtl + b  -> shift +5   左右分屏
+4. crtl + b  -> shift + "   左右分屏
 5. crtl + b  -> shift +[   上下屏切换

@@ -462,4 +462,6 @@ bool compare_exchange_strong( T& expected, T desired,
 
 30. typeid
 
-31. 
+31. 不同编译单元中全局变量的初始化顺序是未定义的
+
+32. 
