@@ -39,4 +39,11 @@
       //的所有权将移交给调用者。此后再调用has_passwd函数时将返回false。
       inline ::std::string* release_passwd()
 
-9. 
+9.  protobuf2和3差异
+  移除了 default 选项：
+    在 proto2 中，可以使用 default 选项为某一字段指定默认值。在 proto3 中，字段的默认值只能根据字段类型由系统决定。也就是说，
+    默认值全部是约定好的，而不再提供指定默认值的语法。在字段被设置为默认值的时候，该字段不会被序列化。这样可以节省空间，提高效率。
+    但这样就无法区分某字段是根本没赋值，还是赋值了默认值
+  消息定义时，移除了 “required”、 “optional” ：
+
+10. ShortDebugString

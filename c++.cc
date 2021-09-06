@@ -464,4 +464,14 @@ bool compare_exchange_strong( T& expected, T desired,
 
 31. 不同编译单元中全局变量的初始化顺序是未定义的
 
-32. 
+32. multiset<>
+
+33.  template< class ForwardIt >
+     ForwardIt next( ForwardIt it, typename std::iterator_traits<ForwardIt>::difference_type n = 1 );
+    it  -- 迭代指针
+    n   -- 向前进的元素个数，缺省默认为1
+Return value
+The nth successor of iterator it.（返回it的第n个后继迭代指针）
+
+34. unordered_map: unordered_map内部实现了一个哈希表（也叫散列表，通过把关键码值映射到Hash表中一个位置来访问记录，查找的时间复杂度可达到O(1)
+    其在海量数据处理中有着广泛应用）。因此，其元素的排列顺序是无序的。哈希表详细介绍

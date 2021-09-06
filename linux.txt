@@ -58,4 +58,15 @@ journalctl -xb | egrep -i 'killed process'
     他当时大胆声称并预言方法学家们10年之内绝找不到什么好的的神奇银弹。他的文章发表后，被广泛引用，后来他的随笔结集成书，《人月神话》。
     从此，在软件界，银弹（Silver Bullet）成了一个通用的比拟流行开来。1975年所出版的《人月神话》—被称为软件工程圣经。
 
-12. 
+12. /proc/stat
+    /proc/**/stat
+    /sys/class/thermal
+    /proc/**/task
+    /proc/meminfo/
+    /proc/partitions/
+    /etc/mtab
+    /proc/**/cmdline
+    /proc/**/task
+    /proc/**/task/**/comm
+
+13. 

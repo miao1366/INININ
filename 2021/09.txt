@@ -1,1 +1,25 @@
-01
+01. 上午会议+bvar
+    下午小车出产出， 测试语音标签
+
+02. 
+    下午语音标签落盘bag开发。
+
+03. 上午到奥北，了解和熟悉数据回传
+    ssh caimiaomiao@192.168.100.66    caimiaomiao
+
+06. 上午写ppt
+    下午写ppt, ICU1.5数据回传会议
+    气囊信号没有给出，需求无法实现
+    Aeblf 来在vsomeip服务
+    AEB
+    FCTB    MCU
+    关系都是或的关系
+    ModDisp
+    行驶域
+    泊车域
+    ACC
+    HWA
+    TJA
+    NOH
+    9.30 气囊解决。 
+
