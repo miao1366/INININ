@@ -1,0 +1,15 @@
+1. https://zhuanlan.zhihu.com/p/85639686
+   github.com/chenyahui/AnnotatedCode/tree/master/libco
+
+2. 如果我们不使用协程，我想处理多个连接又想用处理单个连接一样写逻辑该怎么办？有一种网络模型叫做半同步/半反应堆，
+   他就是将每一个连接分配给其中一个线程，而每个线程只处理一个连接，这样每个线程就是同步的逻辑了。但是线程是很昂贵的，
+   一个线程处理一个连接在高并发情况下是非常不合理的.
+
+3. libaco
+   s_task    // https://github.com/xhawk18/s_task
+
+4. https://blog.csdn.net/weixin_43705457/article/details/106863859
+
+5. https://blog.csdn.net/weixin_43705457/article/details/106863859
+
+6. 

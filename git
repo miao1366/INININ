@@ -264,3 +264,9 @@ git submodule update --init --recursive
    https://github.com/Rubik90/websocket/
 
 60. ssh-keygen -t rsa -C "账户地址" 
+
+61. 场景 在submodle下修改了文件。
+git stash
+git checkout develop
+git pull
+git stash pop
