@@ -293,10 +293,19 @@ void swap(vector<_Tp, _Alloc>& __x) {
   
   
 65. ssize_t pread(int fd, void *buf, size_t count, off_t offset);
-    ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset);
+    ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset);    写入地址=文件开始+offset  返回值：成功，返回写入到文件中的字节数；失败，返回-1；
 	pread简单来说就是在指定偏移offset位置开始读取count个字节，同理可推 pwrite 。;
 	pread函数相当于先后调用了lseek和read函数，但是还是有区别的，有以下两点区别：1. pread函数是原子操作，而先后调用两个函数不是原子操作;2. pread函数是不会改变当前文件偏移量的，而read和wr
-	
+    
+    就是对于对多线程读写比较有意义，不会相互影响读写文件时的offset，这也是多线程时读写文件一个头痛的问题。不过我仔细一想。
+        1. 对于pwrite来说，多个线程之间即使不影响offset但还是存在使用上的问题。
+        2. 对于pread来说是可以解决多个线程offset相互影响的问题
+
+    pwrite相当于先调用lseek接着调用write。但又不完全是这样：
+      （1）pwrite是原子操作，定位和写操作在一个原子操作中完成，期间不可中断。但分开的lseek和write中间可能被其他程序中断。
+      （2）pwrite不更改当前文件的指针，也就是说不改变当前文件偏移量。
+      （3）pwrite中的offset是一个绝对量，相对于文件开始处的绝对量，与当前文件指针位置无关
+
 66. char* getenv( const char* env_var );
     于宿主环境（操作系统）提供的环境列表搜索匹配 env_var 所指向的 C 字符串，并返回指向与匹配的列表成员关联的 C 字符串的指针。
 	
@@ -491,8 +500,33 @@ ilist3初始化为两个迭代器指定范围中元素的拷贝，范围中的�
    EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的。
    EPOLLONESHOT：只监听一次事件，当监听完这次事件之后，如果还需要继续监听这个socket的话，需要再次把这个socket加入到EPOLL队列里
    
+    EPOLLERR = 8               ----发生错误
+    EPOLLET = 2147483648       ----默认为水平触发，设置该事件后则边缘触发
+    EPOLLHUP = 16              ----挂起状态
+    EPOLLIN = 1                ----可读
+    EPOLLMSG = 1024            ----忽略
+    EPOLLONESHOT = 1073741824  ----一次性行为。在退出一个事件后，FD内部禁用
+    EPOLLOUT = 4               ----可写
+    EPOLLPRI = 2               ----紧急可读
+    EPOLLRDBAND = 128          ----读取优先
+    EPOLLRDNORM = 64           ----相当于epollin
+    EPOLLWRBAND = 512          ----写入优先
+    EPOLLWRNORM = 256          ----相当于epollout
    
    
+poll函数的事件标志符值
+         常量                       说明
+        POLLIN              普通或优先级带数据可读
+        POLLRDNORM          普通数据可读
+        POLLRDBAND          优先级带数据可读
+        POLLPRI             高优先级数据可读
+        POLLOUT             普通数据可写
+        POLLWRNORM          普通数据可写
+        POLLWRBAND          优先级带数据可写
+        POLLERR             发生错误
+        POLLHUP             发生挂起
+        POLLNVAL            描述字不是一个打开的文件
+        原文链接：https://blog.csdn.net/djinglan/article/details/8302938
    
  
  83 std::map 
@@ -2921,4 +2955,27 @@ template <class InputIterator1, class InputIterator2, class OutputIterator, clas
        char *getlogin(void);
        int getlogin_r(char *buf, size_t bufsize);
 
-268. 
+268. int poll(struct pollfd fd[], nfds_t nfds, int timeout);
+　   参数：
+　　 1）第一个参数:一个结构数组,struct pollfd结构如下：
+        struct pollfd {
+            int fd;          //文件描述符
+            short events;    //请求的事件
+            short revents;   //返回的事件
+        };
+    events和revents是通过对代表各种事件的标志进行逻辑或运算构建而成的。events包括要监视的事件，poll用已经发生的事件填充revents。poll函数通过在revents中设置标志肌肤POLLHUP、
+    POLLERR和POLLNVAL来反映相关条件的存在。不需要在events中对于这些标志符相关的比特位进行设置。如果fd小于0， 则events字段被忽略，而revents被置为0.
+    标准中没有说明如何处理文件结束。文件结束可以通过revents的标识符POLLHUN或返回0字节的常规读操作来传达。即使POLLIN或POLLRDNORM指出还有数据要读，POLLHUP也可能会被设置。
+    因此，应该在错误检验之前处理正常的读操作。
+    原文链接：https://blog.csdn.net/djinglan/article/details/8302938
+    
+    2）第二个参数nfds：要监视的描述符的数目。
+    3）最后一个参数timeout：是一个用毫秒表示的时间，是指定poll在返回前没有接收事件时应该等待的时间。如果  它的值为-1，poll就永远都不会超时。如果整数值为32个比特，
+       那么最大的超时周期大约是30分钟
+
+269.   int futex (int *uaddr, int op, int val, const struct timespec *timeout,int *uaddr2, int val3);
+       虽然参数有点长，其实常用的就是前面三个，后面的timeout大家都能理解，其他的也常被ignore。
+       uaddr就是用户态下共享内存的地址，里面存放的是一个对齐的整型计数器。
+       op存放着操作类型。定义的有5中，这里我简单的介绍一下两种，剩下的感兴趣的自己去man futex
+       FUTEX_WAIT: 原子性的检查uaddr中计数器的值是否为val,如果是则让进程休眠，直到FUTEX_WAKE或者超时(time-out)。也就是把进程挂到uaddr相对应的等待队列上去。
+       FUTEX_WAKE: 最多唤醒val个等待在uaddr上进程。

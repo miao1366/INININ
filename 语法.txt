@@ -1280,3 +1280,100 @@ printf("%.*s\n", 3, "abc");        // 输出abc >3是一样的效果 因为输�
 
 214.  如果需要在一个线程内部的各个函数调用都能访问、但其它线程不能访问的变量（被称为static memory local to a thread 线程局部静态变量），
       就需要新的机制来实现。这就是TLS。
+
+215. memory_order_relaxed 
+    只保证当前操作的原子性，不考虑线程间的同步，其他线程可能读到新值，也可能读到旧值。比如 C++ shared_ptr 里的引用计数，我们只关心当前的应用数量，
+    而不关心谁在引用谁在解引用
+
+    没有顺序一致性的要求，也就是说同一个线程的原子操作还是按照happens-before关系，但不同线程间的执行关系是任意。
+    由于Relaxed ordering 仅仅保证load()和store()是原子操作，除此之外，不提供任何跨线程的同步。
+    如果某个操作只要求是原子操作，除此之外，不需要其它同步的保障，就可以使用 Relaxed ordering。程序计数器是一种典型的应用场景：
+    
+216. 
+        PTHREAD_DESTRUCTOR_ITERATIONS     线程退出时操作系统实现试图销毁线程特定数据的最大次数    _SC_THREAD_DESTRUCTOR_ITERATIONS
+        PTHREAD_KEYS_MAX                  进程可以创建的键的最大数目                          _SC_THREAD_KEYS_MAX
+        PTHREAD_STACK_MIN                 一个线程的栈可用的最小字节数                         _SC_THREAD_STACK_MIN
+        PTHREAD_THREADS_MAX               进程可以创建的最大线程数                            _SC_THREAD_THREADS_MAX
+        原文链接：https://blog.csdn.net/yzhang6_10/article/details/51994346
+
+217. thread_local变量是C++ 11新引入的一种存储类型。它会影响变量的存储周期(Storage duration)
+     有且只有thread_local关键字修饰的变量具有线程周期(thread duration)，这些变量(或者说对象）在线程开始的时候被生成(allocated)，
+     在线程结束的时候被销毁(deallocated)。并且每 一个线程都拥有一个独立的变量实例(Each thread has its own instance of the object)。
+     thread_local 可以和static 与 extern关键字联合使用，这将影响变量的链接属性(to adjust linkage)。
+
+218. __thread是GCC内置的线程局部存储设施，存取效率可以和全局变量相比。__thread变量每一个线程有一份独立实体，各个线程的值互不干扰。
+     可以用来修饰那些带有全局性且值可能变，但是又不值得用全局变量保护的变量
+     Thread Local Storage 线程局部存储(tls)是一种机制,通过这一机制分配的变量,每个当前线程有一个该变量的实例
+
+219. futex (fast userspace mutex) 
+     是Linux的一个基础组件，可以用来构建各种更高级别的同步机制，比如锁或者信号量等等，POSIX信号量就是基于futex构建的。
+     大多数时候编写应用程序并不需要直接使用futex，一般用基于它所实现的系统库就够了
+
+  历史
+    传统的SystemV IPC(inter process communication)进程间同步机制都是通过内核对象来实现的，以 semaphore 为例，当进程间要同步的时候，必须通过系统调用semop(2)
+    进入内核进行PV操作。系统调用的缺点是开销很大，需要从user mode切换到kernel mode、保存寄存器状态、从user stack切换到kernel stack、等等，通常要消耗上百条指令。
+    事实上，有一部分系统调用是可以避免的，因为现实中很多同步操作进行的时候根本不存在竞争，即某个进程从持有semaphore直至释放semaphore的这段时间内，
+    常常没有其它进程对同一semaphore有需求，在这种情况下，内核的参与本来是不必要的，可是在传统机制下，持有semaphore必须先调用semop(2)进入内核去看看有没有人和它竞争，
+    释放semaphore也必须调用semop(2)进入内核去看看有没有人在等待同一semaphore，这些不必要的系统调用造成了大量的性能损耗。
+
+  futex设计思想
+     futex的解决思路是：在无竞争的情况下操作完全在user space进行，不需要系统调用，仅在发生竞争的时候进入内核去完成相应的处理(wait 或者 wake up)。
+     所以说，futex是一种user mode和kernel mode混合的同步机制，需要两种模式合作才能完成，futex变量必须位于user space，而不是内核对象，
+     futex的代码也分为user mode和kernel mode两部分，无竞争的情况下在user mode，发生竞争时则通过sys_futex系统调用进入kernel mode进行处理
+     futex的解决思路是：在无竞争的情况下操作完全在user space进行，不需要系统调用，仅在发生竞争的时候进入内核去完成相应的处理(wait 或者 wake up)。
+     所以说，futex是一种user mode和kernel mode混合的同步机制，需要两种模式合作才能完成，futex变量必须位于user space，而不是内核对象，
+     futex的代码也分为user mode和kernel mode两部分，无竞争的情况下在user mode，发生竞争时则通过sys_futex系统调用进入kernel mode进行处理
+    链接：https://www.jianshu.com/p/d17a6152740c
+
+220. __attribute__((always_inline))
+
+221. 理想的同步机制应该是在没有锁冲突的情况下在用户态利用原子指令就解决问题，而需要挂起等待时再使用内核提供的系统调用进行睡眠与唤醒。
+     换句话说，用户态的spinlock在trylock失败时，能不能让进程挂起，并且由持有锁的线程在unlock时将其唤醒？
+
+222. 在Unix系统中，传统的进程间同步机制都是通过对内核对象操作来完成的，这个内核对象在需要同步的进程中都是可见的，进程间的同步是通过系统调用在内核中完成。
+     这种同步方式因为涉及用户态和内核态的切换，效率比较低。而且只要使用了传统的同步机制，进入临界区时即使没有其他的进程竞争也必须切换到内核态来检查内核同步对象的状态，
+     这种不必要的切换显然带来了大量的浪费
+
+223.     extern int  __futex_wake_ex(volatile void *ftx, int pshared, int val);
+         extern int  __futex_wait_ex(volatile void *ftx, int pshared, int val, const struct timespec *timeout);
+         这两个函数比前面的多了一个参数pshared。pshared的值为true表示wake和wait操作是用于进程间的挂起和唤醒；值为false表示操作用于进程内线程的挂起和唤醒。
+         当pshared的值为false时，执行Futex系统调用的操作码为:
+         FUTEX_WAIT|FUTEX_PRIVATE_FLAG，
+         FUTEX_WAKE|FUTEX_PRIVATE_FLAG
+
+        这是linux / glibc完成的一项优化，可以在进程之间不共享futex时更快。除非在互斥锁上设置PTHREAD_PROCESS_SHARED属性，
+        否则Glibc将使用每个futex调用的_PRIVATE版本
+
+224. syscall()
+
+一般情况下，用户进程是不能访问内核的。它既不能访问内核所在的内存空间，也不能调用内核中的函数。系统调用是一个例外。其原理是：
+    (1)进程先用适当的值填充寄存器
+    (2)然后调用一个特殊的指令
+    (3)这个指令会让用户程序跳转到一个事先定义好的内核中的一个位置
+    （4）进程可以跳转到的固定的内核位置。这个过程检查系统调用号，这个号码告诉内核进程请求哪种服务。然后，它查看系统调用表(sys_call_table)找到所调用的内核函数入口地址。接着，就调用函数，等返回后，做一些系统检查，最后返回到进程。
+
+    内核提供用户空间程序与内核空间进行交互的一套标准接口，这些接口让用户态程序能受限访问硬件设备，比如申请系统资源，操作设备读写，创建新进程等。用户空间发生请求，
+    内核空间负责执行，这些接口便是用户空间和内核空间共同识别的桥梁，这里提到两个字“受限”，是由于为了保证内核稳定性，而不能让用户空间程序随意更改系统，
+    必须是内核对外开放的且满足权限的程序才能调用相应接口。
+    在用户空间和内核空间之间，有一个叫做Syscall(系统调用, system call)的中间层，是连接用户态和内核态的桥梁。这样即提高了内核的安全型，也便于移植，
+    只需实现同一套接口即可。Linux系统，用户空间通过向内核空间发出Syscall，产生软中断，从而让程序陷入内核态，执行相应的操作。对于每个系统调用都会有一个对应的系统调用号，
+    比很多操作系统要少很多。
+    安全性与稳定性：内核驻留在受保护的地址空间，用户空间程序无法直接执行内核代码，也无法访问内核数据，通过系统调用
+    性能：Linux上下文切换时间很短，以及系统调用处理过程非常精简，内核优化得好，所以性能上往往比很多其他操作系统执行要好
+
+225. ：那就是在信号处理函数中不能调用非异步安全(asynchronous-safe)的函数，localtime不是一个异步安全函数。
+
+226. 线程安全    :
+     异步信号安全 :
+     可重入      :
+异步信号安全:
+    诸如printf之类的标准库函数内部实现可能有个互斥锁，这个互斥锁是专门针对于IO缓冲区的，也就是说每个逻辑执行流要打印前(打印意味着要向缓冲区写入字符)都要获得锁，
+    然后把要打印的内容输入缓冲区，最后释放互斥锁。
+  解释:
+    由于要在打印前获取互斥锁，所以在信号处理程序中调用printf可能要出现死锁：当前逻辑执行流调用printf，正好取得锁时，信号发生了，此时执行流不得不调用信号处理函数，
+    正巧信号处理函数也要执行打印printf，同样要获取缓冲区控制锁，但是锁已经被自己先前lock了(这正是自己二次加锁死锁现象)，所以出现了死锁。
+    同样这个也可以很好的解释为什么线程调用printf不会死锁，因为即使如果一个线程正加好锁发生线程切换，新来的线程要执行printf，但是发现缓冲区已锁，自己睡眠等待即可，
+    不会出现死锁，到先前那个线程执行完打印后，自然会释放锁的。
+  原文链接：https://blog.csdn.net/qq_44947859/article/details/89737666
+
+227. 

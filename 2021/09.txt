@@ -50,4 +50,42 @@
     下午测试label 编写规则
     2. 事故定责，AEB功能激活触发的数据 P00 
 
-09. 
+10.
+    sudo echo -n dycar005 > /etc/.carid
+    sudo echo -n xALgpvJPARTUDaFlYSvfJUFNFJe2ldezcFbnWv9LTIroGUw6GQWxpcMN9bkwg5Q3 > /etc/.login_code 
+    没有这个信号方向盘接管ACC功能退出（VsmIf.VSM_DATACLCT_INFO_BUS.ACCDataClct_DriverSteerHWAExit）
+
+todo
+破损道路
+(LA_Prediction_Reason[0] != false && LH_Prediction_Reason[0]  != false) && (LH_ConFidence<0.3 ||  LA_Confidence<0.3
+确认LA_Prediction_Reason是数组还是第一位
+
+23 破损道路需要确认信号，车道线不能给出正确的信号。
+
+24 破损道路， 相机出现上下颠簸信号不确认
+
+33 新旧车道线  紫色 需求待确认
+
+34 禁停网络线
+
+35 一般障碍物
+
+40 大型货车 EQ4_OBJ_ELEM_BUS:OBJ_Object_Class 待确认
+
+41 怎么的测试方法才能满足测试场景 需要咨询振南 
+   若冰 
+   mobieye可能没有需要的数据。
+
+研发debug
+    9.13前 故障触发 代码完初版需求，回传内容无视频数据
+AI算法
+   9.10-9月15日实车测试，完成所有需求 实车测试后开始提测，回传内容无视频数据.
+
+13. 上午到公司
+
+18. MsgNode
+qq  qq  
+    qwertyuiop33   2731807785
+    miao1029081208
+
+19. 

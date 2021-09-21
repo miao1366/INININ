@@ -47,3 +47,7 @@
   消息定义时，移除了 “required”、 “optional” ：
 
 10. ShortDebugString
+
+11. parse_fromstring()
+
+12.  

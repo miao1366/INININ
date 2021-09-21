@@ -254,6 +254,15 @@ classObjectPool{GlobalPool<T> global_pool_[kGlobalPoolNum];thread_localstaticLoc
 使用 __attribute ((aligned(64)))与 cacheline 进行对齐，内存对齐可以避免 cacheline 的伪共享。伪共享是什么？现在的 CPU 一般有三级缓存，其中在 CPU 中 L1 cache 和 L2 cache 为每个核独有，L3 则所有核共享，因此产生了 cache 的一致性问题。为了解决 cache 的一致性问题，一个核在写入自己的 L1 cache 后，另一个核对在同一个 cacheline 上的变量进行访问/修改时需要根据 MESI 协议把对应的 cacheline 同步到其他核，从而保证 cache 的一致性。但是在多线程程序中有可能发生下图中的现象：被不同线程访问、修改的变量被加载到同一 cacheline 中。
 
 
+二 内存对齐
+
+1 什么是内存对齐？
+    看到的一句说明，“数据项仅仅能存储在地址是数据项大小的整数倍的内存位置上”。
+2 为什么要内存对齐？
+    （1）硬件原因，一些硬件平台必须要求内存对齐，否则抛出异常；另外涉及到不同平台的移植问题。
+    （2）性能原因，对齐后访问效率更高。
+
+内存对齐包括内存首地址对齐和成员地址对齐？
 
 当多核要操作的不同变量处于同一 cacheline，其中一个核心更新缓存行中的某个变量时，这个 cacheline 会被标为失效，如果其他核心需要访问这个 cacheline 时需要从内存中重新加载，这种现象被称为伪共享。
 

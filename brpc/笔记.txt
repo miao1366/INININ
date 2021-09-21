@@ -302,3 +302,21 @@ PTHREAD_MUTEX_ADAPTIVE_NP，适应锁，动作最简单的锁类型，仅等待�
     通过一个全局单例以遍历链表的方式来实现对所有sampler的采集。
 
 56. CombineSampler
+    if (offset >= 0) {
+        static iobuf::iov_function pwritev_func = iobuf::get_pwritev_func();
+        nw = pwritev_func(fd, vec, nvec, offset);
+    } else {
+
+57.    __BEGIN_DECLS
+       __END_DECLS
+
+58. __attribute__ const
+    该属性只能用于带有数值类型参数的函数上。当重复调用带有数值参数的函数时，由于返回值是相同的，所以此时编译器可以进行优化处理，
+    除第一次需要运算外，其它只需要返回第一次的结果就可以了，进而可以提高效率.
+
+59. murmurhash3.h  加密哈希和非加密哈希-MM是非加密哈希
+
+60. 
+    const size_t OFFSET_TABLE[] = {
+        #include "bthread/offset_inl.list"
+    };
