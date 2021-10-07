@@ -1,0 +1,4 @@
+1. 赵炯老师 <<Linux内核完全剖析>>
+   哈工大李治军老师的mooc和配套教材书《操作系统原理实现与实践》
+   https://study.163.com/instructor/3359044.htm
+2. 

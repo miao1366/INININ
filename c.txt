@@ -18,4 +18,4 @@ int main() {
 2. 二进制表示方法
     二进制：0Bxxxxx
 
-3. 
+3. NDEBUG宏是Standard C中定义的宏，专门用来控制assert()的行为。如果定义了这个宏，则assert不会起作用

@@ -503,3 +503,127 @@ The nth successor of iterator it.（返回it的第n个后继迭代指针）
     在内联函数较多的情况下，为了避免头文件过长、版面混乱，可以将所有的内联函数定义移到一个单独的文件中去，然后再 用#include指令将它包含到类声明的后面（类的头文件的底部）。
     这样的文件称为一个内联函数定义文件。inl文件中也可以包含头文件的，因为内联函数中可能包含其他文件中定义的东西。按照惯例， 应该将这个文件命名为“filename.inl”，
     其中“filename”与相应的头文件和实现文件相同
+
+40. push_heap    大顶堆
+#include <iostream>
+#include <algorithm>
+#include <vector>
+int main() {
+    std::vector<int> v { 3, 1, 4, 1, 5, 9 };
+    std::make_heap(v.begin(), v.end());
+    std::cout << "v: ";
+    for (auto i : v) std::cout << i << ' ';
+    std::cout << '\n';
+    v.push_back(6);
+    std::cout << "before push_heap: ";
+    for (auto i : v) std::cout << i << ' ';
+    std::cout << '\n';
+    std::push_heap(v.begin(), v.end());
+    std::cout << "after push_heap:  ";
+    for (auto i : v) std::cout << i << ' ';
+    std::cout << '\n';
+}
+    Output:
+        v: 9 5 4 1 1 3 
+        before push_heap: 9 5 4 1 1 3 6 
+        after push_heap:  9 5 6 1 1 3 4
+push_heap()：把元素添加在底层vector的end()处，然后重新调整堆序
+pop_heap() ：把堆顶元素取出来，放到了数组或者是vector的末尾，用原来末尾元素去替代，
+            然后end迭代器减1（后常跟vector的pop_back()操作
+
+            将第一个元素与最后一个元素互换之后,再将除最后一个元素重组织成堆
+
+41. make_heap  用于把一个可迭代容器变成一个堆，默认是大顶堆
+    pop_heap()用于将堆的第零个元素与最后一个元素交换位置，然后针对前n - 1个元素调用make_heap()函数，它也有三个参数，参数意义与make_heap()相同，第三个参数应与make_heap时的第三个参数保持一致。
+    push_heap()用于把数据插入到堆中，它也有三个参数，其意义与make_heap()的相同，第三个参数应与make_heap时的第三个参数保持一致。
+            在使用push_heap()前，请确保已经把数据通过q.push_back()传入q中，而不是在push_heap()后再使用q.push_back(t)！
+
+42. fetch_or
+    描述 (Description)
+    它以原子方式在参数和原子对象的值之间执行按位OR，并获得先前保存的值
+
+43. ctor    构造函数
+    dtor    析构函数
+
+44. posix多线程有感--自旋锁
+转自：http://www.csdn123.com/html/blogs/20130509/11141.htm
+自旋锁是SMP架构中的一种low-level的同步机制。
+    当线程A想要获取一把自旋锁而该锁又被其它线程锁持有时，线程A会在一个循环中自旋以检测锁是不是已经可用了。对于自选锁需要注意：
+    由于自旋时不释放CPU，因而持有自旋锁的线程应该尽快释放自旋锁，否则等待该自旋锁的线程会一直在那里自旋，这就会浪费CPU时间。
+    持有自旋锁的线程在sleep之前应该释放自旋锁以便其它线程可以获得自旋锁。（在内核编程中，如果持有自旋锁的代码sleep了就可能导致整个系统挂起，
+    最近刚解决了一个内核中的问题就是由于持有自旋锁时sleep了，然后导致所有的核全部挂起（是一个8核的CPU））
+    使用任何锁需要消耗系统资源（内存资源和CPU时间），这种资源消耗可以分为两类：
+
+建立锁所需要的资源
+当线程被阻塞时锁所需要的资源
+Pthreads提供的与Spin Lock锁操作相关的API主要有：
+
+1）初始化自旋锁
+int pthread_spin_init(pthread_spinlock_t *lock int pshared)  
+    On success, there functions return zero.  On failure, they return an error numbe
+用来申请使用自旋锁所需要的资源并且将它初始化为非锁定状态。pshared的取值及其含义：
+PTHREAD_PROCESS_SHARED：该自旋锁可以在多个进程中的线程之间共享。
+PTHREAD_PROCESS_PRIVATE：仅初始化本自旋锁的线程所在的进程内的线程才能够使用该自旋锁。
+
+2）获得一个自旋锁 int pthread_spin_lock(pthread_spinlock_t *lock);
+    用来获取（锁定）指定的自旋锁. 如果该自旋锁当前没有被其它线程所持有，则调用该函数的线程获得该自旋锁.
+    否则该函数在获得自旋锁之前不会返回。如果调用该函数的线程在调用该函数时已经持有了该自旋锁，则结果是不确定的。
+
+3）尝试获取一个自旋锁int pthread_spin_trylock(pthread_spinlock_t *lock);
+   会尝试获取指定的自旋锁，如果无法获取则理解返回失败。
+
+4）释放（解锁）一个自旋锁 int pthread_spin_unlock(pthread_spinlock_t *lock)
+   用于释放指定的自旋锁。
+
+5）销毁一个自旋锁int int pthread_spin_destroy(pthread_spinlock_t *lock)
+pthread_spin_destroy 用来销毁指定的自旋锁并释放所有相关联的资源（所谓的所有指的是由pthread_spin_init自动申请的资源）在调用该函数之后如果没有调用 pthread_spin_init重新初始化自旋锁，则任何尝试使用该锁的调用的结果都是未定义的。如果调用该函数时自旋锁正在被使用或者自旋锁未被初 始化则结果是未定义的。
+互斥量和自旋锁的区别：
+Pthreads提供的Mutex锁操作相关的API主要有：
+
+从实现原理上来讲，Mutex属于sleep-waiting类型的 锁。例如在一个双核的机器上有两个线程(线程A和线程B)，它们分别运行在Core0和Core1上。
+假设线程A想要通过 pthread_mutex_lock操作去得到一个临界区的锁，而此时这个锁正被线程B所持有，那么线程A就会被阻塞(blocking)，
+Core0 会在此时进行上下文切换(Context Switch)将线程A置于等待队列中，此时Core0就可以运行其他的任务(例如另一个线程C)而不必进行忙等待。而Spin lock则不然，
+它属于busy-waiting类型的锁，如果线程A是使用pthread_spin_lock操作去请求锁，那么线程A就会一直在 Core0上进行忙等待并不停的进行锁请求，直到得到这个锁为止。
+如果大家去查阅Linux glibc中对pthreads API的实现NPTL(Native POSIX Thread Library) 
+的源码的话(使用”getconf GNU_LIBPTHREAD_VERSION”命令可以得到我们系统中NPTL的版本号)，就会发现pthread_mutex_lock()操作如果 
+没有锁成功的话就会调用system_wait()的系统调用并将当前线程加入该mutex的等待队列里。而spin lock则可以理解为在一个while(1)循环中用内嵌的汇编代码实现的锁操作
+(印象中看过一篇论文介绍说在linux内核中spin lock操作只需要两条CPU指令，解锁操作只用一条指令就可以完成)。有兴趣的朋友可以参考另一个名为sanos的微内核中pthreds API的实现：mutex.c spinlock.c，尽管与NPTL中的代码实现不尽相同，但是因为它的实现非常简单易懂，对我们理解spin lock和mutex的特性还是很有帮助的。
+对于自旋锁来说，它只需要消耗很少的资源来建立锁；随后当线程被阻塞时，它就会一直重复检查看锁是否可用了，也就是说当自旋锁处于等待状态时它会一直消耗CPU时间。
+对于互斥锁来说，与自旋锁相比它需要消耗大量的系统资源来建立锁；随后当线程被阻塞时，线程的调度状态被修改，并且线程被加入等待线程队列；最后当锁可用 时
+，在获取锁之前，线程会被从等待队列取出并更改其调度状态；但是在线程被阻塞期间，它不消耗CPU资源。
+因此自旋锁和互斥锁适用于不同的场景。自旋锁适用于那些仅需要阻塞很短时间的场景，而互斥锁适用于那些可能会阻塞很长时间的场景。
+
+自旋锁与linux内核进程调度关系
+　　如果临界区可能包含引起睡眠的代码则不能使用自旋锁，否则可能引起死锁。
+　　那么为什么信号量保护的代码可以睡眠而自旋锁就不能呢？
+　　先看下自旋锁的实现方法吧，自旋锁的基本形式如下：
+　　spin_lock(&mr_lock); 　　//临界区 　　spin_unlock(&mr_lock); 　　跟踪一下spin_lock(&mr_lock)的实现 　　#define spin_lock(lock) _spin_lock(lock) 　　#define _spin_lock(lock) __LOCK(lock) 　　#define __LOCK(lock) \ 　　do { preempt_disable(); __acquire(lock); (void)(lock); } while (0)
+        注意到“preempt_disable()”，这个调用的功能是“关抢占”（在spin_unlock中会重新开启抢占功能）。从 中可以看出，使用自旋锁保护的区域是工作在非抢占的状态；即使获取不到锁，在“自旋”状态也是禁止抢占的。了解到这，我想咱们应该能够理解为何自旋锁保护 的代码不能睡眠了。试想一下，如果在自旋锁保护的代码中间睡眠，此时发生进程调度，则可能另外一个进程会再次调用spinlock保护的这段代码。而我们 现在知道了即使在获取不到锁的“自旋”状态，也是禁止抢占的，而“自旋”又是动态的，不会再睡眠了，也就是说在这个处理器上不会再有进程调度发生了，那么 死锁自然就发生了。
+
+　　咱们可以总结下自旋锁的特点：
+　　● 单处理器非抢占内核下：自旋锁会在编译时被忽略；
+　　● 单处理器抢占内核下：自旋锁仅仅当作一个设置内核抢占的开关；
+　　● 多处理器下：此时才能完全发挥出自旋锁的作用，自旋锁在内核中主要用来防止多处理器中并发访问临界区，防止内核抢占造成的竞争。
+linux抢占发生的时间
+　　最后在了解下linux抢占发生的时间，抢占分为用户抢占和内核抢占。
+　　用户抢占在以下情况下产生：
+　　● 从系统调用返回用户空间
+　　● 从中断处理程序返回用户空间
+　　内核抢占会发生在：
+　　● 当从中断处理程序返回内核空间的时候，且当时内核具有可抢占性；
+　　● 当内核代码再一次具有可抢占性的时候。（如:spin_unlock时）
+　　● 如果内核中的任务显式的调用schedule()
+　　● 如果内核中的任务阻塞。
+　　基本的进程调度就是发生在时钟中断后，并且发现进程的时间片已经使用完了，则发生进程抢占。通常我们会利用中断处理程序返回内核空间的时候可以进行内核抢占这个特性来提高一些I/O操作的实时性，
+   如：当I/O事件发生的是时候，对应的中断处理程序被激活，当它发现有进程在等待这个I/O事件的时候，它 会激活等待进程，并且设置当前正在执行进程的need_resched标志，
+   这样在中断处理程序返回的时候，调度程序被激活，原来在等待I/O事件的进程 （很可能）获得执行权，从而保证了对I/O事件的相对快速响应（毫秒级）。
+   可以看出，在I/O事件发生的时候，I/O事件的处理进程会抢占当前进程，系统 的响应速度与调度时间片的长度无关。
+
+总结：
+（1）Mutex适合对锁操作非常频繁的场景，并且具有更好的适应性。尽管相比spin lock它会花费更多的开销（主要是上下文切换），
+    但是它能适合实际开发中复杂的应用场景，在保证一定性能的前提下提供更大的灵活度。
+（2）spin lock的lock/unlock性能更好(花费更少的cpu指令)，但是它只适应用于临界区运行时间很短的场景。而在实际软件开发中，
+    除非程序员对自己的程序的锁操作行为非常的了解，否则使用spin lock不是一个好主意(通常一个多线程程序中对锁的操作有数以万次，
+    如果失败的锁操作(contended lock requests)过多的话就会浪费很多的时间进行空等待)。
+（3）更保险的方法或许是先（保守的）使用 Mutex，然后如果对性能还有进一步的需求，可以尝试使用spin lock进行调优。毕竟我们的程序不像Linux kernel
+     那样对性能需求那么高(Linux Kernel最常用的锁操作是spin lock和rw lock)。

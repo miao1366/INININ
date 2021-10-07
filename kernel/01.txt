@@ -21,3 +21,462 @@
 9.  TLB    地址转换后备缓冲区
 
 
+1. setoffof    container_of
+    https://www.cnblogs.com/yangguang-it/p/11667772.html
+
+2.  内核地址空间    用户地址空间
+
+3.  x86段页式内存管理和页表映射机制
+    页目录表
+
+                页表映射
+   虚拟地址  --------------->   物理地址
+
+                   段页式转换                 页表映射
+   (用户)逻辑地址 --------------> 线性地址 ---------------> 物理地址
+   一级页表映射
+   二级页表映射
+   三级页表映射
+   四级页表映射
+
+
+   32位线性地址中  Dir(10bit)    Table(10bit)    Offset(12bit)
+   Dir    页目录表的索引
+   Table  页表的偏移或者说是页表的索引
+
+   物理地址    物理块编号 + offset
+   CR3寄存器 
+
+4.  信号量的特点
+    1. 用于进程和进程之间的同步
+    2. 允许有多个进程进入临界区代码执行
+    3. 进程获取不到信号量锁会陷入休眠，并让出cpu
+    4. 被信号量锁保护的临界区代码允许休眠
+    5. 本质是基于进程调度器，UP和SMP下的实现无差异
+    6. 不支持进程和中断之间的同步
+
+5. linux内核是环形双向链表
+   list_add_tail() 
+   list_add_tail( struct  list_head * new ,  struct  list_head *head)  将new所代表的list_head插入head所索引的队列的尾部
+
+    static inline long __timeout_cmp(const struct __poller_node *node1, const struct __poller_node *node2) {
+        long ret = node1->timeout.tv_sec - node2->timeout.tv_sec;
+        if (ret == 0)
+        ret = node1->timeout.tv_nsec - node2->timeout.tv_nsec;
+        return ret;
+    }
+
+6. unsigned long int getauxval(unsigned long int type);
+用户空间应用程序与内核之间有许多交流机制。系统调用和伪文件系统（诸如：/proc和/sys）广为人知。信号也同样广为人知；内核利用信号通知进程的各种同步或异步事件——例子：当进程尝试写一个破碎的管道或子进程终止时。
+内核和用户空间交流还有许多复杂的机制。包括Linux专用的netlink sockets和user-mode helper功能。Netlink套接字为内核交换信息提供了一套套接字风格的API。user-mode helper功能允许内核自动调用用户空间的可执行文件；这个机制被用于许多地方，包括控制组的实现和piping core dumps to a user-space application。
+辅助向量(auxiliary vector)，一个从内核到用户空间的信息交流机制，它一直保持透明。然而，在GNU C库(glibc)2.16发布版中添加了一个新的库函数"getauxval()"，这似乎在六月底，现在它已经变得更加可见。
+历史上，许多UNIX系统实现过辅助向量功能。本质上，它是一个键值对列表，当一个新的可执行映像被加载到进程中时被内核的ELF二进制加载器（fs/binfmt_elf.c文件，在内核源码中）构造。这个列表被放在进程地址空间的特定位置；在Linux系统上它存在于用户地址空间的高位(high end)，在栈，命令行参数（argv）和环境变量（environ）的正上方（向下生长）。
+输入图片说明
+从描述和图表中我们可以看到，虽然在辅助向量在一定程度上被隐藏，对它的访问需要费点功夫。即使不使用新的库函数，一个应用程序想要访问辅助向量只需要获得挨着环境变量列表结尾的NULL指针的地址。而且，在shell级别(level)，我们可以通过设置LD_SHOW_AUXV环境变量来查明当执行一个应用程序时提供给可执行文件的辅助向量。
+$ LD_SHOW_AUXV=1 sleep 1000
+AT_SYSINFO_EHDR: 0x7fff35d0d000
+AT_HWCAP:        bfebfbff
+AT_PAGESZ:       4096
+AT_CLKTCK:       100
+AT_PHDR:         0x400040
+AT_PHENT:        56
+AT_PHNUM:        9
+AT_BASE:         0x0
+AT_FLAGS:        0x0
+AT_ENTRY:        0x40164c
+AT_UID:          1000
+AT_EUID:         1000
+AT_GID:          1000
+AT_EGID:         1000
+AT_SECURE:       0
+AT_RANDOM:       0x7fff35c2a209
+AT_EXECFN:       /usr/bin/sleep
+AT_PLATFORM:     x86_64
+在系统中每个进程的辅助向量可以通过/proc/PID/auxv文件看到。dump的文件内容与上面命令的一致（作为八字节十进制数，用于该例子的键和值的尺寸在64位系统上），我们可以看到在向量中的键值对，下面内容中键值对均为0的行表示向量的结尾：
+
+$ od -t d8 /proc/15558/auxv
+0000000                   33      140734096265216
+0000020                   16           3219913727
+0000040                    6                 4096
+0000060                   17                  100
+0000100                    3              4194368
+0000120                    4                   56
+0000140                    5                    9
+0000160                    7                    0
+0000200                    8                    0
+0000220                    9              4200012
+0000240                   11                 1000
+0000260                   12                 1000
+0000300                   13                 1000
+0000320                   14                 1000
+0000340                   23                    0
+0000360                   25      140734095335945
+0000400                   31      140734095347689
+0000420                   15      140734095335961
+0000440                    0                    0
+0000460
+扫描用户空间内存的高位或读取/proc/PID/auxv的方法从辅助向量中取值是不优雅的。新的库函数提供了从列表中取出单个值的简单机制：
+
+#include <sys/auxv.h> 
+unsigned long int getauxval(unsigned long int type);
+
+函数仅有一个参数，并返回对应的值。glibc头文件定义一个符号常量集，它们均以"AT_*"这种格式定义，将这些符号作为键传入getauxval；这些名称与执行带LD_SHOW_AUXV=1的命令时显示的字符串完全一样。
+当然，现在显而易见的问题是：什么样的信息被放在辅助向量中，和谁需要这些信息？辅助向量的主要访问者是动态链接器（ld-linux.so）。在正常的方案中，内核的ELF二进制加载器通过加载可执行文件到进程的内存构造一个进程映像，同样的加载linker到内存。此时，动态链接器(dynamic linker)准备好接管加载程序需要的动态链接库的任务，移交控制程序本身的准备工作。然而，它缺少对这些任务某些至关重要的信息：程序在虚拟地址空间中的位置，和程序执行的起始地址。
+理论上，内核可以提供一个系统调用动态链接器可以获得所需的信息。然而，这是一种低效的做事方式：内核的程序加载器已经拥有信息（因为它扫描了ELF二进制文件并构建了进程映像）并知道动态链接程序会需要它。而不是保留这个信息的记录，直到动态链接程序要求，内核可以简单的让它在进程映像的某个动态链接器已知的位置被获得。该位置当然保存的是辅助向量。
+事实证明，内核的程序加载器拥有这些信息并且是动态链接器所需要的。By placing all of this information in the auxiliary vector, the kernel either saves the programming overhead of making this information available in some other way (e.g., by implementing a dedicated system call), or saves the dynamic linker the cost of making a system call, or both.辅助向量中的值可通过getauxval()获得，下面是该函数可传入的参数：
+AT_PHDR和AT_ENTRY：这些键的值是可执行文件的ELF程序头的地址和可执行文件的入口地址。动态链接器使用这些信息执行链接并将控制权交给可执行文件。
+AT_SECURE：如果这个可执行文件应该被安全地对待，内核会给这个键分配一个非零值。这个设置可以被Linux Security Module触发，but the common reason is that the kernel recognizes that the process is executing a set-user-ID or set-group-ID program.在这种情况下，动态链接器禁用某些环境变量（就如ld-linux.so(8)手册页中的描述）并且C库改变其行为的其他方面。
+AT_UID, AT_EUID, AT_GID, 和 AT_EGID：这些是进程的真实和有效的用户ID和组ID。Making these values available in the vector saves the dynamic linker the cost of making system calls to determine the values.如果AT_SECURE值不可获得，动态链接器使用这些值来做出是否安全地处理可执行的决定。
+AT_PAGESZ：这个值是系统页尺寸。动态链接器在链接阶段需要这个信息，并且C库在malloc函数族的实现中使用它。
+AT_PLATFORM：这个值指向一个字符串，用于辨认程序运行在哪个硬件平台。在某些情况下，the dynamic linker uses this value in the interpretation of rpath values. (The ld-linux.so(8) man page describes rpath values.)
+AT_SYSINFO_EHDR：这个值指向包含有Virtual Dynamic Shared Object (VDSO)的页，这是内核创建的以提供某些系统调用的快速实现。（一些VDSO的文档可在内核源文件Documentation/ABI/stable/vdso中找到）
+AT_HWCAP：这个值指向一个多字节位掩码，设置指示详细的处理器能力。这个信息可以被用来提供某些库函数优化的行为。位掩码是硬件相关（例如：内核源码文件"arch/x86/include/asm/cpufeature.h"详细的讲述了Intel x86架构）。
+AT_RANDOM：The value is a pointer to sixteen random bytes provided by the kernel. The dynamic linker uses this to implement a stack canary.
+为什么GNU C库开发者选择添加getauxval()函数的确切的原因还有点不清楚。提交消息和新文件项的变更只是简单的说明什么改变了，而没有改变的理由
+
+7 proc文件
+/proc/[pid]/auxv 包含传递给进程的 ELF 解释器信息，格式是每一项都是一个 unsigned long长度的 ID 加上一个 unsigned long 长度的值。最后一项以连续的两个 0x00 开头
+/proc/[pid]/cmdline 是一个只读文件，包含进程的完整命令行信息。如果该进程已经被交换出内存或者这个进程是 zombie 进程，则这个文件没有任何内容。该文件以空字符 null 而不是换行符作为结束标志
+/proc/[pid]/comm 包含进程的命令名
+/proc/[pid]/cwd 是进程当前工作目录的符号链接。举例如下：
+/proc/[pid]/environ 显示进程的环境变量
+/proc/[pid]/exe 为实际运行程序的符号链接
+/proc/[pid]/fd 是一个目录，包含进程打开文件的情况
+/proc/[pid]/latency 显示哪些代码造成的延时比较大。如果要使用这个特性需要执行 echo 1 > /proc/sys/kernel/latencytop
+/proc/[pid]/maps 显示进程的内存区域映射信息
+/proc/[pid]/root 是进程根目录的符号链接
+/proc/[pid]/stack 示当前进程的内核调用栈信息，只有内核编译时打开了 CONFIG_STACKTRACE 编译选项，才会生成这个文件
+/proc/[pid]/statm 显示进程所占用内存大小的统计信息。包含七个值，度量单位是 page(page大小可通过 getconf PAGESIZE 得到
+/proc/[pid]/status 包含进程的状态信息。其很多内容与 /proc/[pid]/stat 和 /proc/[pid]/statm 相同，但是却是以一种更清晰地方式展现出来
+/proc/[pid]/syscall 显示当前进程正在执行的系统调用
+/proc/[pid]/wchan 显示当进程 sleep 时，kernel 当前运行的函数
+
+8 queue.h 
+
+9 操作系统结构
+ ——————————————
+| 用户应用程序   |
+|_____________ |
+|操作系统的服务层 |
+|syscall()     |
+|_____________ |
+| 操作系统内核   |
+|_____________ |
+| 硬件系统, 驱动 |
+|_____________ |
+
+操作系统内核: 文件系统、内存管理、进程管理、驱动管理
+
+
+操作系统的工作方式:
+    1. 把操作系统从用户态切换到内核态(用户应用程序到内核的流程)
+    2. 实现操作系统的系统调用(操作系统服务层)
+    3. 应用操作系统提供的底层函数,进行功能实现
+      3.1 操作系统的驱动结构
+    4. 退出后从内核态切换到用户态
+
+10. 操作系统内核中各级模块的相互关联
+    10.1 linux内核的整体模块:
+        进程调度模块: 进程的调用、轮换...
+        内存管理模块
+        文件系统模块
+        进程间通信模块
+        驱动管理模块
+    
+    10.2 每个模块间的关系
+        1. 内存管理和驱动管理模块    虚拟内存的缓存和回存机制
+        2. VFS虚拟文件系统
+
+11. 操作系统结构的独立性
+    管理层
+    实现层
+    易于维护和升级
+    低版本的内核 之间的区别
+    内核驱动的种类             内核驱动的管理模式并没有巨大的改变(一段时间3个阶段的跳段  零散型  分层型  设备树)
+    进程的调度算法发生了改变     进程的管理方式并没有巨大的改变
+
+12. 中断
+目的: 
+    1. 硬件的中断响应---------------------->内核驱动中的中断
+    2. 系统调用的函数响应(sy_scall)--------->系统调用
+    3. 自定义中断------------------------->软件的软中断模式
+    4. 信号中断(kill -signalnum)---------->对了解信号的使用  创建等
+    5. 系统的异常和错误-------------------->系统的异常获取  了解系统异常的作用
+
+linux的中断机制
+  硬中断:
+    X86: 由电脑主机的8259A类似的硬件中断控制芯片发出的中断
+    ARM: arm中断控制器发出的中断
+  软中断:
+    异常:
+      cpu自行保留的中断
+      系统调用异常
+  代码结构
+      asm.s                   trap.c
+      syatem_call.s           fork.c  signal.c  exit.c  sys.c
+
+中断的工作流程:
+  回忆:
+    cpu工作模式的转化
+    寄存器的拷贝与压栈
+    设置中断异常向量表
+    保存正常运行的函数返回值
+    跳转到对应的中断服务函数上运行
+    进行模式的复原以及寄存器的复原
+    跳转回正常工作的函数地址继续运行
+
+linux中断的工作流程
+    1. 将所有的寄存器值入栈
+        (8086中) SS  EFLAGS  ESP  CS  EIP    (错误码)  arm中的(r0-r15)
+    2. 将异常码入栈(中断号)
+    3. 将单前的函数返回值进行入栈
+    4. 调用对应的中断服务函数
+    5. 返回所有入栈的寄存器值
+
+                          中断前的处理过程&中断后的处理过程            中断的执行过程
+硬件中断的处理过程                asm.s                               trap.c
+软件和系统调用的处理过程         system_call.s                        fork.c  signal.c  exit.c  sys.c
+
+中断的代码实现过程
+                           中断前的处理过程&中断后的处理过程            中断的执行过程
+硬件中断的处理过程                asm.s                               trap.
+
+
+16. traps.c
+    set_trap_gate      设置的权限较高，只能由用户程序调用
+    set_system_gate    设置的权限较低，用户和系统所有的进程调用
+
+idt    中断描述表
+
+17. system_call.s
+
+代码段           代码
+数据段           全局变量
+程序状态段(tss)   存放程序状态码
+栈段             
+
+sys.h
+fn_ptr sys_call_table[]
+
+系统的进程管理
+  1. 系统的进程的运转方式
+  系统时间:(jiffies  系统滴答)
+    cpu内部有一个RTC,会在上电的时候调用mktime函数计算出从1970年1月1日0时开始道当前开机所过的秒数.给mktime函数传来的时间结构体的赋值
+    是由初始化时RTC(或者coms)中读出的参数，这个参数值会转化为时间存入全局变量中，并且会为jiffies所用.
+    jiffies 是一个系统的时钟滴答，一个系统滴答是10ms,可以用作定时器
+
+    10ms一个系统滴答，会引发一个定时器中断，(timer_interrupt)定时器中断中首先对jiffies加一操作，后会调用do_timer()
+
+void do_timer(long cpl)
+{
+    if (cpl)    //cpl变量是内核中用来指示被中断程序的特权，0表示内核进程，1表示被中断的是用户进程
+        current->utime++;  //utime  用户程序的运行时间
+    else
+        current->stime++;  //stime  内核程序的运行时间
+    if ((--current->counter)>0) return;
+    current->counter=0;
+    if (!cpl) return;
+    schedule();
+}
+
+
+  2. 如何进行创建一个新的进程
+  3. 进程的调度
+  4. 进程的退出
+  5. 进程间通信
+
+  linux操作系统CPL、DPL、RPL
+  current->counter    进程的时间片
+  task_struct    一个进程    task_struct[]  进程向量表  counter
+  counter  进程的调度就是task_struct[]进程链表的检索，找时间片最大的那个进程对象(task_struct)，然后进行
+           调用，直到时间片为0,退出，之后在进行新一轮的调用
+
+  counter  当全部的task_struct[]()所有的进程的counter都为0，就进行新一轮的时间片分配。
+  优先级分配    (*p)->counter = ((*p)->counter >> 1) + (*p)->priority;
+  优先级时间片轮转调度算法
+  
+  counter = counter/2 + priority
+  LDT  局部描述符(代码段， 数据段)
+  TSS  进程的状态描述符  在进程运行的过程中，CPU需要知道的进程的状态标识
+  1.进程的状态
+    分时技术进行多进程调度。
+  重点:进程是如何创建的
+    linux在初始化的过程中会进行0号进程的创建，fork()
+
+    main.c  void main(void)-->trap_init()
+7.
+系统级别 GDT(描述符)  全局描述符表GDT
+ ——————————————
+|   进程2       |
+ ——————————————
+|   进程1       |
+|_____________ |
+|进程0          |
+|_____________ |
+| 内核数据段     |
+|_____________ |
+| 内核代码段     |
+|_____________ |
+
+
+
+ ——————————————
+|  堆栈         |
+|              |
+|              |
+|              |
+|              |
+|_____________ |
+| TSS进程的状态  |
+|__描述符_______|
+| LDT局部描述符  | (代码段， 数据段)
+|_____________ |
+
+
+
+内核态: 不可抢占的
+用户态: 可以抢占的
+move_to_user_mode(); 把内核状态切换到用户状态
+在内核初始化的过程中，会手动创建0号进程，0号进程是所有进程的父进程
+
+main.c: 
+    (void) open("/dev/tty0",O_RDWR,0);打开标准输入控制台
+    (void) dup(0);打开标准输出控制台
+    (void) dup(0);打开标准错误控制台
+
+在0号进程中:
+    1.打开标准输入、标准输出、标准错误的控制台句柄
+    2.创建1号进程，如果创建成功，则在一号进程中执行
+      shell程序 "/bin/sh"
+    3.0号进程不可能结束，他会在没有其他进程调用的时候调用，只会执行for(;;) pause();
+
+/etc  系统配置文件目录
+
+进程创建:
+  fork
+  1.在task链表中找一个进程空位存放当前的进程
+  2.创建一个task_struct
+  3.设置task_struct
+  
+进程的创建就是对0号进程或者当前进程的复制
+  0号进程复制     把task[0]对应的task_struct复制给新创建的task_struct
+  对于栈堆的拷贝   当进程做创建的时候要复制原有的栈堆
+
+进程的创建是系统调用
+.align 2
+_sys_fork:
+    call _find_empty_process
+    testl %eax,%eax
+    js 1f
+    push %gs
+    pushl %esi
+    pushl %edi
+    pushl %ebp
+    pushl %eax
+    call _copy_process
+    addl $20,%esp
+1:  ret
+
+  1.给当前要创建的进程分配一个进程号 _find_empty_process
+  2.创建一个子进程的task_struct结构体
+    struct task_struct *p;
+    int i;
+    struct file *f;
+    p = (struct task_struct *)get_free_page();
+    if (!p)
+        return -EAGAIN;
+  3. 将当前的子进程放入到整体进程链表中
+        p->state = TASK_UNINTERRUPTIBLE;
+        p->pid = last_pid;
+        p->father = current->pid;
+        p->counter = p->priority;
+        p->signal = 0;
+        p->alarm = 0;
+        p->leader = 0;  /* process leadership doesn't inherit */
+        p->utime = p->stime = 0;
+        p->cutime = p->cstime = 0;
+
+    if (last_task_used_math == current)
+        __asm__("clts ; fnsave %0"::"m" (p->tss.i387));
+    如果当前进程使用了协处理器，那就设置当前创建进程的协处理器
+
+    int copy_mem(int nr,struct task_struct *p) 进行老进程向新进程代码段，数据段(LDT)拷贝
+        
+    //如果父进程打开了某个文件，那么子进程也同样打开了这个文件，所以将文件的打开计数+1
+    for (i=0; i<NR_OPEN;i++)
+    if (f=p->filp[i])
+        f->f_count++;
+
+    //对父进程的资源计数加1
+    if (current->pwd)
+        current->pwd->i_count++;
+    if (current->root)
+        current->root->i_count++;
+    if (current->executable)
+    //进程设置两个段，并且结合刚才拷贝过来的，组装成一个进程
+    set_tss_desc(gdt+(nr<<1)+FIRST_TSS_ENTRY,&(p->tss));
+    set_ldt_desc(gdt+(nr<<1)+FIRST_LDT_ENTRY,&(p->ldt));
+    //给程序的状态标志位标记为可运行状态
+    p->state = TASK_RUNNING;
+    //返回进程号  
+    return last_pid;
+
+  4.
+
+  协处理器，这是一种协助中央处理器完成其无法执行或执行效率、效果低下的处理工作而开发和应用的处理器。
+  这种中央处理器无法执行的工作有很多，比如设备间的信号传输、接入设备的管理等；而执行效率、
+  效果低下的有图形处理、声频处理等。为了进行这些处理，各种辅助处理器就诞生了。
+
+5. 进程被创建到了链表中，如何在进行进一步的调用和调度？
+  进程调度:  schedule.c   
+  void schedule(void)    进程调度函数
+  switch_to()            进程切换函数
+
+  辅助函数:
+    void show_task(int nr,struct task_struct * p) //打印p->pid,p->state，打印栈的空闲大小
+    void math_state_restore() //协处理器恢复函数 
+
+进程状态: 运行状态                可以被运行，就绪状态，进程切换只有在运行状态
+         可中断睡眠状态           可以被信号中断，使其变成RUNNING
+         不可中断睡眠状态         只能被wakeup所唤醒，使其变成RUNNING
+         暂停状态                收到SIGSTOP SIGTSTP SIGTTIN信号进入暂停状态
+         僵尸状态                进程停止运行了，但是父进程没有进行回收 
+         #define TASK_RUNNING               0
+         #define TASK_INTERRUPTIBLE         1
+         #define TASK_UNINTERRUPTIBLE       2
+         #define TASK_ZOMBIE                3
+         #define TASK_STOPPED               4
+
+         ((*p)->alarm && (*p)->alarm < jiffies)    //闹钟小于滴答时间，说明闹钟时间已经超时。
+
+        while (1) {
+        c = -1;
+        next = 0;
+        i = NR_TASKS;
+        p = &task[NR_TASKS];
+        while (--i) {
+            if (!*--p)
+                continue;
+            if ((*p)->state == TASK_RUNNING && (*p)->counter > c)
+                c = (*p)->counter, next = i;
+        }
+        if (c) break;  //当前进程链表中，还有一些进程的时间片没有用完
+        
+        //时间片的重新分配
+        for(p = &LAST_TASK ; p > &FIRST_TASK ; --p)
+            if (*p)
+                //时间片的分配  counter = counter /2 + priority
+                (*p)->counter = ((*p)->counter >> 1) + (*p)->priority;
+    }
+
+    switch_to()  进程切换
+      把进程切换为当前进程
+        1. 将需要切换的进程赋值给当前进程指针
+        2. 进行进程的上下文切换
+        3. 
+    上下文:程序运行是CPU的特殊寄存器，通用寄存器(TSS)等信息 + 当前堆栈中的信息
+
+    void sleep_on()
+      当某个进程想要访问CPU的资源的时候，碰巧CPU资源被占用，那么就会调用sleep_on()函数，把进程休眠
+  
+    <<Linux 内核设计的艺术>>

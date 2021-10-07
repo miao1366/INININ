@@ -2979,3 +2979,38 @@ template <class InputIterator1, class InputIterator2, class OutputIterator, clas
        op存放着操作类型。定义的有5中，这里我简单的介绍一下两种，剩下的感兴趣的自己去man futex
        FUTEX_WAIT: 原子性的检查uaddr中计数器的值是否为val,如果是则让进程休眠，直到FUTEX_WAKE或者超时(time-out)。也就是把进程挂到uaddr相对应的等待队列上去。
        FUTEX_WAKE: 最多唤醒val个等待在uaddr上进程。
+
+       int futex (void *futex, int op, int val, const struct timespec *timeout) ，
+       这里第一个参数 futex 指向被映射的内存地址，op 表示操作类型，timeout 表示阻塞时间，而 val 对于不同的值具有不同的意义。
+       在使用者角度，futex(2) 相比 pthread_mutex / pthread_condition_variable 和 sysv semaphore，有一些独一无二的特色。
+       futex 的等待操作可以指定条件。将常量 FUTEX_WAIT 作为参数传递给 futex 作为第二个参数 op 的值，这个时候第三个参数 op 的值将作为一个比较对象。
+       当 *(int *)futex == val 的时候，调用体将被阻塞直到 timeout 时间到达，或者被其它执行体唤醒。如果 *(int *)futex != val，则锁定过程会被直接跳过
+
+270.  pid_t fork(void);
+    1）在父进程中，fork返回新创建子进程的进程ID；
+    2）在子进程中，fork返回0；
+    3）如果出现错误，fork返回一个负值；
+
+271. std::sort 
+      如果 left 小于 right 返回TRUE，则排序的结果为升序
+      vector<int > vet_;
+      vet_.push_back(3);
+      vet_.push_back(10);
+      vet_.push_back(111);
+      vet_.push_back(-1);
+      vet_.push_back(4);
+      std::sort(vet_.begin(), vet_.end(), [](int a, int b) {
+          return a < b;
+      });
+      for(int i : vet_) {
+          cout<< " " << i;
+      }
+      std::cout <<endl;
+      return 0;
+
+       // -1 3 4 10 111
+
+272. int pthread_spin_init(pthread_spinlock_t *lock int pshared);
+
+273. is_sorted()
+    检查数组或者向量是否被排序好  默认检查方式：升序

@@ -111,3 +111,9 @@ $ docker ps -a
      sudo docker run -it --privileged=true --shm-size=4g --net=host  --name brpc 38b3fa4640d4
      sudo docker exec -it 9846fc2bcde9 bash
      apt-get update && apt-get install -y --no-install-recommends curl apt-utils openssl ca-certificates
+
+    -v /home/haomo/cmm:/home
+    sudo docker run -it --privileged=true --shm-size=4g --net=host -v /home/haomo/cmm:/home  --name pcb a8d3c83513f9
+
+-i 标志保障容器中STDIN是开启的，尽管我们并没有附着到容器中(即docker attach)，持久的标准输入是交互式shell的”半边天“。
+-t 标志则是另外的”半边天“，它告诉Docker为要创建的容器分配一个伪tty终端，这样，新创建的容器才能提供一个交互式的shell
