@@ -683,6 +683,3 @@ futex
     如果不用另一个智能指针来保存release返回的指针，程序就要负责资源的释放。
 
     std::unique_ptr    release()    移动构造
-
-    函数定义 void *dlsym(void *handle, const char* symbol);
-    handle是由dlopen打开动态链接库后返回的指针，symbol就是要求获取的函数的名称。dlsym函数的返回值是void*，指向要查找的函数symbol的地址，供调用使用
