@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<!-- saved from url=(0048)https://www.cnblogs.com/arnoldlu/p/10272466.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="never">
+    <meta name="description" content="定位内存泄漏基本上是从宏观到微观，进而定位到代码位置。 从/proc/meminfo可以看到整个系统内存消耗情况，使用top可以看到每个进程的VIRT(虚拟内存)和RES(实际占用内存)，基本上就可以">
+    <meta property="og:description" content="定位内存泄漏基本上是从宏观到微观，进而定位到代码位置。 从/proc/meminfo可以看到整个系统内存消耗情况，使用top可以看到每个进程的VIRT(虚拟内存)和RES(实际占用内存)，基本上就可以">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>/proc/&lt;pid&gt;/maps简要分析 - ArnoldLu - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="https://common.cnblogs.com/favicon.svg" type="image/svg+xml">
+    
+    <link rel="stylesheet" href="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/blog-common.min.css">
+    <link id="MainCss" rel="stylesheet" href="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/bundle-anothereon001.min.css">
+    <link type="text/css" rel="stylesheet" href="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/cnblogs.css">
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/bundle-anothereon001-mobile.min.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/arnoldlu/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/arnoldlu/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/arnoldlu/wlwmanifest.xml">
+    <script type="text/javascript" async="" src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/analytics.js"></script><script type="text/javascript" src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/encoder.js"></script><script>
+        var currentBlogId = 323754;
+        var currentBlogApp = 'arnoldlu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'AnotherEon001';
+        var visitorUserId = '';
+        var hasCustomScript = false;
+        try {
+            if (hasCustomScript && document.referrer && document.referrer.indexOf('baidu.com') >= 0) {
+                Object.defineProperty(document, 'referrer', { value: '' });
+                Object.defineProperty(Document.prototype, 'referrer', { get: function(){ return ''; } });
+            }
+        } catch(error) { }
+    </script>
+        <script>
+            var currentPostDateAdded = '2019-04-30 12:00';
+        </script>
+    <script src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/jquery-2.2.0.min.js"></script>
+    <script src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/blog-common.min.js"></script><style type="text/css">.medium-zoom-overlay{position:fixed;top:0;right:0;bottom:0;left:0;opacity:0;transition:opacity .3s;will-change:opacity}.medium-zoom--opened .medium-zoom-overlay{cursor:pointer;cursor:zoom-out;opacity:1}.medium-zoom-image{cursor:pointer;cursor:zoom-in;transition:transform .3s cubic-bezier(.2,0,.2,1)!important}.medium-zoom-image--hidden{visibility:hidden}.medium-zoom-image--opened{position:relative;cursor:pointer;cursor:zoom-out;will-change:transform}</style>
+    
+    
+    
+    <script type="text/javascript">
+        window.codeHighlightEngine = 1
+        window.enableCodeLineNumber = false
+    </script>
+</head>
+<body class="skin-anothereon001 has-navbar has-bannerbar">
+    <a name="top"></a>
+        <img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/35695-20211008160613875-1434480564.jpg" style="display:none" onload="impressC0()">
+        <a target="_blank" href="https://c.gridsumdissector.com/r/?gid=gad_545_fieh18b6&amp;ck=46&amp;adk=567&amp;autorefresh=__AUTOREFRESH__" onclick="clickBanner(494);ga(&#39;send&#39;, &#39;event&#39;, &#39;banner&#39;, &#39;click&#39;, &#39;C0-pangle&#39;)">
+            <div class="bannerbar aliyun forpc" style="background-size: contain; background-image: url(https://img2020.cnblogs.com/blog/35695/202110/35695-20211008160613875-1434480564.jpg)">
+            </div>
+        </a>     
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/logo.svg" alt="博客园Logo"></a></li>
+                <li><a href="https://www.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-sitehome&#39;)">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-news&#39;)">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-q&#39;)">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-brands&#39;)">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-ing&#39;)">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-edu&#39;)">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3">
+                        <button type="submit" id="zzk_search_button">
+                            <img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/search.svg" alt="搜索">
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔" style="display: none;">
+                        <img id="new_post_icon" class="navbar-icon" src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/newpost.svg" alt="写随笔">
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客" style="display: none;">
+                        <img id="myblog_icon" class="navbar-icon" src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/myblog.svg" alt="我的博客">
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息" style="display: none;">
+                        <img id="msg_icon" class="navbar-icon" src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/message.svg" alt="短消息">
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown" style="display: none;">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/avatar-default.svg" alt="用户头像">
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/lite-mode-check.svg" class="hide"><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/" style="display: inline;">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()" style="display: inline;">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <div id="page_begin_html">
+        <p>
+<a href="http://elixir.free-electrons.com/linux/latest/source" target="_blank">LXR</a>
+<a href="http://www.cnblogs.com/arnoldlu/p/6421317.html" target="_blank"> | KVM</a>
+<a href="http://www.cnblogs.com/arnoldlu/p/6229978.html" target="_blank"> | PM</a>
+<a href="http://www.cnblogs.com/arnoldlu/p/7025751.html" target="_blank"> | Time</a>
+<a href="http://www.cnblogs.com/arnoldlu/p/7406441.html" target="_blank"> | Interrupt</a>
+<a href="http://www.cnblogs.com/arnoldlu/p/7998225.html" target="_blank"> | Systems Performance</a>
+<a href="http://www.cnblogs.com/arnoldlu/p/7997549.html" target="_blank"> | Bootup Optimization</a>
+</p>
+    </div>
+    <div id="wrapper">
+<div id="header">
+
+<div id="top">
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/arnoldlu/">Arnold Lu@南京</a>
+</h1>
+<div id="subtitle">联系方式：arnoldlu@qq.com</div>
+</div>
+<div id="sub"><div class="BlogStats">随笔 - 256, 文章 - 0, 评论 - 30, 阅读 - 
+<span title="总阅读数: 1415075">
+141万</span></div>
+
+</div>
+
+
+
+
+</div>
+<div id="main_container">
+<div id="main_content">
+<div id="content">
+	<div id="post_detail">
+    <div class="post">
+        <h2>
+            
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/arnoldlu/p/10272466.html">
+    <span>/proc/&lt;pid&gt;/maps简要分析</span>
+    
+
+
+
+</a>
+
+        </h2>
+        <div class="postbody">
+            <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<p>定位内存泄漏基本上是从宏观到微观，进而定位到代码位置。</p>
+<p>从<a href="https://www.cnblogs.com/arnoldlu/p/8568330.html#proc_meminfo" target="_blank">/proc/meminfo</a>可以看到整个系统内存消耗情况，使用top可以看到每个进程的VIRT(虚拟内存)和RES(实际占用内存)，基本上就可以将泄漏内存定位到进程范围。</p>
+<p>之前也大概了解过<a href="https://www.cnblogs.com/arnoldlu/p/8568330.html#maps" target="_blank">/proc/self/maps</a>，基于里面信息能大概判断泄露的内存的属性，是哪个区域在泄漏、对应哪个文件。辅助工具<span style="color: rgba(255, 0, 0, 1)">procmem</span>输出更可读的maps信息。</p>
+<p>&nbsp;</p>
+<p>下面分别从进程地址空间各段划分、maps和段如何对应、各段异常如何定位三方面展开。</p>
+<h1>1.进程地址空间划分</h1>
+<h2>1.1 段及其作用</h2>
+<p>首先通过下图简单看一下，进程地址空间从低地址开始依次是代码段(Text)、数据段(Data)、BSS段、堆、内存映射段(mmap)、栈。</p>
+<p><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/270929306664122.jpg" alt="" width="937" height="540" style="display: block; margin-left: auto; margin-right: auto" class="medium-zoom-image"></p>
+<h3>1.1.1 代码段(text)</h3>
+<p><span style="color: rgba(255, 0, 0, 1)">代码段也称正文段或文本段，通常用于存放程序执行代码(即CPU执行的机器指令)。</span>一般C语言执行语句都编译成机器代码保存在代码段。通常代码段是可共享的，因此频繁执行的程序只需要在内存中拥有一份拷贝即可。</p>
+<p><span style="color: rgba(255, 0, 0, 1)">代码段通常属于只读</span>，以防止其他程序意外地修改其指令(对该段的写操作将导致段错误)。某些架构也允许代码段为可写，即允许修改程序。</p>
+<p>代码段指令根据程序设计流程依次执行，对于顺序指令，只会执行一次(每个进程)；若有反复，则需使用跳转指令；若进行递归，则需要借助栈来实现。</p>
+<p>代码段指令中包括操作码和操作对象(或对象地址引用)。若操作对象是立即数(具体数值)，将直接包含在代码中；若是局部数据，将在栈区分配空间，然后引用该数据地址；若位于BSS段和数据段，同样引用该数据地址。</p>
+<p>代码段最容易受优化措施影响。</p>
+<h3>1.1.2 数据段(Data)</h3>
+<p><span style="color: rgba(255, 0, 0, 1)">数据段通常用于存放程序中已初始化且初值不为0的全局变量和静态局部变量。数据段属于静态内存分配(静态存储区)，可读可写。</span></p>
+<p>数据段保存在目标文件中(在嵌入式系统里一般固化在镜像文件中)，其内容由程序初始化。例如，对于全局变量int gVar = 10，必须在目标文件数据段中保存10这个数据，然后在程序加载时复制到相应的内存。</p>
+<p>数据段与BSS段的区别如下：&nbsp;</p>
+<p>&nbsp; &nbsp; &nbsp;1) <span style="color: rgba(255, 0, 0, 1)">BSS段不占用物理文件尺寸，但占用内存空间；数据段占用物理文件，也占用内存空间。</span></p>
+<p>&nbsp; &nbsp; &nbsp;对于大型数组如int ar0[10000] = {1, 2, 3, ...}和int ar1[10000]，ar1放在BSS段，只记录共有10000*4个字节需要初始化为0，而不是像ar0那样记录每个数据1、2、3...，此时BSS为目标文件所节省的磁盘空间相当可观。</p>
+<p>&nbsp; &nbsp; &nbsp;2) 当程序读取数据段的数据时，系统会出发缺页故障，从而分配相应的物理内存；当程序读取BSS段的数据时，内核会将其转到一个全零页面，不会发生缺页故障，也不会为其分配相应的物理内存。</p>
+<p>&nbsp; &nbsp; &nbsp;运行时数据段和BSS段的整个区段通常称为数据区。某些资料中“数据段”指代数据段 + BSS段 + 堆。</p>
+<h3>1.1.3 BSS段</h3>
+<p>&nbsp; &nbsp; &nbsp;BSS(Block Started by Symbol)段中通常存放程序中以下符号：</p>
+<ul>
+<li><span style="color: rgba(255, 0, 0, 1)">未初始化的全局变量和静态局部变量</span></li>
+<li><span style="color: rgba(255, 0, 0, 1)">初始值为0的全局变量和静态局部变量(依赖于编译器实现)</span></li>
+<li><span style="color: rgba(255, 0, 0, 1)">未定义且初值不为0的符号(该初值即common block的大小)</span></li>
+</ul>
+<p>&nbsp; &nbsp; &nbsp;C语言中，未显式初始化的静态分配变量被初始化为0(算术类型)或空指针(指针类型)。由于程序加载时，BSS会被操作系统清零，所以未赋初值或初值为0的全局变量都在BSS中。BSS段仅为未初始化的静态分配变量预留位置，在目标文件中并不占据空间，这样可减少目标文件体积。但程序运行时需为变量分配内存空间，故目标文件必须记录所有未初始化的静态分配变量大小总和(通过start_bss和end_bss地址写入机器代码)。当加载器(loader)加载程序时，将为BSS段分配的内存初始化为0。在嵌入式软件中，进入main()函数之前BSS段被C运行时系统映射到初始化为全零的内存(效率较高)。</p>
+<p>&nbsp; &nbsp; &nbsp;注意，尽管均放置于BSS段，但初值为0的全局变量是强符号，而未初始化的全局变量是弱符号。若其他地方已定义同名的强符号(初值可能非0)，则弱符号与之链接时不会引起重定义错误，但运行时的初值可能并非期望值(会被强符号覆盖)。因此，定义全局变量时，若只有本文件使用，则尽量使用static关键字修饰；否则需要为全局变量定义赋初值(哪怕0值)，保证该变量为强符号，以便链接时发现变量名冲突，而不是被未知值覆盖。</p>
+<p>&nbsp; &nbsp; &nbsp;某些编译器将未初始化的全局变量保存在common段，链接时再将其放入BSS段。在编译阶段可通过-fno-common选项来禁止将未初始化的全局变量放入common段。</p>
+<h3>&nbsp;1.1.4 堆(heap)</h3>
+<p>&nbsp; &nbsp; &nbsp;<span style="color: rgba(255, 0, 0, 1)">堆用于存放进程运行时动态分配的内存段，可动态扩张或缩减。</span>堆中内容是匿名的，不能按名字直接访问，只能通过指针间接访问。当进程调用malloc(C)/new(C++)等函数分配内存时，新分配的内存动态添加到堆上(扩张)；当调用free(C)/delete(C++)等函数释放内存时，被释放的内存从堆中剔除(缩减)&nbsp;。</p>
+<p>&nbsp; &nbsp; &nbsp;分配的堆内存是经过字节对齐的空间，以适合原子操作。堆管理器通过链表管理每个申请的内存，由于堆申请和释放是无序的，最终会产生内存碎片。堆内存一般由应用程序分配释放，回收的内存可供重新使用。若程序员不释放，程序结束时操作系统可能会自动回收。</p>
+<p>&nbsp; &nbsp; &nbsp;堆的末端由break指针标识，当堆管理器需要更多内存时，可通过系统调用brk()和sbrk()来移动break指针以扩张堆，一般由系统自动调用。</p>
+<p>&nbsp; &nbsp; &nbsp;使用堆时经常出现两种问题：1) 释放或改写仍在使用的内存(“内存破坏”)；2)未释放不再使用的内存(“内存泄漏”)。当释放次数少于申请次数时，可能已造成内存泄漏。泄漏的内存往往比忘记释放的数据结构更大，因为所分配的内存通常会圆整为下个大于申请数量的2的幂次(如申请212B，会圆整为256B)。</p>
+<h3>1.1.5 内存映射段(mmap)</h3>
+<p>&nbsp; &nbsp; &nbsp;此处，内核将硬盘文件的内容直接映射到内存, 任何应用程序都可通过Linux的mmap()系统调用请求这种映射。内存映射是一种方便高效的文件I/O方式， 因而被用于装载动态共享库。用户也可创建匿名内存映射，该映射没有对应的文件, 可用于存放程序数据。在 Linux中，若通过malloc()请求一大块内存，C运行库将创建一个匿名内存映射，而不使用堆内存。”大块” 意味着比阈值 MMAP_THRESHOLD还大，缺省为128KB，可通过mallopt()调整。</p>
+<p>&nbsp; &nbsp; &nbsp;<span style="color: rgba(255, 0, 0, 1)">该区域用于映射可执行文件用到的动态链接库。</span>在Linux 2.4版本中，若可执行文件依赖共享库，则系统会为这些动态库在从0x40000000开始的地址分配相应空间，并在程序装载时将其载入到该空间。在Linux 2.6内核中，共享库的起始地址被往上移动至更靠近栈区的位置。</p>
+<p>&nbsp; &nbsp; &nbsp;从进程地址空间的布局可以看到，在有共享库的情况下，留给堆的可用空间还有两处：一处是从.bss段到0x40000000，约不到1GB的空间；另一处是从共享库到栈之间的空间，约不到2GB。这两块空间大小取决于栈、共享库的大小和数量。这样来看，是否应用程序可申请的最大堆空间只有2GB？事实上，这与Linux内核版本有关。在上面给出的进程地址空间经典布局图中，共享库的装载地址为0x40000000，这实际上是Linux kernel 2.6版本之前的情况了，在2.6版本里，共享库的装载地址已经被挪到靠近栈的位置，即位于0xBFxxxxxx附近，因此，此时的堆范围就不会被共享库分割成2个“碎片”，故kernel 2.6的32位Linux系统中，malloc申请的最大内存理论值在2.9GB左右。</p>
+<h3>1.1.6 栈(stack)</h3>
+<p>&nbsp; &nbsp; &nbsp;<span style="color: rgba(255, 0, 0, 1)">栈又称堆栈，由编译器自动分配释放，行为类似数据结构中的栈(先进后出)。</span>堆栈主要有三个用途：</p>
+<ul>
+<li><span style="color: rgba(255, 0, 0, 1)">为函数内部声明的非静态局部变量(C语言中称“自动变量”)提供存储空间。</span></li>
+<li><span style="color: rgba(255, 0, 0, 1)">记录函数调用过程相关的维护性信息，称为栈帧(Stack Frame)或过程活动记录(Procedure Activation Record)。</span>它包括函数返回地址，不适合装入寄存器的函数参数及一些寄存器值的保存。除递归调用外，堆栈并非必需。因为编译时可获知局部变量，参数和返回地址所需空间，并将其分配于BSS段。</li>
+<li><span style="color: rgba(255, 0, 0, 1)">临时存储区，用于暂存长算术表达式部分计算结果或alloca()函数分配的栈内内存。</span></li>
+</ul>
+<p>&nbsp; &nbsp; &nbsp;持续地重用栈空间有助于使活跃的栈内存保持在CPU缓存中，从而加速访问。进程中的每个线程都有属于自己的栈。向栈中不断压入数据时，若超出其容量就会耗尽栈对应的内存区域，从而触发一个页错误。此时若栈的大小低于堆栈最大值RLIMIT_STACK(通常是8M)，则栈会动态增长，程序继续运行。映射的栈区扩展到所需大小后，不再收缩。</p>
+<p>&nbsp; &nbsp; &nbsp;Linux中ulimit -s命令可查看和设置堆栈最大值，当程序使用的堆栈超过该值时, 发生栈溢出(Stack Overflow)，程序收到一个段错误(Segmentation Fault)。注意，调高堆栈容量可能会增加内存开销和启动时间。</p>
+<p>&nbsp; &nbsp; &nbsp;堆栈既可向下增长(向内存低地址)也可向上增长, 这依赖于具体的实现。本文所述堆栈向下增长。</p>
+<p>&nbsp; &nbsp; &nbsp;栈的大小在运行时由内核动态调整。</p>
+<h3>1.1.7 栈和堆的区别</h3>
+<p>①管理方式：栈由编译器自动管理；堆由程序员控制，使用方便，但易产生内存泄露。</p>
+<p>②生长方向：栈向低地址扩展(即”向下生长”)，是连续的内存区域；堆向高地址扩展(即”向上生长”)，是不连续的内存区域。这是由于系统用链表来存储空闲内存地址，自然不连续，而链表从低地址向高地址遍历。</p>
+<p>③空间大小：栈顶地址和栈的最大容量由系统预先规定(通常默认2M或10M)；堆的大小则受限于计算机系统中有效的虚拟内存，32位Linux系统中堆内存可达2.9G空间。</p>
+<p>④存储内容：栈在函数调用时，首先压入主调函数中下条指令(函数调用语句的下条可执行语句)的地址，然后是函数实参，然后是被调函数的局部变量。本次调用结束后，局部变量先出栈，然后是参数，最后栈顶指针指向最开始存的指令地址，程序由该点继续运行下条可执行语句。堆通常在头部用一个字节存放其大小，堆用于存储生存期与函数调用无关的数据，具体内容由程序员安排。</p>
+<p>⑤分配方式：栈可静态分配或动态分配。静态分配由编译器完成，如局部变量的分配。动态分配由alloca函数在栈上申请空间，用完后自动释放。堆只能动态分配且手工释放。</p>
+<p>⑥分配效率：栈由计算机底层提供支持：分配专门的寄存器存放栈地址，压栈出栈由专门的指令执行，因此效率较高。堆由函数库提供，机制复杂，效率比栈低得多。Windows系统中VirtualAlloc可直接在进程地址空间中分配一块内存，快速且灵活。</p>
+<p>⑦分配后系统响应：只要栈剩余空间大于所申请空间，系统将为程序提供内存，否则报告异常提示栈溢出。</p>
+<p>&nbsp; &nbsp; &nbsp;操作系统为堆维护一个记录空闲内存地址的链表。当系统收到程序的内存分配申请时，会遍历该链表寻找第一个空间大于所申请空间的堆结点，然后将该结点从空闲结点链表中删除，并将该结点空间分配给程序。若无足够大小的空间(可能由于内存碎片太多)，有可能调用系统功能去增加程序数据段的内存空间，以便有机会分到足够大小的内存，然后进行返回。，大多数系统会在该内存空间首地址处记录本次分配的内存大小，供后续的释放函数(如free/delete)正确释放本内存空间。</p>
+<p>&nbsp; &nbsp; &nbsp;此外，由于找到的堆结点大小不一定正好等于申请的大小，系统会自动将多余的部分重新放入空闲链表中。</p>
+<p>⑧碎片问题：栈不会存在碎片问题，因为栈是先进后出的队列，内存块弹出栈之前，在其上面的后进的栈内容已弹出。而频繁申请释放操作会造成堆内存空间的不连续，从而造成大量碎片，使程序效率降低。</p>
+<p>&nbsp; &nbsp; &nbsp;可见，堆容易造成内存碎片；由于没有专门的系统支持，效率很低；由于可能引发用户态和内核态切换，内存申请的代价更为昂贵。所以栈在程序中应用最广泛，函数调用也利用栈来完成，调用过程中的参数、返回地址、栈基指针和局部变量等都采用栈的方式存放。所以，建议尽量使用栈，仅在分配大量或大块内存空间时使用堆。</p>
+<p>&nbsp; &nbsp; &nbsp;使用栈和堆时应避免越界发生，否则可能程序崩溃或破坏程序堆、栈结构，产生意想不到的后果。</p>
+<h2>1.2 段和mm_struct关系</h2>
+<p>struct mm_struct是进程内存结构体，里面的参数和各段地址对应关系如下图。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 255, 1)">struct</span><span style="color: rgba(0, 0, 0, 1)"> mm_struct {
+    </span><span style="color: rgba(0, 0, 255, 1)">struct</span> vm_area_struct *mmap;        <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> list of VMAs </span><span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 0, 0, 1)">...
+    unsigned </span><span style="color: rgba(0, 0, 255, 1)">long</span> <span style="color: rgba(255, 0, 0, 1)">mmap_base</span>;        <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> base of mmap area </span><span style="color: rgba(0, 128, 0, 1)">*/</span><span style="color: rgba(0, 0, 0, 1)">
+    unsigned </span><span style="color: rgba(0, 0, 255, 1)">long</span> mmap_legacy_base;         <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> base of mmap area in bottom-up allocations </span><span style="color: rgba(0, 128, 0, 1)">*/</span><span style="color: rgba(0, 0, 0, 1)">...
+    unsigned </span><span style="color: rgba(0, 0, 255, 1)">long</span><span style="color: rgba(0, 0, 0, 1)"><span style="color: rgba(255, 0, 0, 1)"> start_code</span>, <span style="color: rgba(255, 0, 0, 1)">end_code</span>, <span style="color: rgba(255, 0, 0, 1)">start_data</span>, <span style="color: rgba(255, 0, 0, 1)">end_data</span>;
+    unsigned </span><span style="color: rgba(0, 0, 255, 1)">long</span><span style="color: rgba(0, 0, 0, 1)"><span style="color: rgba(255, 0, 0, 1)"> start_brk</span>, <span style="color: rgba(255, 0, 0, 1)">brk</span>, <span style="color: rgba(255, 0, 0, 1)">start_stack</span>;
+    unsigned </span><span style="color: rgba(0, 0, 255, 1)">long</span><span style="color: rgba(0, 0, 0, 1)"><span style="color: rgba(255, 0, 0, 1)"> arg_start</span>, <span style="color: rgba(255, 0, 0, 1)">arg_end</span>, <span style="color: rgba(255, 0, 0, 1)">env_start</span>, <span style="color: rgba(255, 0, 0, 1)">env_end</span>;
+</span>...
+    <span style="color: rgba(0, 0, 255, 1)">struct</span><span style="color: rgba(0, 0, 0, 1)"><span style="color: rgba(255, 0, 0, 1)"> mm_rss_stat</span> <span style="color: rgba(255, 0, 0, 1)">rss_stat</span>;
+</span><span style="color: rgba(0, 0, 0, 1)">...
+};</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>mm_strutc数据结构和段对应关系如下：</p>
+<p>&nbsp;</p>
+<p><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/20160901215036575" alt="mm_struct 内存段" title="" style="display: block; margin-left: auto; margin-right: auto" class="medium-zoom-image"></p>
+<h1>2. /proc/&lt;pid&gt;/maps</h1>
+<p>在了解了段及其作用之后，再来看看maps中各个vma对应哪个段？</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 255, 1)">static</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)">
+show_map_vma(</span><span style="color: rgba(0, 0, 255, 1)">struct</span> seq_file *m, <span style="color: rgba(0, 0, 255, 1)">struct</span> vm_area_struct *vma, <span style="color: rgba(0, 0, 255, 1)">int</span><span style="color: rgba(0, 0, 0, 1)"> is_pid)
+{
+    </span><span style="color: rgba(0, 0, 255, 1)">struct</span> mm_struct *mm = vma-&gt;<span style="color: rgba(0, 0, 0, 1)">vm_mm;
+    </span><span style="color: rgba(0, 0, 255, 1)">struct</span> file *file = vma-&gt;<span style="color: rgba(0, 0, 0, 1)">vm_file;
+    </span><span style="color: rgba(0, 0, 255, 1)">struct</span> proc_maps_private *priv = m-&gt;<span style="color: rgba(0, 0, 255, 1)">private</span><span style="color: rgba(0, 0, 0, 1)">;
+    vm_flags_t flags </span>= vma-&gt;<span style="color: rgba(0, 0, 0, 1)">vm_flags;
+    unsigned </span><span style="color: rgba(0, 0, 255, 1)">long</span> ino = <span style="color: rgba(128, 0, 128, 1)">0</span><span style="color: rgba(0, 0, 0, 1)">;
+    unsigned </span><span style="color: rgba(0, 0, 255, 1)">long</span> <span style="color: rgba(0, 0, 255, 1)">long</span> pgoff = <span style="color: rgba(128, 0, 128, 1)">0</span><span style="color: rgba(0, 0, 0, 1)">;
+    unsigned </span><span style="color: rgba(0, 0, 255, 1)">long</span><span style="color: rgba(0, 0, 0, 1)"> start, end;
+    dev_t dev </span>= <span style="color: rgba(128, 0, 128, 1)">0</span><span style="color: rgba(0, 0, 0, 1)">;
+    </span><span style="color: rgba(0, 0, 255, 1)">const</span> <span style="color: rgba(0, 0, 255, 1)">char</span> *name =<span style="color: rgba(0, 0, 0, 1)"> NULL;
+
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (file) {
+        </span><span style="color: rgba(0, 0, 255, 1)">struct</span> inode *inode = file_inode(vma-&gt;<span style="color: rgba(0, 0, 0, 1)">vm_file);
+        dev </span>= inode-&gt;i_sb-&gt;<span style="color: rgba(0, 0, 0, 1)">s_dev;
+        ino </span>= inode-&gt;<span style="color: rgba(0, 0, 0, 1)">i_ino;
+        pgoff </span>= ((loff_t)vma-&gt;vm_pgoff) &lt;&lt;<span style="color: rgba(0, 0, 0, 1)"> PAGE_SHIFT;------------------------------<span style="color: rgba(255, 0, 0, 1)">此vma第一页在地址空间中是第几页。</span>
+    }
+
+    </span><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> We don't show the stack guard page in /proc/maps </span><span style="color: rgba(0, 128, 0, 1)">*/</span><span style="color: rgba(0, 0, 0, 1)">
+    start </span>= vma-&gt;<span style="color: rgba(0, 0, 0, 1)">vm_start;
+    end </span>= vma-&gt;<span style="color: rgba(0, 0, 0, 1)">vm_end;
+
+    seq_setwidth(m, </span><span style="color: rgba(128, 0, 128, 1)">25</span> + <span style="color: rgba(0, 0, 255, 1)">sizeof</span>(<span style="color: rgba(0, 0, 255, 1)">void</span> *) * <span style="color: rgba(128, 0, 128, 1)">6</span> - <span style="color: rgba(128, 0, 128, 1)">1</span><span style="color: rgba(0, 0, 0, 1)">);
+    seq_printf(m, </span><span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">%08lx-%08lx %c%c%c%c %08llx %02x:%02x %lu </span><span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(0, 0, 0, 1)">,
+            start,
+            end,
+            flags </span>&amp; VM_READ ? <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">r</span><span style="color: rgba(128, 0, 0, 1)">'</span> : <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">-</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">,
+            flags </span>&amp; VM_WRITE ? <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">w</span><span style="color: rgba(128, 0, 0, 1)">'</span> : <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">-</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">,
+            flags </span>&amp; VM_EXEC ? <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">x</span><span style="color: rgba(128, 0, 0, 1)">'</span> : <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">-</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">,
+            flags </span>&amp; VM_MAYSHARE ? <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">s</span><span style="color: rgba(128, 0, 0, 1)">'</span> : <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">p</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">,
+            pgoff,
+            MAJOR(dev), MINOR(dev), ino);-------------------------------------------<span style="color: rgba(255, 0, 0, 1)">首先打印maps里面前5项数据，起讫地址、属性、偏移地址、主从设备号、inode编号。
+
+    </span></span><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)">
+     * Print the dentry name for named mappings, and a
+     * special [heap] marker for the heap:
+     </span><span style="color: rgba(0, 128, 0, 1)">*/</span>
+    <span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (file) {---------------------------------------------------------------------<span style="color: rgba(255, 0, 0, 1)">如果是个文件，那么打印文件完整路径。</span>
+        seq_pad(m, </span><span style="color: rgba(128, 0, 0, 1)">'</span> <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">);
+        seq_file_path(m, file, </span><span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">\n</span><span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(0, 0, 0, 1)">);
+        </span><span style="color: rgba(0, 0, 255, 1)">goto</span><span style="color: rgba(0, 0, 0, 1)"> done;
+    }
+
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span> (vma-&gt;vm_ops &amp;&amp; vma-&gt;vm_ops-&gt;<span style="color: rgba(0, 0, 0, 1)">name) {
+        name </span>= vma-&gt;vm_ops-&gt;<span style="color: rgba(0, 0, 0, 1)">name(vma);
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (name)
+            </span><span style="color: rgba(0, 0, 255, 1)">goto</span><span style="color: rgba(0, 0, 0, 1)"> done;
+    }
+
+    name </span>=<span style="color: rgba(0, 0, 0, 1)"> arch_vma_name(vma);
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span> (!<span style="color: rgba(0, 0, 0, 1)">name) {
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span> (!<span style="color: rgba(0, 0, 0, 1)">mm) {
+            name </span>= <span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">[vdso]</span><span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(0, 0, 0, 1)">;---------------------------------------------------------<span style="color: rgba(255, 0, 0, 1)">vDSO是系统调用相关，详细信息见<a href="https://en.wikipedia.org/wiki/VDSO" target="_blank"><span style="color: rgba(255, 0, 0, 1)">vDSO</span></a>。
+            </span></span><span style="color: rgba(0, 0, 255, 1)">goto</span><span style="color: rgba(0, 0, 0, 1)"> done;
+        }
+
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span> (vma-&gt;vm_start &lt;= mm-&gt;brk &amp;&amp;<span style="color: rgba(0, 0, 0, 1)">
+            vma</span>-&gt;vm_end &gt;= mm-&gt;<span style="color: rgba(0, 0, 0, 1)">start_brk) {------------------------------------------<span style="color: rgba(255, 0, 0, 1)">满足<strong>start_brk &lt;= vma &lt;= brk</strong>，则其vma是[heap]。</span>
+            name </span>= <span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">[heap]</span><span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(0, 0, 0, 1)">;
+            </span><span style="color: rgba(0, 0, 255, 1)">goto</span><span style="color: rgba(0, 0, 0, 1)"> done;
+        }
+
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (is_stack(priv, vma))-----------------------------------------------------<span style="color: rgba(255, 0, 0, 1)">满足vma包含所在地址空间的<strong>start_stack</strong>地址，则vma是[stack]。</span>
+            name </span>= <span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">[stack]</span><span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(0, 0, 0, 1)">;
+    }
+
+done:
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (name) {
+        seq_pad(m, </span><span style="color: rgba(128, 0, 0, 1)">'</span> <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">);
+        seq_puts(m, name);
+    }
+    seq_putc(m, </span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">\n</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">);
+}
+
+</span><span style="color: rgba(0, 0, 255, 1)">static</span> <span style="color: rgba(0, 0, 255, 1)">int</span> is_stack(<span style="color: rgba(0, 0, 255, 1)">struct</span> proc_maps_private *<span style="color: rgba(0, 0, 0, 1)">priv,
+            </span><span style="color: rgba(0, 0, 255, 1)">struct</span> vm_area_struct *<span style="color: rgba(0, 0, 0, 1)">vma)
+{
+</span>    <span style="color: rgba(0, 0, 255, 1)">return</span> vma-&gt;vm_start &lt;= vma-&gt;vm_mm-&gt;start_stack &amp;&amp;------------------------------<span style="color: rgba(255, 0, 0, 1)">判断一个vma是否属于stack，只需要判断start_stack是否在其区域内。</span><span style="color: rgba(0, 0, 0, 1)">
+        vma</span>-&gt;vm_end &gt;= vma-&gt;vm_mm-&gt;<span style="color: rgba(0, 0, 0, 1)">start_stack;
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<h1>3. maps实例即如何异常定位</h1>
+<p>本实例中的用户空间地址从0x00000000到0x80000000，从地址空间划分可知，从低到高依次是：</p>
+<ul>
+<li>可执行文件的代码段、数据段、BSS段。</li>
+<li>堆heap。</li>
+<li>文件映射和匿名映射，包括vdso、库的映射、mmap映射的内存等等。</li>
+<li>栈stack。</li>
+</ul>
+<p>通过top或者procrank之类工具发现某个进程存在内存泄漏的风险，然后查看进程的maps信息，进而可以缩小泄漏点范围。</p>
+<p>一般情况下泄漏点常在堆和文件/匿名映射区域。</p>
+<p>对于堆，需要了解哪些函数申请的内存在堆中，然后加以监控相关系统调用。</p>
+<p>对于文件映射，定位较简单，可以通过文件名找到对应代码。</p>
+<p>对于匿名映射，则需要根据大小或者地址范围猜测用途。当然也可以通过strace 跟踪和maps对应找到对应的泄漏点。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre></pre>
+<pre><span style="color: rgba(255, 0, 0, 1)">起始地址-结束地址    属性  偏移地址 主从设备号 inode编号 文件名</span></pre>
+<pre><span style="color: rgba(128, 0, 128, 1)">00008000</span>-<span style="color: rgba(128, 0, 128, 1)">00590000</span> r-xp <span style="color: rgba(128, 0, 128, 1)">00000000</span> b3:<span style="color: rgba(128, 0, 128, 1)">01</span> <span style="color: rgba(128, 0, 128, 1)">1441836</span>    /root/xxx----------------------------可执行文件的代码段，下面分别是只读和可读写的段。<span style="color: rgba(128, 0, 128, 1)">00590000</span>-005b2000 r--p <span style="color: rgba(128, 0, 128, 1)">00587000</span> b3:<span style="color: rgba(128, 0, 128, 1)">01</span> <span style="color: rgba(128, 0, 128, 1)">1441836</span>    /root/xxx<span style="color: rgba(0, 0, 0, 1)">
+005b2000</span>-005c4000 rw-p 005a9000 b3:<span style="color: rgba(128, 0, 128, 1)">01</span> <span style="color: rgba(128, 0, 128, 1)">1441836</span>    /root/xxx<span style="color: rgba(0, 0, 0, 1)">
+005c4000</span>-0280c000 rwxp <span style="color: rgba(128, 0, 128, 1)">00000000</span> <span style="color: rgba(128, 0, 128, 1)">00</span>:<span style="color: rgba(128, 0, 128, 1)">00</span> <span style="color: rgba(128, 0, 128, 1)">0</span><span style="color: rgba(0, 0, 0, 1)">          [heap]-------------------------------如果堆在业务稳定后，还继续单向增加，则可能存在泄漏。
+2aaa8000</span>-2aac5000 r-xp <span style="color: rgba(128, 0, 128, 1)">00000000</span> b3:<span style="color: rgba(128, 0, 128, 1)">01</span> <span style="color: rgba(128, 0, 128, 1)">786621</span>     /lib/ld-<span style="color: rgba(128, 0, 128, 1)">2.28</span>.<span style="color: rgba(128, 0, 128, 1)">9000</span><span style="color: rgba(0, 0, 0, 1)">.so-----------------下面是最复杂的部分，存在各种各种样的内存使用情况，大体上有库映射、匿名内存映射、文件内存映射等。
+2aac5000</span>-2aac6000 r--p 0001c000 b3:<span style="color: rgba(128, 0, 128, 1)">01</span> <span style="color: rgba(128, 0, 128, 1)">786621</span>     /lib/ld-<span style="color: rgba(128, 0, 128, 1)">2.28</span>.<span style="color: rgba(128, 0, 128, 1)">9000</span><span style="color: rgba(0, 0, 0, 1)">.so
+2aac6000</span>-2aac7000 rw-p 0001d000 b3:<span style="color: rgba(128, 0, 128, 1)">01</span> <span style="color: rgba(128, 0, 128, 1)">786621</span>     /lib/ld-<span style="color: rgba(128, 0, 128, 1)">2.28</span>.<span style="color: rgba(128, 0, 128, 1)">9000</span><span style="color: rgba(0, 0, 0, 1)">.so
+2aac7000</span>-2aac8000 r-xp <span style="color: rgba(128, 0, 128, 1)">00000000</span> <span style="color: rgba(128, 0, 128, 1)">00</span>:<span style="color: rgba(128, 0, 128, 1)">00</span> <span style="color: rgba(128, 0, 128, 1)">0</span><span style="color: rgba(0, 0, 0, 1)">          [vdso]
+2aac8000</span>-2aaca000 rw-p <span style="color: rgba(128, 0, 128, 1)">00000000</span> <span style="color: rgba(128, 0, 128, 1)">00</span>:<span style="color: rgba(128, 0, 128, 1)">00</span> <span style="color: rgba(128, 0, 128, 1)">0</span><span style="color: rgba(0, 0, 0, 1)">...
+2d9aa000</span>-2d9c8000 r-xp <span style="color: rgba(128, 0, 128, 1)">00000000</span> b3:<span style="color: rgba(128, 0, 128, 1)">01</span> <span style="color: rgba(128, 0, 128, 1)">656126</span>     /usr/lib/libv4lconvert.so.<span style="color: rgba(128, 0, 128, 1)">0.0</span>.<span style="color: rgba(128, 0, 128, 1)">0</span><span style="color: rgba(0, 0, 0, 1)">
+2d9c8000</span>-2d9c9000 ---p 0001e000 b3:<span style="color: rgba(128, 0, 128, 1)">01</span> <span style="color: rgba(128, 0, 128, 1)">656126</span>     /usr/lib/libv4lconvert.so.<span style="color: rgba(128, 0, 128, 1)">0.0</span>.<span style="color: rgba(128, 0, 128, 1)">0</span><span style="color: rgba(0, 0, 0, 1)">
+2d9c9000</span>-2d9ca000 r--p 0001e000 b3:<span style="color: rgba(128, 0, 128, 1)">01</span> <span style="color: rgba(128, 0, 128, 1)">656126</span>     /usr/lib/libv4lconvert.so.<span style="color: rgba(128, 0, 128, 1)">0.0</span>.<span style="color: rgba(128, 0, 128, 1)">0</span><span style="color: rgba(0, 0, 0, 1)">
+2d9ca000</span>-2d9cb000 rw-p 0001f000 b3:<span style="color: rgba(128, 0, 128, 1)">01</span> <span style="color: rgba(128, 0, 128, 1)">656126</span>     /usr/lib/libv4lconvert.so.<span style="color: rgba(128, 0, 128, 1)">0.0</span>.<span style="color: rgba(128, 0, 128, 1)">0</span><span style="color: rgba(0, 0, 0, 1)">
+2d9cb000</span>-2da23000 rw-p <span style="color: rgba(128, 0, 128, 1)">00000000</span> <span style="color: rgba(128, 0, 128, 1)">00</span>:<span style="color: rgba(128, 0, 128, 1)">00</span> <span style="color: rgba(128, 0, 128, 1)">0</span><span style="color: rgba(0, 0, 0, 1)">...
+3e8aa000</span>-3e90c000 rw-s <span style="color: rgba(128, 0, 128, 1)">00000000</span> <span style="color: rgba(128, 0, 128, 1)">00</span>:<span style="color: rgba(128, 0, 128, 1)">06</span> <span style="color: rgba(128, 0, 128, 1)">5243</span>       /dev/<span style="color: rgba(0, 0, 0, 1)">mem_cma
+3ea00000</span>-3ea42000 rw-p <span style="color: rgba(128, 0, 128, 1)">00000000</span> <span style="color: rgba(128, 0, 128, 1)">00</span>:<span style="color: rgba(128, 0, 128, 1)">00</span> <span style="color: rgba(128, 0, 128, 1)">0</span><span style="color: rgba(0, 0, 0, 1)"> 
+3ea42000</span>-3eb00000 ---p <span style="color: rgba(128, 0, 128, 1)">00000000</span> <span style="color: rgba(128, 0, 128, 1)">00</span>:<span style="color: rgba(128, 0, 128, 1)">00</span> <span style="color: rgba(128, 0, 128, 1)">0</span><span style="color: rgba(0, 0, 0, 1)">7fa4a000</span>-7fa6b000 rwxp <span style="color: rgba(128, 0, 128, 1)">00000000</span> <span style="color: rgba(128, 0, 128, 1)">00</span>:<span style="color: rgba(128, 0, 128, 1)">00</span> <span style="color: rgba(128, 0, 128, 1)">0</span>          [stack]--------------------------------栈的大小是可变的，但是不能超过RLIMIT_STACK规定的大小。</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<h2>3.1 堆内存</h2>
+<p>堆内存主要由malloc()/calloc()/realloc()/fre()申请释放，所以如果发生了堆泄漏就需要重点看着几个函数调用情况。</p>
+<p>malloc()对应的系统调用是brk()，但是当申请超过128KB内存时就会调用mmap()。</p>
+<p>关于堆内存管理参考：《<a id="cb_post_title_url" href="https://www.cnblogs.com/alisecurity/p/5486458.html">Linux堆内存管理深入分析(上)</a>》、《<a id="cb_post_title_url" href="https://www.cnblogs.com/alisecurity/p/5520847.html">Linux堆内存管理深入分析（下）</a>》、《<a href="https://blog.csdn.net/jin13277480598/article/details/54406980" target="_blank">对堆栈中分析的比较好的文章进行的总结</a>》、《<a href="https://blog.csdn.net/gfgdsg/article/details/42709943" target="_blank">Linux内存分配小结--malloc、brk、mmap</a>》、《<a id="cb_post_title_url" class="postTitle2" href="https://www.cnblogs.com/52php/p/5794342.html">Linux C 堆内存管理函数malloc()、calloc()、realloc()、free()详解</a>》。</p>
+<h2>3.2 栈内存</h2>
+<p>栈的地址方向是从高到低，范围由RLIMIT_STACK规定。</p>
+<p>可以通过ulimit -s查看，一般是8MB。</p>
+<p>栈相关问题多是溢出问题。</p>
+<h2>3.3 mmap映射区</h2>
+<p>重点关注mmap相关调用《<a id="cb_post_title_url" href="https://www.cnblogs.com/arnoldlu/p/8330785.html">Linux内存管理 (9)mmap</a>》、《<a id="cb_post_title_url" href="https://www.cnblogs.com/arnoldlu/p/9367253.html">Linux内存管理 (9)mmap(补充)</a>》。</p>
+<h1>4. 让maps可读性更强</h1>
+<p>通过/proc/&lt;pid&gt;/maps获取的数据可读性不强，通过脚本可以使其更容易理解。更容易找出内存消耗在哪里。</p>
+<p>在jupyter-notebook中输入如下脚本：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 0, 1)">import re
+import pandas </span><span style="color: rgba(0, 0, 255, 1)">as</span><span style="color: rgba(0, 0, 0, 1)"> pd
+import matplotlib.pyplot </span><span style="color: rgba(0, 0, 255, 1)">as</span><span style="color: rgba(0, 0, 0, 1)"> plt
+import sys
+reload(sys)
+sys.setdefaultencoding(</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">utf8</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">)
+
+maps_filename</span>=<span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">maps_aie_thd_165.txt</span><span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(0, 0, 0, 1)">
+#maps_filename</span>=<span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">maps_init.txt</span><span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(0, 0, 0, 1)">
+maps_list</span>=<span style="color: rgba(0, 0, 0, 1)">[]
+maps_file </span>= open(maps_filename, <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">rb</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">)
+maps_columns </span>= [<span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">start</span><span style="color: rgba(128, 0, 0, 1)">"</span>, <span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">end</span><span style="color: rgba(128, 0, 0, 1)">"</span>, <span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">size(KB)</span><span style="color: rgba(128, 0, 0, 1)">"</span>, <span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">filename</span><span style="color: rgba(128, 0, 0, 1)">"</span>, <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">permission</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">]
+maps_process_end</span>=<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">80000000</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">
+
+pre_end</span>=<span style="color: rgba(128, 0, 128, 1)">0</span>
+<span style="color: rgba(0, 0, 255, 1)">for</span> line <span style="color: rgba(0, 0, 255, 1)">in</span><span style="color: rgba(0, 0, 0, 1)"> maps_file:
+    #</span><span style="color: rgba(128, 0, 128, 1)">00008000</span>-0000b000 r-xp <span style="color: rgba(128, 0, 128, 1)">00000000</span> b3:<span style="color: rgba(128, 0, 128, 1)">01</span> <span style="color: rgba(128, 0, 128, 1)">1023</span>       /root/<span style="color: rgba(0, 0, 0, 1)">pidmax
+    #0000b000</span>-0000c000 r--p <span style="color: rgba(128, 0, 128, 1)">00002000</span> b3:<span style="color: rgba(128, 0, 128, 1)">01</span> <span style="color: rgba(128, 0, 128, 1)">1023</span>       /root/<span style="color: rgba(0, 0, 0, 1)">pidmax
+    #0000c000</span>-0000d000 rw-p <span style="color: rgba(128, 0, 128, 1)">00003000</span> b3:<span style="color: rgba(128, 0, 128, 1)">01</span> <span style="color: rgba(128, 0, 128, 1)">1023</span>       /root/<span style="color: rgba(0, 0, 0, 1)">pidmax
+    maps_line_fmt </span>= <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">(?P&lt;start&gt;.{8})-(?P&lt;end&gt;.{8}) (?P&lt;permission&gt;.{4}) (?P&lt;size&gt;.{8}) (?P&lt;major&gt;.{2}):(?P&lt;minor&gt;.{2}) (?P&lt;handle&gt;[0-9]*) *(?P&lt;filename&gt;.*)</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">
+    m </span>=<span style="color: rgba(0, 0, 0, 1)"> re.match(maps_line_fmt, line)
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)">(not m):
+        </span><span style="color: rgba(0, 0, 255, 1)">continue</span><span style="color: rgba(0, 0, 0, 1)">
+    start </span>= m.group(<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">start</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">)
+    end </span>= m.group(<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">end</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">)
+    permission </span>= m.group(<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">permission</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">)
+    #size </span>= m.group(<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">size</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">)
+    #major </span>= m.group(<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">major</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">)
+    #minor </span>= m.group(<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">minor</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">)
+    #handle </span>= m.group(<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">handle</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">)
+    filename </span>= m.group(<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">filename</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">)
+    
+    start_int </span>= <span style="color: rgba(0, 0, 255, 1)">int</span>(start, <span style="color: rgba(128, 0, 128, 1)">16</span><span style="color: rgba(0, 0, 0, 1)">)
+    end_int </span>= <span style="color: rgba(0, 0, 255, 1)">int</span>(end, <span style="color: rgba(128, 0, 128, 1)">16</span><span style="color: rgba(0, 0, 0, 1)">)
+
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span>(pre_end !=<span style="color: rgba(0, 0, 0, 1)"> start_int):
+        maps_list.append([ </span><span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">{:0&gt;8x}</span><span style="color: rgba(128, 0, 0, 1)">"</span>.format(pre_end), start, (start_int - pre_end)/<span style="color: rgba(128, 0, 128, 1)">1024</span>, <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">NOT USED</span><span style="color: rgba(128, 0, 0, 1)">'</span>, <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">unknown</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">])
+    #print start</span>+<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">,</span><span style="color: rgba(128, 0, 0, 1)">'</span>+end+<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">,</span><span style="color: rgba(128, 0, 0, 1)">'</span>+permission+<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">,</span><span style="color: rgba(128, 0, 0, 1)">'</span>+<span style="color: rgba(0, 0, 0, 1)">filename
+    #</span>---p r--p rw-p r-xp rwxp rw-<span style="color: rgba(0, 0, 0, 1)">s
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span> permission == <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">---p</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">:
+        permission </span>= <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">guard/thread stack</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">
+    elif (permission </span>== <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">r--p</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">):
+        permission </span>= <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">readonly var</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">
+    elif (permission </span>== <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">rw-p</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">):
+        permission </span>= <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">read/write var</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">
+    elif (permission </span>== <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">r-xp</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">):
+        permission </span>= <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">code</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">
+    elif (permission </span>== <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">rwxp</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">):
+        permission </span>= <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">heap/stack</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">
+    elif (permission </span>== <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">rw-s</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">):
+        permission </span>= <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">sharememory</span><span style="color: rgba(128, 0, 0, 1)">'</span>
+    <span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)">:
+        permission </span>= <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">unkown</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">
+    maps_list.append([start, end, (end_int </span>- start_int)/<span style="color: rgba(128, 0, 128, 1)">1024</span><span style="color: rgba(0, 0, 0, 1)">, filename, permission])
+    pre_end </span>=<span style="color: rgba(0, 0, 0, 1)"> end_int
+maps_file.close()
+maps_list.append([end, maps_process_end, (</span><span style="color: rgba(0, 0, 255, 1)">int</span>(maps_process_end, <span style="color: rgba(128, 0, 128, 1)">16</span>) - end_int)/<span style="color: rgba(128, 0, 128, 1)">1024</span>, <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">NOT USED</span><span style="color: rgba(128, 0, 0, 1)">'</span>, <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">unknown</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">])
+
+maps_pd </span>= pd.DataFrame(columns=maps_columns, data=<span style="color: rgba(0, 0, 0, 1)">maps_list)
+maps_pd.to_csv(</span><span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">maps.csv</span><span style="color: rgba(128, 0, 0, 1)">"</span>, encoding=<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">utf-8</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">)
+print </span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">Total memory =</span><span style="color: rgba(128, 0, 0, 1)">'</span>, maps_pd[<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">size(KB)</span><span style="color: rgba(128, 0, 0, 1)">'</span>].sum()/<span style="color: rgba(128, 0, 128, 1)">1024</span>,<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">(MB)</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">
+
+rectangle_width </span>= <span style="color: rgba(128, 0, 128, 1)">800</span><span style="color: rgba(0, 0, 0, 1)">
+maps_height_base </span>= <span style="color: rgba(128, 0, 128, 1)">40</span><span style="color: rgba(0, 0, 0, 1)">
+maps_height_diff </span>= <span style="color: rgba(128, 0, 128, 1)">160</span><span style="color: rgba(0, 0, 0, 1)">
+maps_size_min </span>= maps_pd[<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">size(KB)</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">].min()
+maps_size_max </span>= <span style="color: rgba(128, 0, 128, 1)">16384</span><span style="color: rgba(0, 0, 0, 1)">
+rectangle_x </span>= <span style="color: rgba(128, 0, 128, 1)">50</span><span style="color: rgba(0, 0, 0, 1)">
+rectangle_y </span>= <span style="color: rgba(128, 0, 128, 1)">50</span><span style="color: rgba(0, 0, 0, 1)">
+
+fig </span>=<span style="color: rgba(0, 0, 0, 1)"> plt.figure()
+
+ax </span>= fig.add_subplot(<span style="color: rgba(128, 0, 128, 1)">111</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 0, 255, 1)">for</span> index, maps <span style="color: rgba(0, 0, 255, 1)">in</span><span style="color: rgba(0, 0, 0, 1)"> maps_pd.iterrows():
+    rectangle_height </span>= (<span style="color: rgba(0, 0, 255, 1)">float</span>)(min(maps_size_max, maps[<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">size(KB)</span><span style="color: rgba(128, 0, 0, 1)">'</span>]) - maps_size_min)*maps_height_diff/maps_size_max +<span style="color: rgba(0, 0, 0, 1)"> maps_height_base
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span> maps[<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">filename</span><span style="color: rgba(128, 0, 0, 1)">'</span>] == <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">NOT USED</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">:
+        color </span>= <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">red</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">
+        text_color </span>= <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">white</span><span style="color: rgba(128, 0, 0, 1)">'</span>
+    <span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)">:
+        color_value </span>= (<span style="color: rgba(0, 0, 255, 1)">int</span>)((<span style="color: rgba(0, 0, 255, 1)">float</span>)(min(maps_size_max, maps[<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">size(KB)</span><span style="color: rgba(128, 0, 0, 1)">'</span>]) - maps_size_min)/maps_size_max*<span style="color: rgba(128, 0, 128, 1)">0xffffff</span><span style="color: rgba(0, 0, 0, 1)">)
+        color </span>= <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">#%06x</span><span style="color: rgba(128, 0, 0, 1)">'</span>%<span style="color: rgba(0, 0, 0, 1)">(color_value)
+        text_color </span>= <span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">#%06x</span><span style="color: rgba(128, 0, 0, 1)">'</span>%(<span style="color: rgba(128, 0, 128, 1)">0xffffff</span> -<span style="color: rgba(0, 0, 0, 1)"> color_value)
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span> maps[<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">size(KB)</span><span style="color: rgba(128, 0, 0, 1)">'</span>] &gt;= <span style="color: rgba(128, 0, 128, 1)">1024</span><span style="color: rgba(0, 0, 0, 1)">:
+        maps_label </span>= <span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">(%.2fMB)%s(%s)</span><span style="color: rgba(128, 0, 0, 1)">"</span>%((<span style="color: rgba(0, 0, 255, 1)">float</span>)(maps[<span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">size(KB)</span><span style="color: rgba(128, 0, 0, 1)">"</span>])/<span style="color: rgba(128, 0, 128, 1)">1024</span>, maps[<span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">filename</span><span style="color: rgba(128, 0, 0, 1)">"</span>], maps[<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">permission</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">])
+    </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)">:
+        maps_label </span>= <span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">(%dKB)%s(%s)</span><span style="color: rgba(128, 0, 0, 1)">"</span>%(maps[<span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">size(KB)</span><span style="color: rgba(128, 0, 0, 1)">"</span>], maps[<span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">filename</span><span style="color: rgba(128, 0, 0, 1)">"</span>], maps[<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">permission</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">])
+    #print rectangle_x, rectangle_y, rectangle_width, rectangle_height, maps[</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">size(KB)</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">], color
+    plt.bar(rectangle_x, rectangle_height, width</span>=rectangle_width, bottom=rectangle_y, align=<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">edge</span><span style="color: rgba(128, 0, 0, 1)">'</span>,facecolor=color, linewidth=<span style="color: rgba(128, 0, 128, 1)">1</span>, edgecolor=<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">red</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">)
+    plt.text(rectangle_x</span>+<span style="color: rgba(128, 0, 128, 1)">10</span>, rectangle_y+rectangle_height/<span style="color: rgba(128, 0, 128, 1)">2</span>, maps_label, horizontalalignment=<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">left</span><span style="color: rgba(128, 0, 0, 1)">'</span>, verticalalignment=<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">center</span><span style="color: rgba(128, 0, 0, 1)">'</span>, color=text_color, fontsize=<span style="color: rgba(128, 0, 128, 1)">12</span><span style="color: rgba(0, 0, 0, 1)">)
+
+    rectangle_y </span>+=<span style="color: rgba(0, 0, 0, 1)"> rectangle_height
+
+plt.xlim(</span><span style="color: rgba(128, 0, 128, 1)">0</span>, rectangle_width+<span style="color: rgba(128, 0, 128, 1)">100</span><span style="color: rgba(0, 0, 0, 1)">)
+plt.ylim(</span><span style="color: rgba(128, 0, 128, 1)">0</span>, rectangle_y+<span style="color: rgba(128, 0, 128, 1)">100</span><span style="color: rgba(0, 0, 0, 1)">)
+plt.axis(</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">off</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(0, 0, 0, 1)">)
+    
+#plt.show()
+fig.set_size_inches(rectangle_width</span>/<span style="color: rgba(128, 0, 128, 1)">100</span>, rectangle_y/<span style="color: rgba(128, 0, 128, 1)">100</span><span style="color: rgba(0, 0, 0, 1)">)
+fig.savefig(</span><span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">maps.svg</span><span style="color: rgba(128, 0, 0, 1)">'</span>, dpi=<span style="color: rgba(128, 0, 128, 1)">120</span>, bbox_inches=<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">tight</span><span style="color: rgba(128, 0, 0, 1)">'</span>, format=<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">svg</span><span style="color: rgba(128, 0, 0, 1)">'</span>)</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>输出两份文档：maps.csv和maps.svg，一个是对每个vma进行文本统计，一个是将maps图形化。</p>
+<p>1. 查看未使用区域，从大到小排列。</p>
+<p>可以看出进程虚拟地址空间的空闲大小，以及分布在哪里。</p>
+<p><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/1083701-20200117112552756-1650602977.png" alt="" style="display: block; margin-left: auto; margin-right: auto" class="medium-zoom-image"></p>
+<p>2. 查看已使用区域，从大到小排列。</p>
+<p>可以看出进程虚拟内存都被谁使用了，是否有异常。</p>
+<p><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/1083701-20200117112923648-1015281835.png" alt="" style="display: block; margin-left: auto; margin-right: auto" class="medium-zoom-image"></p>
+<p>3. maps图形化</p>
+<p>未使用部分用红色高亮显示，高度根据大小响应变化。</p>
+<p>其他模块颜色和大小都根据模块变化。</p>
+<p>&nbsp;<img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/1083701-20200117114534627-540868527.png" alt="" style="display: block; margin-left: auto; margin-right: auto" class="medium-zoom-image"></p>
+<p>&nbsp;参考资料：《<a href="https://blog.csdn.net/freeelinux/article/details/53782986" target="_blank">Linux虚拟地址空间布局以及进程栈和线程栈总结</a>》</p>
+</div>
+<div id="MySignature">
+    联系方式:arnoldlu@qq.com
+</div>
+<div class="clear"></div>
+<div id="blog_post_info_block"><div id="BlogPostCategory">
+    分类: 
+            <a href="https://www.cnblogs.com/arnoldlu/category/926714.html" target="_blank">Linux相关学习总结</a>,             <a href="https://www.cnblogs.com/arnoldlu/category/1132616.html" target="_blank">Linux内存管理</a></div>
+
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(10272466,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow(&#39;421fcf3e-89c6-e611-845c-ac853d9f53ac&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/arnoldlu/" target="_blank"><img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/sample_face.gif" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/arnoldlu/">ArnoldLu</a><br>
+            <a href="https://home.cnblogs.com/u/arnoldlu/followees/">关注 - 0</a><br>
+            <a href="https://home.cnblogs.com/u/arnoldlu/followers/">粉丝 - 212</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;421fcf3e-89c6-e611-845c-ac853d9f53ac&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(10272466,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">4</span>
+    </div>
+    <div class="buryit" onclick="votePost(10272466,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/arnoldlu/p/10762009.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/arnoldlu/p/10762009.html" title="发布于 2019-04-24 14:03">Linux和Uboot下eMMC boot分区读写</a>
+    <br>
+    <a href="https://www.cnblogs.com/arnoldlu/p/10815908.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/arnoldlu/p/10815908.html" title="发布于 2019-05-05 00:00">非法指令(Illegal Instruction)问题定位</a>
+
+</div>
+</div>
+        </div>
+        <p class="postfoot">
+            posted on 
+<span id="post-date">2019-04-30 00:00</span>&nbsp;
+<a href="https://www.cnblogs.com/arnoldlu/">ArnoldLu</a>&nbsp;
+阅读(<span id="post_view_count">12648</span>)&nbsp;
+评论(<span id="post_comment_count">0</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=10272466" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(10272466);return false;">收藏</a>&nbsp;
+<a href="javascript:void(0)" onclick="reportManager.report({ currentUserId: &#39;&#39;, targetType: &#39;blogPost&#39;, targetId: &#39;10272466&#39;, targetLink: &#39;https://www.cnblogs.com/arnoldlu/p/10272466.html&#39;, title: &#39;/proc/&amp;lt;pid&amp;gt;/maps简要分析&#39; })">举报</a>
+        </p>
+    </div>
+</div>
+
+
+<script src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/highlight.min.js" async="" onload="markdown_highlight()"></script>
+<script>
+    var allowComments = true, cb_blogId = 323754, cb_blogApp = 'arnoldlu', cb_blogUserGuid = '421fcf3e-89c6-e611-845c-ac853d9f53ac';
+    var cb_entryId = 10272466, cb_entryCreatedDate = '2019-04-30 00:00', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="https://www.cnblogs.com/arnoldlu/p/10272466.html#" onclick="return RefreshPage();">刷新页面</a><a href="https://www.cnblogs.com/arnoldlu/p/10272466.html#top">返回顶部</a></div>
+    <div id="comment_form_container" style="visibility: visible;"><div class="login_tips">
+    登录后才能查看或发表评论，立即 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return account.login(&#39;!comments&#39;);">登录</a> 或者
+    <a href="https://www.cnblogs.com/">逛逛</a> 博客园首页
+</div>
+</div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="https://www.cnblogs.com/cmt/p/15375689.html" target="_blank" onclick="gtag(&#39;event&#39;, &#39;click&#39;, {&#39;event_category&#39;: &#39;ad&#39;, &#39;event_label&#39;: &#39;T2-并行科技&#39;})">【推荐】并行超算云面向博客园粉丝推出“免费算力限时申领”特别活动</a><br><a href="http://www.uccpsoft.com/index.htm" target="_blank" onclick="gtag(&#39;event&#39;, &#39;click&#39;, {&#39;event_category&#39;: &#39;ad&#39;, &#39;event_label&#39;: &#39;T2-ucancode&#39;})">【推荐】跨平台组态\工控\仿真\CAD 50万行C++源码全开放免费下载！</a><br><a href="https://brands.cnblogs.com/huawei/p/2357" target="_blank" onclick="gtag(&#39;event&#39;, &#39;click&#39;, {&#39;event_category&#39;: &#39;ad&#39;, &#39;event_label&#39;: &#39;T2-华为专区&#39;})">【推荐】华为全面助力青少年编程教育普及，花瓣少儿编程正式上线</a><br></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+             <a onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;banner&#39;, &#39;click&#39;, &#39;Pangle-C1&#39;)" target="_blank" rel="nofollow" href="https://c.gridsumdissector.com/r/?gid=gad_545_mzyfo0un&amp;ck=46&amp;adk=566&amp;autorefresh=__AUTOREFRESH__">
+                <img style="width: 300px; height: 250px;" src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/35695-20211008160624813-1694591598.jpg" alt="" onload="impressC1()">
+             </a>
+    </div>
+    <div id="under_post_card1"><div class="under-post-card">
+<b>编辑推荐：</b>
+<br>
+
+· <a href="https://www.cnblogs.com/arthinking/p/15422958.html" target="_blank">消息队列那么多，为什么建议深入了解下RabbitMQ？</a>
+    <br>
+· <a href="https://www.cnblogs.com/yexiaochai/p/15431566.html" target="_blank">技术管理进阶——管人还是管事？</a>
+    <br>
+· <a href="https://www.cnblogs.com/jackyfei/p/15423513.html" target="_blank">以终为始：如何让你的开发符合预期</a>
+    <br>
+· <a href="https://www.cnblogs.com/chejiangyi/p/15420637.html" target="_blank">五个维度打造研发管理体系</a>
+    <br>
+· <a href="https://www.cnblogs.com/SivilTaram/p/semantic_parsing.html" target="_blank"> 不会SQL也能做数据分析？浅谈语义解析领域的机会与挑战 </a>
+    <br>
+</div></div>
+    <div id="under_post_card2"><div class="itnews under-post-card">
+    <b>最新新闻</b>：
+    <br>
+ ·          <a href="https://news.cnblogs.com/n/704545/" target="_blank">跟你聊得这么投缘，你却说自己不是人？！（2021-10-23 17:39）</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/704544/" target="_blank">艾伦AI研究所发布最强zero-shot免费问答模型「金刚鹦鹉」：参数量小16倍，比GPT-3问答更强（2021-10-23 17:20）</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/704543/" target="_blank">武装机器狗不会自主杀人，机器狗公司CEO：监管武器是政府的事（2021-10-23 17:13）</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/704542/" target="_blank">网页版VS Code来了，特斯拉Xbox手机都能用，随时随地写bug（2021-10-23 17:00）</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/704541/" target="_blank">实锤举报！复旦硕士被爆「英译中」9年前顶会论文（附对比）（2021-10-23 16:45）</a>
+        <br>
+    » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
+</div></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+
+
+</div>
+</div>
+<div id="leftmenu">
+
+
+<h3>导航</h3>
+<ul>
+    <li>
+        <a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+
+    </li>
+    <li>
+        
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/arnoldlu/">
+首页</a>
+
+    </li>
+    <li>
+        
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+
+    </li>
+    <li>
+        
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/ArnoldLu">
+联系</a>
+    </li>
+    <li>
+        
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/arnoldlu/rss/">
+订阅</a>
+        
+<a id="blog_nav_rss_image" href="https://www.cnblogs.com/arnoldlu/rss/">
+    <img src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/xml.gif" alt="订阅">
+</a>
+    </li>
+    <li>
+        
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+
+    </li>
+</ul>
+
+
+<div id="blog-calendar" style="">
+
+<table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar" border="0">
+    <tbody>
+        <tr>
+            <td colspan="7">
+                <table class="CalTitle" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2021/09/23&#39;); return false;">&lt;</a>
+                            </td>
+                            <td align="center">2021年10月</td>
+                            <td align="right" class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2021/11/23&#39;); return false;">&gt;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    <tr>
+        <th class="CalDayHeader" align="center" abbr="日" scope="col">日</th>
+        <th class="CalDayHeader" align="center" abbr="一" scope="col">一</th>
+        <th class="CalDayHeader" align="center" abbr="二" scope="col">二</th>
+        <th class="CalDayHeader" align="center" abbr="三" scope="col">三</th>
+        <th class="CalDayHeader" align="center" abbr="四" scope="col">四</th>
+        <th class="CalDayHeader" align="center" abbr="五" scope="col">五</th>
+        <th class="CalDayHeader" align="center" abbr="六" scope="col">六</th>
+    </tr>
+            <tr>
+                            <td class="CalOtherMonthDay" align="center">26</td>
+                            <td class="CalOtherMonthDay" align="center">27</td>
+                            <td class="CalOtherMonthDay" align="center">28</td>
+                            <td class="CalOtherMonthDay" align="center">29</td>
+                            <td class="CalOtherMonthDay" align="center">30</td>
+                        <td class="" align="center">
+                            1
+                        </td>
+                    <td class="CalWeekendDay" align="center">
+                        2
+                    </td>
+            </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            3
+                        </td>
+                            <td class="" align="center">
+                                4
+                            </td>
+                            <td class="" align="center">
+                                5
+                            </td>
+                            <td class="" align="center">
+                                6
+                            </td>
+                            <td class="" align="center">
+                                7
+                            </td>
+                            <td class="" align="center">
+                                8
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            9
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            10
+                        </td>
+                            <td class="" align="center">
+                                11
+                            </td>
+                            <td class="" align="center">
+                                12
+                            </td>
+                            <td class="" align="center">
+                                13
+                            </td>
+                            <td class="" align="center">
+                                14
+                            </td>
+                            <td class="" align="center">
+                                15
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            16
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            17
+                        </td>
+                            <td class="" align="center">
+                                18
+                            </td>
+                            <td class="" align="center">
+                                19
+                            </td>
+                            <td class="" align="center">
+                                20
+                            </td>
+                            <td class="" align="center">
+                                21
+                            </td>
+                            <td class="" align="center">
+                                22
+                            </td>
+                        <td class="CalTodayDay" align="center">
+                            23
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            24
+                        </td>
+                            <td class="" align="center">
+                                25
+                            </td>
+                            <td class="" align="center">
+                                26
+                            </td>
+                            <td class="" align="center">
+                                27
+                            </td>
+                            <td class="" align="center">
+                                28
+                            </td>
+                            <td class="" align="center">
+                                29
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            30
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            31
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                1
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                2
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                3
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                4
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                5
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            6
+                        </td>
+                </tr>
+    </tbody>
+</table></div><script>loadBlogDefaultCalendar();</script>
+<div id="sidebar_news" class="newsItem"><meta name="vs_showGrid" content="False">
+<h3>公告</h3>
+
+<div id="blog-news">
+    
+    <div id="profile_block">
+        昵称：
+        <a href="https://home.cnblogs.com/u/arnoldlu/">
+            ArnoldLu
+        </a>
+        <br>
+        园龄：
+        <a href="https://home.cnblogs.com/u/arnoldlu/" title="入园时间：2016-12-20">
+            4年10个月
+        </a>
+        <br>
+        粉丝：
+        <a href="https://home.cnblogs.com/u/arnoldlu/followers/">
+            212
+        </a>
+        <br>
+        关注：
+        <a href="https://home.cnblogs.com/u/arnoldlu/followees/">
+            0
+        </a>
+        <div id="p_b_follow">
+<a href="javascript:void(0)" onclick="follow(&#39;421fcf3e-89c6-e611-845c-ac853d9f53ac&#39;)">+加关注</a></div>
+        <script>getFollowStatus('421fcf3e-89c6-e611-845c-ac853d9f53ac');</script>
+    </div>
+</div>
+
+</div>
+<div id="sidebar_c3"></div>
+<div id="blog-sidecolumn"><!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            <div id="widget_my_zzk" class="div_my_zzk">
+                <input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk">
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div id="sidebar_shortcut" class="sidebar-block">
+<h3 class="catListTitle">
+常用链接
+</h3>
+<ul>
+    
+<li><a href="https://www.cnblogs.com/arnoldlu/p/" title="我的博客的随笔列表">我的随笔</a></li>
+<li><a href="https://www.cnblogs.com/arnoldlu/MyComments.html" title="我的发表过的评论列表">我的评论</a></li>
+<li><a href="https://www.cnblogs.com/arnoldlu/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li>
+<li><a href="https://www.cnblogs.com/arnoldlu/RecentComments.html" title="我的博客的评论列表">最新评论</a></li>
+<li><a href="https://www.cnblogs.com/arnoldlu/tag/" title="我的博客的标签列表">我的标签</a></li>
+
+</ul>
+</div>
+
+<!-- 最新随笔 -->
+<div id="sidebar_recentposts" class="sidebar-block">
+<h3 class="catListTitle">最新随笔</h3>
+<div class="RecentComment" id="RecentPosts">
+    <ul style="word-break:break-all">
+                <li>
+                    
+<a href="https://www.cnblogs.com/arnoldlu/p/14127860.html">1.FreeRTOS相关教程</a>
+
+                </li>
+                <li>
+                    
+<a href="https://www.cnblogs.com/arnoldlu/p/14522564.html">2.在CPU Hit/MIss时，Cache和Main Memory之间交互策略</a>
+
+                </li>
+                <li>
+                    
+<a href="https://www.cnblogs.com/arnoldlu/p/14332530.html">3.ARM Trusted Firmware分析——镜像签名/加密/生成、解析/解密/验签</a>
+
+                </li>
+                <li>
+                    
+<a href="https://www.cnblogs.com/arnoldlu/p/14382157.html">4.ARM Trusted Firmware分析——固件升级(FWU)</a>
+
+                </li>
+                <li>
+                    
+<a href="https://www.cnblogs.com/arnoldlu/p/14301334.html">5.ARM Trusted Firmware分析——TBBR、TBB、FIP-TBB</a>
+
+                </li>
+                <li>
+                    
+<a href="https://www.cnblogs.com/arnoldlu/p/14070629.html">6.ARM CoreSight Debug and Trace</a>
+
+                </li>
+                <li>
+                    
+<a href="https://www.cnblogs.com/arnoldlu/p/14299631.html">7.ARM Trusted Firmware分析——编译选项</a>
+
+                </li>
+                <li>
+                    
+<a href="https://www.cnblogs.com/arnoldlu/p/14149912.html">8.QEMU搭建虚拟化开发环境(QEMU 5.2.0)</a>
+
+                </li>
+                <li>
+                    
+<a href="https://www.cnblogs.com/arnoldlu/p/14245834.html">9.ARMv8-A QEMU运行OP-TEE/ATF环境搭建</a>
+
+                </li>
+                <li>
+                    
+<a href="https://www.cnblogs.com/arnoldlu/p/14243491.html">10.ARM工具链选择参考</a>
+
+                </li>
+    </ul>
+</div></div>
+
+<!-- 我的标签 -->
+<div id="sidebar_toptags" class="sidebar-block"></div>
+
+<!-- 积分与排名 -->
+<div id="sidebar_scorerank" class="sidebar-block"><h3>积分与排名</h3>
+<ul>
+    <li>
+        积分 - 
+534121
+    </li>
+    <li>
+        排名 - 
+845
+    </li>
+</ul></div>
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+
+    <h3>
+        
+随笔分类
+<span style="font-size:11px;font-weight:normal">(242)</span>
+
+
+    </h3>
+    <ul>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/926715.html" rel="" target="">
+    Android相关学习总结(3)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/1907573.html" rel="" target="">
+    ARM Ecosystem(9)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/1919344.html" rel="" target="">
+    ARM Trusted Firmware(5)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/1329328.html" rel="" target="">
+    Linux Debug(26)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/1470315.html" rel="" target="">
+    Linux/UNIX系统编程手册(16)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/1243302.html" rel="" target="">
+    Linux并发与同步专题(5)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/1117994.html" rel="" target="">
+    Linux电源管理(14)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/1167585.html" rel="" target="">
+    Linux进程管理(6)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/1132616.html" rel="" target="">
+    Linux内存管理(32)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/1117986.html" rel="" target="">
+    Linux时间子系统(28)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/926714.html" rel="" target="">
+    Linux相关学习总结(53)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/1118000.html" rel="" target="">
+    Linux虚拟化KVM(7)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/1117988.html" rel="" target="">
+    Linux中断子系统(14)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/1130620.html" rel="" target="">
+    Python(3)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/1117974.html" rel="" target="">
+    Zephyr(6)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/category/1138562.html" rel="" target="">
+    性能优化(15)
+</a>
+
+            </li>
+        
+    </ul>
+    <h3>
+        
+随笔档案
+<span style="font-size:11px;font-weight:normal">(256)</span>
+
+
+    </h3>
+    <ul>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2021/06.html" rel="" target="">
+    2021年6月(1)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2021/03.html" rel="" target="">
+    2021年3月(1)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2021/02.html" rel="" target="">
+    2021年2月(2)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2021/01.html" rel="" target="">
+    2021年1月(7)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2020/12.html" rel="" target="">
+    2020年12月(6)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2020/11.html" rel="" target="">
+    2020年11月(5)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2020/10.html" rel="" target="">
+    2020年10月(4)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2020/09.html" rel="" target="">
+    2020年9月(2)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2020/08.html" rel="" target="">
+    2020年8月(3)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2020/07.html" rel="" target="">
+    2020年7月(2)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2020/06.html" rel="" target="">
+    2020年6月(2)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2020/05.html" rel="" target="">
+    2020年5月(1)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2020/04.html" rel="" target="">
+    2020年4月(1)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2020/03.html" rel="" target="">
+    2020年3月(3)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2020/02.html" rel="" target="">
+    2020年2月(2)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2020/01.html" rel="" target="">
+    2020年1月(3)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2019/12.html" rel="" target="">
+    2019年12月(3)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2019/11.html" rel="" target="">
+    2019年11月(1)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2019/10.html" rel="" target="">
+    2019年10月(3)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2019/09.html" rel="" target="">
+    2019年9月(5)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2019/08.html" rel="" target="">
+    2019年8月(1)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2019/07.html" rel="" target="">
+    2019年7月(9)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2019/06.html" rel="" target="">
+    2019年6月(2)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2019/05.html" rel="" target="">
+    2019年5月(5)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2019/04.html" rel="" target="">
+    2019年4月(5)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2019/03.html" rel="" target="">
+    2019年3月(3)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2019/02.html" rel="" target="">
+    2019年2月(2)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2019/01.html" rel="" target="">
+    2019年1月(6)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2018/12.html" rel="" target="">
+    2018年12月(1)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2018/11.html" rel="" target="">
+    2018年11月(4)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2018/10.html" rel="" target="">
+    2018年10月(2)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2018/09.html" rel="" target="">
+    2018年9月(4)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2018/08.html" rel="" target="">
+    2018年8月(4)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2018/07.html" rel="" target="">
+    2018年7月(8)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2018/06.html" rel="" target="">
+    2018年6月(2)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2018/05.html" rel="" target="">
+    2018年5月(7)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2018/04.html" rel="" target="">
+    2018年4月(4)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2018/03.html" rel="" target="">
+    2018年3月(2)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2018/02.html" rel="" target="">
+    2018年2月(9)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2018/01.html" rel="" target="">
+    2018年1月(7)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="false" style="display: none">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2017/12.html" rel="" target="">
+    2017年12月(8)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="false" style="display: none">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2017/11.html" rel="" target="">
+    2017年11月(6)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="false" style="display: none">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2017/10.html" rel="" target="">
+    2017年10月(8)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="false" style="display: none">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2017/09.html" rel="" target="">
+    2017年9月(13)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="false" style="display: none">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2017/08.html" rel="" target="">
+    2017年8月(3)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="false" style="display: none">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2017/07.html" rel="" target="">
+    2017年7月(6)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="false" style="display: none">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2017/06.html" rel="" target="">
+    2017年6月(20)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="false" style="display: none">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2017/05.html" rel="" target="">
+    2017年5月(7)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="false" style="display: none">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2017/04.html" rel="" target="">
+    2017年4月(4)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="false" style="display: none">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2017/03.html" rel="" target="">
+    2017年3月(12)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="false" style="display: none">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2017/02.html" rel="" target="">
+    2017年2月(5)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="false" style="display: none">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2017/01.html" rel="" target="">
+    2017年1月(7)
+</a>
+
+            </li>
+            <li data-category-list-item-visible="false" style="display: none">
+                
+<a href="https://www.cnblogs.com/arnoldlu/archive/2016/12.html" rel="" target="">
+    2016年12月(13)
+</a>
+
+            </li>
+        <li><a href="javascript:void(0)" onclick="sideColumnManager.loadMore(this)">更多</a></li>
+    </ul>
+</div>
+
+<!-- 最新评论 -->
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block">
+<div id="topview_posts_wrap">
+    <h3 class="catListTitle">阅读排行榜</h3>
+    <div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/6241297.html">
+                            1. 系统级性能分析工具perf的介绍与使用(149269)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/9633254.html">
+                            2. 调试器GDB的基本使用方法(93085)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/9553995.html">
+                            3. buildroot使用介绍(61088)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/9462221.html">
+                            4. Linux CPU占用率监控工具小结(58588)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/7904242.html">
+                            5. NB-IoT协议及其PSM(27654)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/10815908.html">
+                            6. 非法指令(Illegal Instruction)问题定位(23734)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/7553978.html">
+                            7. 数据分析之---Python可视化工具(23649)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/7234443.html">
+                            8. Linux时间子系统之三：jiffies(23035)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/8659981.html">
+                            9. Linux中断管理 (1)Linux中断管理机制(22502)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/6497837.html">
+                            10. 开源HTTP解析器---http-parser和fast-http(19093)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div></div>
+
+<!-- 评论排行榜 -->
+<div id="sidebar_topcommentedposts" class="sidebar-block"><div id="topfeedback_posts_wrap">
+    <h3 class="catListTitle">评论排行榜</h3>
+    <div id="TopFeedbackPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/9553995.html">
+                            1. buildroot使用介绍(4)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/8068286.html">
+                            2. Linux内存管理 (3)内核内存的布局图(2)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/6497837.html">
+                            3. 开源HTTP解析器---http-parser和fast-http(2)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/14127860.html">
+                            4. FreeRTOS相关教程(1)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/13993375.html">
+                            5. 《TrustZone for Armv8-A》阅读笔记(1)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/11286841.html">
+                            6. bootrom/spl/uboot/linux逐级加载是如何实现的？(1)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/11207142.html">
+                            7. Linux Thermal Framework分析及实施(1)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/11160510.html">
+                            8. coredump配置、产生、分析以及分析示例(1)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/10986583.html">
+                            9. ramdisk配置、解压、创建rootfs、启动简单分析(1)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/arnoldlu/p/10185126.html">
+                            10. sigsuspend()阻塞：异步信号SIGIO为什么会被截胡？(1)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div></div>
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block">
+<div id="topdigg_posts_wrap">
+    <div class="catListView">
+        <h3 class="catListTitle">推荐排行榜</h3>
+        <div id="TopDiggPostsBlock">
+            <ul style="word-break: break-all">
+                        <li>
+                            <a href="https://www.cnblogs.com/arnoldlu/p/6241297.html">
+                                1. 系统级性能分析工具perf的介绍与使用(8)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/arnoldlu/p/9633254.html">
+                                2. 调试器GDB的基本使用方法(6)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/arnoldlu/p/11207142.html">
+                                3. Linux Thermal Framework分析及实施(4)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/arnoldlu/p/10272466.html">
+                                4. /proc/&lt;pid&gt;/maps简要分析(4)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/arnoldlu/p/8051674.html">
+                                5. Linux内存管理专题(4)
+                            </a>
+                        </li>
+            </ul>
+        </div>
+    </div>
+</div></div><div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap" class="RecentComment">
+    <h3 class="catListTitle">最新评论</h3>
+    <div class="RecentCommentBlock">
+        <ul>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/arnoldlu/p/14127860.html">1. Re:FreeRTOS相关教程</a></li>
+                    <li class="recent_comment_body"><p>链接中的博客写的很好！</p>
+</li>
+                    <li class="recent_comment_author">--sundavid</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/arnoldlu/p/10986583.html">2. Re:ramdisk配置、解压、创建rootfs、启动简单分析</a></li>
+                    <li class="recent_comment_body"><p>写的很赞，学习了。</p>
+</li>
+                    <li class="recent_comment_author">--yuhaojin</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/arnoldlu/p/8879800.html">3. Re:Linux内核访问用户空间文件：get_fs()/set_fs()的使用</a></li>
+                    <li class="recent_comment_body"><p>学习了</p>
+</li>
+                    <li class="recent_comment_author">--DoOrDie</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/arnoldlu/p/9553995.html">4. Re:buildroot使用介绍</a></li>
+                    <li class="recent_comment_body"><p>非常感谢，写的非常详细！！！</p>
+</li>
+                    <li class="recent_comment_author">--ucsd</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/arnoldlu/p/11286841.html">5. Re:bootrom/spl/uboot/linux逐级加载是如何实现的？</a></li>
+                    <li class="recent_comment_body"><p>CSKY 中天微？？？</p>
+</li>
+                    <li class="recent_comment_author">--心火合滨</li>
+        </ul>
+    </div>
+</div></div>
+
+
+</div>
+                    <script>loadBlogSideColumn();</script>
+
+</div>
+</div>
+<div class="clear"></div>
+<div id="footer">
+<p id="footer">
+	Powered by: 
+	<br>
+	
+	<a href="https://www.cnblogs.com/" id="footer_site_link">博客园</a>
+	<br>
+	Copyright © 2021 ArnoldLu
+<br><span id="poweredby">Powered by .NET 6 on Kubernetes</span>
+
+</p>
+
+
+</div>
+</div>
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8FO3GXnjClZGrNGr2Ic8Z1r0ym0Mls2AMWu1uo97pTxqjJ_cR-iyakRAQpnXOeakoaArEg7afQ6N5JZpaRRWbMf7Lc8Mvdt9JPGQzFdw35efDlOQV8jp8ny4ku3cTcrPkyl63RVwGBKcK3XJ4ejb5Lk">
+    <script async="" src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/js"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    var kv = getGACustom();
+    if (kv) {
+        gtag('set', kv);
+    }
+    gtag('config', 'UA-476124-1');
+    </script>
+    <script defer="" src="./_proc__pid__maps简要分析 - ArnoldLu - 博客园_files/hm.js"></script>
+
+
+</body></html>

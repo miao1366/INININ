@@ -66,3 +66,33 @@ ptrdiff_t   size_t   wchar_t   	NULL   	offsetof(type, member-designator)
 24  https://www.jianshu.com/p/e62cc5f7dabf     //函数头文件对应
 
 25 <limits.h>中有INT_MAX和INT_MIN的宏
+            TRIs
+           //21. 用户数据分析，拥堵场景触发   
+            REF_TRIGGER_TIME(intervene) = haomo::hios::time::timestamp();
+            ret |= _co->regist_condition("check_intervene",
+                                         std::make_shared<ConditionDefine>(ConditionDefine::Type::BOOL,
+           [this](const std::string &topic, const std::vector<std::string> &params) -> ConditionDefine::Value
+           {
+               ConditionDefine::Value r;
+               r.is_valid = true;
+               r.val_bool = false;
+               uint64_t now = haomo::hios::time::timestamp();
+               auto fetch_data = ::haomo::hios::dao::msg::history_between("vcan_ecm_data", REF_TRIGGER_TIME(intervene), now);
+               REF_TRIGGER_TIME(intervene) = now;
+               std::reverse(fetch_data.begin(), fetch_data.end());
+               for (auto &data : fetch_data) {
+                   haomo::hios::VcanEcmMsgBus *p_data = dynamic_cast<haomo::hios::VcanEcmMsgBus *>(data.get());
+                   if (!p_data) {
+                       continue;
+                   }
+                   if((p_data->drv_eng_trq_req() > 0.1 ||  p_data->drv_eng_trq_req() < -0.1) && _intervene_last_state == false) {
+                       r.val_bool = true;
+                   }
+                   if (p_data->drv_eng_trq_req() > 0.1 ||  p_data->drv_eng_trq_req() < -0.1) {
+                         _intervene_last_state = true;
+                   } else {
+                         _intervene_last_state = false;
+                   }
+               }
+               return r;
+           }));

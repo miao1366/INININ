@@ -441,7 +441,7 @@ rules : [
     }
 ]
 
-26.     182.92.89.135 
+26.     182.92.89.135   haomo    haomo
         sudo docker run -it --privileged=true --shm-size=4g --net=host -v /home/haomo/cmm:/home  --name pcb a8d3c83513f9
         message LidarScanPb
     {   

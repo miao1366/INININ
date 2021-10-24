@@ -627,3 +627,62 @@ linux抢占发生的时间
     如果失败的锁操作(contended lock requests)过多的话就会浪费很多的时间进行空等待)。
 （3）更保险的方法或许是先（保守的）使用 Mutex，然后如果对性能还有进一步的需求，可以尝试使用spin lock进行调优。毕竟我们的程序不像Linux kernel
      那样对性能需求那么高(Linux Kernel最常用的锁操作是spin lock和rw lock)。
+
+futex 
+    futex是一个高效的同步组件，futex由一个内核态的队列和一个用户态的integer构成，有竞争时会放到等待队列供后面唤醒，整个操作主要用到了自旋锁来保护临界区。
+    基于futex构造锁到时候一个典型的模式是先通过对一个原子变量进行cas操作尝试直接获取锁，如果没竞争直接返回，有竞争调用futex_wait。
+    简单来说，futex主要包括等待和唤醒两个方法：futex_wait和futex_wake，简化后的定义如下
+    
+    //uaddr指向一个地址，val代表这个地址期待的值，当*uaddr==val时，才会进行wait
+    int futex_wait(int *uaddr, int val);
+    //唤醒n个在uaddr指向的锁变量上挂起等待的进程
+    int futex_wake(int *uaddr, int n);
+
+    1) futex_wait：
+        加自旋锁
+        检测*uaddr是否等于val，如果不相等则会立即返回
+        将进程状态设置为TASK_INTERRUPTIBLE
+        将当期进程插入到等待队列中
+        释放自旋锁
+        创建定时任务：当超过一定时间还没被唤醒时，将进程唤醒
+        挂起当前进程
+    2) futex_wake：
+        找到uaddr对应的futex_hash_bucket
+        对其加自旋锁
+        遍历f链表，找到uaddr对应的节点
+        调用wake_futex唤起等待的进程
+        释放自旋锁
+    
+    butex
+    
+
+    我们都知道可以通过/proc/$pid/来获取指定进程的信息，例如内存映射、CPU绑定信息等等。如果某个进程想要获取本进程的系统信息，
+    就可以通过进程的pid来访问/proc/$pid/目录。但是这个方法还需要获取进程pid，在fork、daemon等情况下pid还可能发生变化。
+    为了更方便的获取本进程的信息，linux提供了/proc/self/目录，这个目录比较独特，不同的进程访问该目录时获得的信息是不同的，
+    内容等价于/proc/本进程pid/。进程可以通过访问/proc/self/目录来获取自己的系统信息，而不用每次都获取pid
+
+    定位内存泄漏基本上是从宏观到微观，进而定位到代码位置。
+    从/proc/meminfo可以看到整个系统内存消耗情况，使用top可以看到每个进程的VIRT(虚拟内存)和RES(实际占用内存)，基本上就可以将泄漏内存定位到进程范围。
+    之前也大概了解过/proc/self/maps，基于里面信息能大概判断泄露的内存的属性，是哪个区域在泄漏、对应哪个文件。辅助工具procmem输出更可读的maps信息。
+
+    procmem 介绍
+    procmem：针对每一个进程具体分析就要使用procmem工具了。
+    procmem 给出了procrank中VSS、RSS、PSS、USS的每一部分组成，包括进程可执行程序本身、共享库、堆、栈的内存占用。这里的信息应该是从/proc/pid/maps文件中获取的.
+
+    procrank是按照内存占用情况对进程进行排序。因为它需要遍历／proc下的所有进程获取内存占用情况，所以在运行时候需要有root权限。可用排序的有VSS、RSS、PSS、USS。
+    VSS：Virtual Set Size，虚拟内存耗用内存，包括共享库的内存
+    RSS：Resident Set Size，实际使用物理内存，包括共享库
+    PSS：Proportional Set Size，实际使用的物理内存，共享库按比例分配
+    USS：Unique Set Size，进程独占的物理内存，不计算共享库，也可以理解为将进程杀死能释放出的内存
+
+    Android系统中提供了两个命令行工具procrank、procmem用于查看系统中的内存使用情况。procrank可以查看系统中所有进程的整体内存占用情况，并按照规则排序。
+    而procmem可以针对某个特定的进程分析其堆、栈、共享库等内存占用情况。这两个工具对于我们分析内存相关问题非常有效
+
+    std::unique_ptr 是 c++11中用来取代 std::auto_ptr 指针的指针容器。 它不能与其他unique_ptr类型的指针对象共享所指对象的内存。这种所有权仅能够通过std::move函数来转移。unique_ptr是一个删除了拷贝构造函数、
+    保留了移动构造函数的指针封装类型。 调用release 会切断unique_ptr 和它原来管理的对象的联系。release 返回的指针通常被用来初始化另一个智能指针或给另一个智能指针赋值。
+    如果不用另一个智能指针来保存release返回的指针，程序就要负责资源的释放。
+
+    std::unique_ptr    release()    移动构造
+
+    函数定义 void *dlsym(void *handle, const char* symbol);
+    handle是由dlopen打开动态链接库后返回的指针，symbol就是要求获取的函数的名称。dlsym函数的返回值是void*，指向要查找的函数symbol的地址，供调用使用

@@ -3014,3 +3014,7 @@ template <class InputIterator1, class InputIterator2, class OutputIterator, clas
 
 273. is_sorted()
     检查数组或者向量是否被排序好  默认检查方式：升序
+
+274. 
+    函数定义 void *dlsym(void *handle, const char* symbol);
+    handle是由dlopen打开动态链接库后返回的指针，symbol就是要求获取的函数的名称。dlsym函数的返回值是void*，指向要查找的函数symbol的地址，供调用使用

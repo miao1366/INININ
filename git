@@ -270,3 +270,35 @@ git stash
 git checkout develop
 git pull
 git stash pop
+
+
+62.
+ 2000  cd modules/data_collect/
+ 2001  ls
+ 2002  git branch
+ 2003  git log
+ 2004  git fetch
+ 2005  git pull
+ 2006  git checkout -b develop_icu1_5_miaomiao_branch
+ 2007  git fetch
+ 2008  git pull
+ 2009  git status
+ 2010  git diff
+ 2011  git add -A
+ 2012  git commit -m "add reverse"
+ 2013  git fetch
+ 2014  git pull
+ 2015  git rebase origin/develop_icu1_5_branch
+ 2016  git status
+ 2017  git log
+ 2018  git diff origin/develop_icu1_5_branch
+ 2019  git push
+ 2020  git push --set-upstream origin develop_icu1_5_miaomiao_branch
+
+git 分支比较
+
+1. 显示出branch1和branch2中差异的部分
+git diff branch1 branch2 --stat
+
+2. 显示指定文件的详细差异
+git diff branch1 branch2 具体文件路径
