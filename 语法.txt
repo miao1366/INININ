@@ -1376,4 +1376,24 @@ printf("%.*s\n", 3, "abc");        // 输出abc >3是一样的效果 因为输�
     不会出现死锁，到先前那个线程执行完打印后，自然会释放锁的。
   原文链接：https://blog.csdn.net/qq_44947859/article/details/89737666
 
-227. 
+227. 现在的 mutex实现，都带 CAS，首先会在应用层检测冲突，没冲突的话根本不会不会切换到内核态，直接用户态就搞定了，即时有冲突也会先尝试spinlock一样的 try 几次（有限次数），不行再进入休眠队列
+     https://www.zhihu.com/question/55764216
+     
+     第一个获取mutex锁的线程数据不会引入任何的系统调用
+     https://developer.aliyun.com/article/698642?spm=a2c6h.14164896.0.0.1b0a6556pDxFIm
+
+228. Linux中的spinlock机制[二] - MCS Lock
+   
+229.    邮件列表归档 -- marc.info
+
+230. 
+    std::condition_variable::wait()使用记录：
+    std::condition_variable::wait()有两个重载函数：
+
+    1. void wait (unique_lock<mutex>& lck);
+    2. template <class Predicate>
+        void wait (unique_lock<mutex>& lck, Predicate pred);
+    第一种形式只有一个参数unique_lock&，调用wait时，若参数互斥量lck被锁定，则wait会阻塞。
+    第二种形式除了unique_lock&参数外，第二个参数pred，即函数指针。当函数运行到该wait()函数时，若互斥量lck被锁定，且pred()返回值为false，则wait阻塞，
+    必须同时满足，否则不会阻塞。其等同于下面的形式
+    while (!pred()) wait(lck);

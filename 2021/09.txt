@@ -10365,3 +10365,28 @@ rules : [
     }
 ]
 
+
+                   center_128_lidar_data    6.15     128线雷达
+                        front_lidar_data    9.30     前雷达
+                       front_long_camera   13.76     前长焦
+                front_long_camera_record    2.55
+                     front_middle_camera    8.39      前中距
+              front_middle_camera_record    2.93
+                      front_short_camera   14.10      前短距
+               front_short_camera_record    3.20
+                      left_bp_lidar_data   10.54      左bp
+                         left_lidar_data   10.11      左雷达
+                          lf_wide_camera   16.10      左前广角相机
+                   lf_wide_camera_record    4.69      左前广角相机落盘
+                          lr_wide_camera   21.54      左后广角相机
+                   lr_wide_camera_record    4.88      左后广角相机落盘
+                         rear_lidar_data   11.47      后雷达
+                      rear_middle_camera   14.38      后中距相机
+               rear_middle_camera_record    3.25      后中距相机落盘
+                          rf_wide_camera   23.48      右前广角相机
+                   rf_wide_camera_record    4.96
+                     right_bp_lidar_data   10.00
+                        right_lidar_data   10.50
+                          rr_wide_camera   20.12      右后广角
+                   rr_wide_camera_record    4.86      右后广角落盘
+                                rtk_data   49.94      rtk

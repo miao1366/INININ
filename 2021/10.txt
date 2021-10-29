@@ -22792,8 +22792,8 @@ void DataCollectExec::fetch_data_to_cache(){
 21: 上午合并代码
     下午语音打标签
 
-22: jdc  长城数据中心
-    jdc -> 网关(葛天昊) -> 下发给车端   (触发规则文件， 回传规则文件，shader文件)
+22: gdc  长城数据中心
+    gdc -> 网关(葛天昊) -> 下发给车端   (触发规则文件， 回传规则文件，shader文件)
     oss -> 
     ota更新
 
@@ -22801,3 +22801,47 @@ void DataCollectExec::fetch_data_to_cache(){
 
     ImplWebSocket : public V2XBase
 
+cat ./commit_id.txt
+
+25. 上午奥北数据回传
+    下午准备干gdc
+    数据回传pb会议
+    数据回传整个代码
+
+    车型        车端性能有限
+    mcu        根据信号生成
+    全量数据    
+
+    数据回传 
+    soc全量数据
+    数据回传很重要啊，不可马虎。
+
+    数据回传我把规则给gdc -> gdc解析成前端页面 -> 修改前端页面保存为pb文件 -> 天昊转发给我
+
+26. 上午brpc 
+    下午会议纪要
+    车端回传    数据回归
+    OTA    埋点
+
+python3 ./hibag.py -f  ../hibag_HP-30-V71-AC-011_default_012_20211013151757_20211013151808.bag -t  center_128_lidar_difop_data
+sudo echo -n HP-30-V71-AC-018 > /etc/.carid
+
+/media/miao/BJ209/bag/V71C019_20211027114720
+
+https://data.haomoai.com/admin/release/carui
+
+27. wss    ws
+    collector_v2x_config.prototxt
+net {
+    address : "collector"
+    pub_control: false
+}
+
+manager 
+https://venus_data.haomoai.com/admin/ws/cars
+./build.sh  -m ""
+
+28.
+    账号权限
+    任务系统    39.107.136.198:11116
+    pb文件说明及  定义

@@ -3018,3 +3018,54 @@ template <class InputIterator1, class InputIterator2, class OutputIterator, clas
 274. 
     函数定义 void *dlsym(void *handle, const char* symbol);
     handle是由dlopen打开动态链接库后返回的指针，symbol就是要求获取的函数的名称。dlsym函数的返回值是void*，指向要查找的函数symbol的地址，供调用使用
+    handle参数可能使用如下的两种特殊的伪句柄：
+      RTLD_DEFAULT
+        使用默认的共享目标搜索顺序来找到要找的符号第一次出现的地方。这个搜索范围包含可执行文件中的全局符号以及这个可执行文件的依赖项（也就是使用RTLD_GLOBAL标志动态加载的共享目标）
+      RTLD_NEXT
+        在当前搜索顺序中找，在当前的目标之后，要找的符号下一次出现的地方。 这就允许向在另一个共享目标中的函数提供一层封装。这样一来，在一个预先加载的共享目标中定义的函数中，
+        就可以找到并调用在另一个共享目标中的真函数（其实就是一种劫持呢！！！！）。或者有多层的预加载的时候的下一层！
+
+275.    __rdtsc()
+        rdtsc指令, 该指令返回CPU自启动以来的时钟周期数；该时钟周期数，即处理器的时间戳
+
+276.TSC 是时间戳计数器的缩写，它是 Pentium 兼容处理器中的一个计数器，它记录自启动以来处理器消耗的时钟周期数。在每个时钟到来时，该计数器自动加一。
+    因为 TSC 随着处理器周期速率的变化而变化，所以它提供了非常高的精确度。它经常被用来分析和检测代码。TSC 的值可以通过 rdtsc 指令来读取。
+    TSC的节拍还可以转换为秒，转换方法是将其除以 CPU 的时钟速率(可以从内核变量 cpu_khz 获取)。
+    在 include/asm-i386/Msr.h (内核版本：2.6.23)里可以看到一个函数：
+    static inline  unsigned  long long  native_read_tsc( void)  {
+        unsigned  long  longval;
+        asm  volatile( "rdtsc" :  "=A" (val));
+        return val;
+    }
+    这个函数正是使用 rdtsc 指令读取 TSC 的值，并将其存放在 %eax 和 %edx (=A)中，然后再存往 val 变量中。long long 类型为 64 位。
+
+277.   double scalbln(double x, long int exp);
+       float scalblnf(float x, long int exp);
+       long double scalblnl(long double x, long int exp);
+       此函数用于计算给定数x与提高到幂n的FLT_RADIX的乘积
+
+        #include 
+        using namespace std;
+        int main () {
+            int n = 13;
+            double x = 3.056, result;
+            result = scalbn (x, n);
+            cout << x << " * " << FLT_RADIX << "^" << n << " = " << result << endl;
+            return 0;
+        }
+        // 3.056 * 2^13 = 25034.8
+
+278.    void  _mm_pause(void)
+        PAUSE指令提升了自旋等待循环（spin-wait loop）的性能。当执行一个循环等待时，Intel P4或Intel Xeon处理器会因为检测到一个可能的内存顺序违规（memory order violation）
+        而在退出循环时使性能大幅下降。PAUSE指令给处理器提了个醒：这段代码序列是个循环等待。处理器利用这个提示可以避免在大多数情况下的内存顺序违规，这将大幅提升性能。因为这个原因，
+        所以推荐在循环等待中使用PAUSE指令
+        PAUSE指令对应的C/C++函数 void _mm_pause(void)
+        
+        支持超线程或多核的处理器在自旋等待循环中使用PAUSE指令。
+        使用多线程同步（自旋锁、信号、互斥锁）或者空循环或者加载比较循环（检查某个变量）的程序通过使用PAUSE指令可以提升很大的性能
+        #include <emmintrin.h>
+        while(-1  == ready_flag)
+        {
+            //dosomething
+            _mm_pause();
+        }

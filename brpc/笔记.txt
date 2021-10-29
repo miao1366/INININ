@@ -320,3 +320,21 @@ PTHREAD_MUTEX_ADAPTIVE_NP，适应锁，动作最简单的锁类型，仅等待�
     const size_t OFFSET_TABLE[] = {
         #include "bthread/offset_inl.list"
     };
+
+61. 百度开源的RPC框架BRPC，以其高性能、低延迟、易用性等优势，使得其在高性能的C++开发领域非常受欢迎。
+    为什么高性能、低延迟上能够有足够大的优势
+
+    1. 线程模型(Thread Module)：使用bthread 用户态协程，结合N:M的调度模型，以及work-steal 抢占式调度实现；
+       为bthread打造的butex同步组件，为实现高性能的RPC框架提供了较为高效和简洁的并发编程基础。
+    2. 内存管理(Buffer & Memory Management)：buffer-ManangerMent通过IOBuf（非连续零拷贝缓存）方式减少数据传递处理过程中的拷贝。
+       各种ThreadLocal的ResoucePool，Object Pool等来优化定长的短生命周期的申请和释放。
+    3. 执行队列(exec queue):多生产者单消费者无锁队列，实现了多生产者单消费者之间的的高效通信，在实现单TCP连接复用，高效发送-接收数据上发挥了很重要的作用。
+    4. 超时定时器(Timer Keeping): 使用高效的定时器管理超时的RPC，并进行回调。
+    5. 避免过多编码：将数据Body作为Attachment的方式，而不需要编解码
+
+    线程模型(Thread Model)
+    同步机制(Butex)
+    执行队列(ExecutionQueue)
+    Buffer管理(Buffer ManageMent)
+
+62. CAS    Compare and swap
