@@ -442,3 +442,14 @@ n. 百分位，百分位数
 
 275. Percentile
 n. 百分位，百分位数
+
+276. quoted
+v. 引证（quote 的过去式）
+
+277. wildcards
+n. 通配符；万用字符
+
+278. synchronization
+n. [物] 同步；同时性
+
+279. 

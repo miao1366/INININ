@@ -22845,3 +22845,17 @@ https://venus_data.haomoai.com/admin/ws/cars
     账号权限
     任务系统    39.107.136.198:11116
     pb文件说明及  定义
+
+29. ssh caimiaomiao@10.40.28.214
+
+30. 上午看brpc variable.cpp
+
+31. oss://bucket-dataengine/release/slf/2021/10/22/BJ919/HD_HDO010_20211019163602/core/ubuntu.core-node.2926.11.1634613144
+    ossfs bucket-dataengine::/release/slf/ /home/caimiaomiao/ossfs -ourl=https://oss-cn-beijing-internal.aliyuncs.com -oallow_other -omp_umask=022
+
+    echo bucket-dataengine:LTAI5tPnhpBeaDH6Qc2YGRPz:S2jqSLrNdnRFDjb3ioAHgelxJf8zKp >/etc/passwd-ossfs
+
+    1040312015001416
+    1040342015001461
+
+32. 

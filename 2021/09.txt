@@ -455,6 +455,8 @@ rules : [
     }
 
 27. sudo echo -n HP-30-V71-AC-002
+    sudo echo -n HP-30-V71-AC-P7C024
+ 
 
 28. develop_icu1_5_branch补充自驾和人驾模式
 
