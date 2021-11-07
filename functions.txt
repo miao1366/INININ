@@ -3081,4 +3081,10 @@ socketpair()函数用于创建一对无名的、相互连接的套接子。
 3. 读、写操作可以位于同一个进程，也可以分别位于不同的进程，如父子进程。如果是父子进程时，一般会功能分离，一个进程用来读，一个用来写。因为文件描述副sv[0]和sv[1]是进程共享的，
    所以读的进程要关闭写描述符, 反之，写的进程关闭读描述符。 
 
-280.  
+280.#include <unistd.h>
+       long sysconf(int name);
+    通过名字可以猜到，该函数是获取一些系统的参数。然后通过man sysconf
+    变 量            名字值(Name Value)        描 述
+    _SC_THREADS         _POSIX_THREADS      支持线程
+    sysconf(_SC_NPROCESSORS_CONF)返回系统可以使用的核数，但是其值会包括系统中禁用的核的数目，因 此该值并不代表当前系统中可用的核数。
+    而sysconf(_SC_NPROCESSORS_ONLN)的返回值真正的代表了系统 当前可用的核数

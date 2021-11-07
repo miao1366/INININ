@@ -15,4 +15,17 @@
 
 7. 为SSL会话加载用户私钥的函数是： SSL_CTX_use_PrivateKey_file(SSL_CTX *ctx,const char* file,int type);
 
-8.  
+8.  Openssl静态锁回调  静态锁要求程序员提供两个回调函数，第一个主要是告诉组件在适当的时机获取或者释放锁。定义如下：
+  void locking_function(int mode, int n, const char *file, int line);
+    mode：确定锁执行的操作。存在CRYPTO_LOCK标记时，进行枷锁，否则它应该被释放。
+    n:获取或者释放的锁的编号。第一个锁从0标识。该值永远不会大于或者等于CRYPTO_num_locks变量的值。
+    File：请求互斥对象的对象名称。用于辅助调试，通常由_FILE_预处理器宏提供。
+    Line：请求创建互斥对象的源行号。与file参数一样，它也用于辅助调试，通常由_line_preprocessor宏提供。
+
+9. 下一个回调函数用于获取调用线程的唯一标识符。类似于windows中的GetCurrentThreadId函数。我们容易就明白这是用来获取当前线程信息的，并且保证绝对的唯一。函数需要定义成如下格式。
+    unsigned long id_function(void);
+    最后，我们引入Openssl中的两个库函数：CRYPTO_set_id_callback和CRYPTO_set_locking_callback
+
+10. Deffie-Hellman 算法简介  迪菲赫尔曼算法
+    Deffie-Hellman(简称 DH) 密钥交换是最早的密钥交换算法之一，它使得通信的双方能在非安全的信道中安全的交换密钥，用于加密后续的通信消息。 Whitfield Diffie 和 Martin Hellman 于 1976 提出该算法，
+    之后被应用于安全领域，比如 Https 协议的 TSL(Transport Layer Security)以 DH 算法作为密钥交换算法

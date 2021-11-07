@@ -338,3 +338,14 @@ PTHREAD_MUTEX_ADAPTIVE_NP，适应锁，动作最简单的锁类型，仅等待�
     Buffer管理(Buffer ManageMent)
 
 62. CAS    Compare and swap
+
+63. template <typename T> std::string class_name_str(T const& obj) {
+        return demangle(typeid(obj).name());
+}
+
+64. bthread的三个T
+    讲到bthread，首先要讲的三大件：TaskControl、TaskGroup、TaskMeta。以下简称TC、TG、TM。
+    TaskControl进程内全局唯一。TaskGroup和线程数相当，每个线程(pthread）都有一个TaskGroup，brpc中也将TaskGroup称之为 worker。
+    而TM基本就是表征bthread上下文的真实结构体了。
+    虽然前面我们说bthread并不严格从属于一个pthread，但是bthread在运行的时候还是需要在一个pthread中的worker中（也即TG）被调用执行的
+
