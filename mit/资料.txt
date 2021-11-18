@@ -16,3 +16,5 @@
 8. primary-backup replication
 
 9. 容错 （fault tolerance）和 错误恢复 （fault recovery）
+
+10. 

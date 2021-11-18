@@ -683,3 +683,20 @@ futex
     如果不用另一个智能指针来保存release返回的指针，程序就要负责资源的释放。
 
     std::unique_ptr    release()    移动构造
+
+1. initialization order fiasco
+    Static Initialization Order Fiasco (SIOF)
+        ：对于一个static变量，不管它是全局的或者是类的成员变量，访问它的时候不一定总是成功的，甚至会造成程序crash，
+        因为不能保证它在被访问时已经被初始化了（跟初始化的顺序有关，所以称为初始化顺序的Fiasco）。以下将制造一个非常简单的SIOF情形
+
+        如果不确定在使用时它是否已经被初始化，就要使用函数包装static变量来防止Static Initialization Order FIASCO!
+
+        static initialization order fiasco是对C++的一个非常微妙的并且常见的误解。不幸的是，错误发生在main()开始之前，很难检测到。
+        简而言之，假设你有存在于不同的源文件x.cpp 和y.cpp的两个静态对象x 和 y。再假定y对象的构造函数会调用x对象的某些方法。就是这些。就这么简单。
+        结局是你完蛋不完蛋的机会是50%-50%。如果碰巧x.cpp的编辑单元先被初始化，这很好。但如果y.cpp的编辑单元先被初始化，然后y的构造函数比x的构造函数先运行。
+        也就是说，y的构造函数会调用x对象的方法，而x对象还没有被构造。
+        
+        注意：static initialization order fiasco不作用于内建的／固有的类型，象int 或 char*。例如，如果创建一个static float对象，不会有静态初始化次序的问题。
+        静态初始化次序真正会崩溃的时机只有在你的static或全局对象有构造函数时。
+
+2. 

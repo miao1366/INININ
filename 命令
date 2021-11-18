@@ -1526,4 +1526,9 @@ set-default-source "mic"
         at：一次性定时任务计划执行
         crontab ：每天定时任务计划执行
 
-195. 
+195. mount -o remount rw /
+    这一步是关键的一步，让“/”根文件系统重新挂载并有可读写模式)
+
+196. 
+tar -czvf output.tar.gz ./output/
+tar -xzvf ./output.tar.gz

@@ -349,3 +349,18 @@ PTHREAD_MUTEX_ADAPTIVE_NP，适应锁，动作最简单的锁类型，仅等待�
     而TM基本就是表征bthread上下文的真实结构体了。
     虽然前面我们说bthread并不严格从属于一个pthread，但是bthread在运行的时候还是需要在一个pthread中的worker中（也即TG）被调用执行的
 
+65. 所谓lock-free和wait-free算法是指对于共享的数据并非对其加锁来控制访问，而是多个线程并行的访问。通过该算法可以达到对共享对象并发的读写而不会破坏对象本身。
+    所谓lock-free是指对于线程不加锁，让系统执行所有的步骤。lock-free提到的不加锁是指不使用类似于互斥锁或者信号量之类的排他机制。
+    因为一旦对线程加锁的话，当线程执行中断时，那么对于这个系统来说运行也中断了。所谓wait-free是指，不管其他线程执行什么操作，线程无论有什么操作都能在有限的步骤里面完成。
+    所以对于算法来说达到lock-free不一定能达到wait-free，但是达到wait-free的算法一定是lock-free的
+
+    （1）wait-free：不管OS如何调度线程，每个线程始终在做有用的事情。
+    （2）lock-free：不管OS如何调度线程，至少有一个线程在做有用的事情。
+
+    使用lock-free或者wait-free并不一定会使性能加快，但是能保证一件事情总能在确定的时间完成
+
+66. 无锁队列    Mpsc Queue
+
+67. warn_unused_result 
+
+68. 
