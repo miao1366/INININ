@@ -1,0 +1,11 @@
+1. 环境安装
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+2. source ~/.cargo/env
+
+3. 
+
+周期回传配置文件名    data_collect_rule_collector_icu1_5.prototxt
+监控回传配置文件名    data_collect_rule_monitor_icu1_5.prototxt
+触发回传配置文件名    data_collect_rule_trigger_icu1_5.prototxt
+shadow配置文件名    data_collect_rule_shadow_icu1_5.prototxt

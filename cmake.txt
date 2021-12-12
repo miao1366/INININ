@@ -627,4 +627,6 @@ endif(CURL_FOUND)
 85  -rpath和-rpath-link都可以在链接时指定库的路径；但是运行可执行文件时，-rpath-link指定的路径就不再有效（链接器没有将库的路径包含进可执行文件中），
     而-rpath指定的路径还有效（因为链接器已经将库的路径包含在可执行文件中了)。最后，不管使用了-rpath还是-rpath-link，LD_LIBRARY_PATH还是有效的.
 
-86  
+86  return()
+
+87

@@ -139,3 +139,107 @@ git@codeup.aliyun.com:5f02dcd86a575d7f23661142/hi_delivery/data_collect.git
   1. 1.5数据回传业务熟悉，触发规则代码优化。
 
 16. 收集采集频率
+
+18.
+vsm_data    vehinfo_data  adascan_data   hmi_data  ema_data  vsm_data   plan_dat  camera_eq4_data
+    
+aeb_data    adascan_data   hmi_data  ema_data     plan_data  
+
+http://10.255.16.112/wui/main.jsp
+123.com
+
+24.
+  19 
+
+
+26 route add default gw 172.16.13.97 eth0.13
+   route add default gw 192.168.100.1 eth0
+
+29. 
+
+30. 
+client-dev_ws.haomoai.com/car/
+
+root@buildroot:/opt/data/output# cat ./aarch64/integration/config/node1.prototxt 
+
+node_name : "default"
+scenario  : "default"
+modules : ["common",
+           #"ds_common",
+           "camera_eq4_ds",
+           "radar_ds",
+           "car_info_ds_icu15",
+           "avpr_ds",
+           "avpr_tsync_ds",
+           "avpt_tsync_ds",
+           "baidu_avp_tx_ds",
+           "mcu_data_ds",
+           "imu_icu15",
+           "ehrv2_ds",
+           "mcu_cal_ds",
+#           "hdmap",
+#           "ehrv2",
+#           "ehr",
+           "rfm",
+           "ofm",
+#           "uds",
+           #"v2x",
+           #"comm_condition",
+#           "error_relation",
+           "data_collect",
+           #"rtk_ds",
+           "node1_ipc"
+           ]
+scheduler_config {
+    thread_num : 0
+}
+
+network_config {
+    #ifname : "lo"
+    ifname : "192.168.1.12"
+    cli_port : 8001
+}
+
+mlog_config {
+    default_log_level : "error"
+    use_default_glog : true;
+    log_dir : "/opt/log/icu15"
+    log_config : [
+        { name : "INIT",      log_level : "debug",    sw : true },
+        { name : "FRAMEWORK",      log_level : "error",    sw : true },
+        { name : "TEST",      log_level : "error",    sw : true },
+        { name : "TEST_DS",      log_level : "error",    sw : true },
+        { name : "sche",      log_level : "error",    sw : true },
+        { name : "result_query",      log_level : "info",    sw : true },
+        { name : "fsm",      log_level : "error",    sw : true },
+        { name : "HMI_PERIODIC_EXEC",      log_level : "error",    sw : true }
+    ]
+}
+enable_tracing : true
+enable_multi_mode : true
+
+dag_flow_config {
+    name : "default"
+    priority : 0
+    enable_default : true
+}
+
+plugin_config {
+    name : "cli"
+    type : "CliPlugin"
+}
+
+
+15:18 起动程序，周期只上传mcu_dtc_data
+15:20 停止程序
+
+15:21 起动程序，周期只上传所有topic
+
+
+10:10
+  1. 急刹  实际发生一次   急刹触发了， 点刹车触发了一次
+  2. 第二次启动软件，mcu数据上不来
+  3. 进入不了自动驾驶
+
+   
+ 

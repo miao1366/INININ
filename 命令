@@ -1148,6 +1148,7 @@ alias c:='mount /dev/hda1 /mnt/c & cd /mnt/c' ;用 c: 命令代替命令序列�
 141. 如果安装过程中提示缺少相关依赖，则执行如下命令解决：sudo apt -f install
 
 142. cheese  /dev/video1     // 打开摄像头 
+     camorama -d /dev/video0 
 
 143. 
 echo -e "\a"          //终端发出声音
@@ -1532,3 +1533,24 @@ set-default-source "mic"
 196. 
 tar -czvf output.tar.gz ./output/
 tar -xzvf ./output.tar.gz
+
+197. 一、& 最经常被用到
+这个用在一个命令的最后，可以把这个命令放到后台执行
+二、ctrl + z
+可以将一个正在前台执行的命令放到后台，并且暂停
+三、jobs
+查看当前有多少在后台运行的命令
+四、fg
+将后台中的命令调至前台继续运行
+如果后台中有多个命令，可以用 fg %jobnumber将选中的命令调出，%jobnumber是通过jobs命令查到的后台正在执行的命令的序号(不是pid)
+五、bg
+将一个在后台暂停的命令，变成继续执行
+如果后台中有多个命令，可以用bg %jobnumber将选中的命令调出，%jobnumber是通过jobs命令查到的后台正在执行的命令的序号(不是pid) 
+
+198. 
+    route add default gw 172.16.13.97 eth0.13
+    route add default gw 192.168.100.1 eth0
+
+199. 
+
+15:53       

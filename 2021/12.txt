@@ -1,0 +1,60 @@
+10:10
+  1. 急刹  实际发生一次   急刹触发了， 点刹车触发了一次
+  2. 第二次启动软件，vsm_data vehinfo_data adascan_data hmi_data ema_data vsm_data plan_dat camera_eq4_data数据上不来
+  3. 进入不了自动驾驶
+  4. 第二次启动软件，mcu数据上不来
+  
+  mcu版本和集成版本。
+   acu -v
+   ping 172.16.5.87
+   ping 172.16.13.97
+
+    mount -o remount rw /
+     mount -o remount rw /
+
+02. 
+
+06.
+             adascan_data                      
+             aeb_data                          
+             break_rx                          
+             camera_eq4_data                   
+             chassis_rx                        
+             cr_left_data                      
+             cr_right_data                     
+             data_collect_exec_default_input   
+             ehrv2_data                        
+             gear_rx                           
+             hardware_config                   
+             hmi_data                          
+             imu_data                         
+             latctrl_data                      
+             light_rx                          
+             mcu_domain_st_data                
+             mcu_dtc_data                      
+             miscell_rx                        
+             motor_rx                          
+             mrr_radar_data                    
+             ofm_exec_default_input            
+             ofm_obj_data                      
+             plan_data                         
+             proto_file_des                    
+             rfm_exec_default_input            
+             rfm_output_data                   
+             rsds_left_data                    
+             rsds_right_data                   
+             steer_rx                          
+             throttle_rx                       
+             tire_pressure_data                
+             tracing_msg                       
+             vehicle_angular_rates_data        
+             vehicleaccel_rx                   
+             vehiclespeed_rx                   
+             vehinfo_data                      
+             version_info                      
+             vsm_data                          
+             wheelspeed_rx                     
+
+08.
+1、./docker.sh -R ti -i 进入docker
+2、./build.sh -S ti -p aarch64 -xba   

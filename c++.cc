@@ -699,4 +699,114 @@ futex
         注意：static initialization order fiasco不作用于内建的／固有的类型，象int 或 char*。例如，如果创建一个static float对象，不会有静态初始化次序的问题。
         静态初始化次序真正会崩溃的时机只有在你的static或全局对象有构造函数时。
 
-2. 
+2. code-gen 
+
+3.
+struct A {
+  A() { ++instances; }
+  ~A() { --instances; }
+  inline static int instances = 0;
+};
+
+但从c++11以后，普通的类的成员变量都可以在类的声明中直接初始化了，而静态成员变量（除const static）外，却仍然延袭老的固有的应用方式，就显得有点土味儿了。
+正所谓，有需求，就会有变化，c++17就给它增加了一个关键字inline，实现了同质化的操作
+
+4. 
+template<bool B, class T = void>
+struct enable_if {}; //此时B为false
+ 
+template<class T>
+struct enable_if<true, T> { typedef T type; }; //此时B为true
+
+当 enable_if 的条件为true 时，优先匹配 struct enable_if<true,T> 这个模板，因此会多一个 type 类型， 和T 保持一致。
+template< bool B, class T = void >
+using enable_if_t = typename enable_if<B,T>::type;
+
+基本原理是SFINAE。只有当第一个参数是true的时候才有type，否则就会发生Substitution Failure，这个时候模版实例化就会失败，也就不会产生任何代码
+
+5. 
+头文件：is_convertible
+
+#include<type_traits>
+模板类别：
+
+template< class From, class To >
+struct is_convertible;
+
+template< class From, class To >
+struct is_nothrow_convertible;
+用法:
+
+is_convertible <A*, B*>::value;
+参数：它采用A和B两种数据类型：
+
+A:它代表要转换的参数。
+B:它代表参数A隐式转换的参数。
+返回值：
+
+True:如果将给定的数据类型A转换为数据类型B。
+False:如果给定的数据类型A没有转换为数据类型B。
+
+下面是演示C++中std::is_convertible的程序：
+#include <bits/stdc++.h> 
+#include <type_traits> 
+using namespace std; 
+class A { 
+}; 
+class B:public A { 
+}; 
+class C { 
+}; 
+int main() 
+{ 
+    cout << boolalpha; 
+    bool BtoA = is_convertible<B*, A*>::value; 
+    cout << BtoA << endl; 
+
+    bool AtoB = is_convertible<A*, B*>::value; 
+    cout << AtoB << endl; 
+
+    bool BtoC = is_convertible<B*, C*>::value; 
+    cout << BtoC << endl; 
+    cout << "int to float:"<< is_convertible<int, float>::value << endl; 
+    cout << "int to const int:"<< is_convertible<int, const int>::value << endl; 
+    return 0; 
+}
+输出：
+true
+false
+false
+int to float:true
+int to const int:true
+
+6. initializer_list是一种标准库类型，用于表示某种特定类型的值的数组。和vector一样，initializer_list也是一种模板类型，定义initializer_list对象时，必须说明列表中所含元素的类型。
+   和vector不一样的是，initializer_list对象中的元素永远是常量值，我们无法改变initializer_list对象中元素的值
+
+7. std::string_view
+c++ 17提供了一个新的性能工具std::string_view。它有着类似std::string的接口易于使用，但是又不拥有字符串的内存，避免了很多拷贝内存操作，性能接近原始c字符串指针
+
+8.  std::default_delete 是不指定删除器时 std::unique_ptr 所用的默认删除策略。 default_delete 的特化在典型实现上为空类，并且用于空基类优化。
+    非特化的 default_delete 用 delete 解分配单个对象的内存。
+    亦为提供数组类型的使用 delete[] 的部分特化。
+
+    int main()
+    {
+        //    {
+        //        std::shared_ptr<int> shared_bad(new int[10]);
+        //    } // 析构函数调用 delete ，未定义行为
+    
+        {
+            std::shared_ptr<int> shared_good(new int[10], std::default_delete<int[]>());
+        } // 析构函数调用 delete[] ， ok
+    
+        {
+            std::unique_ptr<int> ptr(new int(5));
+        } // 析构函数调用 default_delete<int> ok 
+    
+        {
+            std::unique_ptr<int[]> ptr(new int[10]);
+        } // 析构函数调用 default_delete<int[]>
+    
+    }
+
+9. __attribute__ ((packed)); 的作用就是告诉编译器取消结构在编译过程中的优化对齐,按照实际占用字节数进行对齐，是GCC特有的语法
