@@ -1,0 +1,25 @@
+1.  https://www.zhihu.com/question/27417946/answer/1253126563
+
+static inline uint32_t next_power_of_2(uint32_t x) {
+    x--;
+    x |= x >> 1; 
+    x |= x >> 2; 
+    x |= x >> 4; 
+    x |= x >> 8; 
+    x |= x >> 16; 
+    x++
+    return x;
+}
+static inline uint32_t next_power_of_2(uint64_t x) {
+    x--;
+    x |= x >> 1; 
+    x |= x >> 2; 
+    x |= x >> 4; 
+    x |= x >> 8; 
+    x |= x >> 16; 
+    x |= x >> 32; 
+    x++
+    return x;
+}
+
+

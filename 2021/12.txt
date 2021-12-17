@@ -58,3 +58,11 @@
 08.
 1、./docker.sh -R ti -i 进入docker
 2、./build.sh -S ti -p aarch64 -xba   
+
+242.89
+13.7
+288.34
+1093.53
+
+
+1395.57

@@ -141,9 +141,11 @@ git@codeup.aliyun.com:5f02dcd86a575d7f23661142/hi_delivery/data_collect.git
 16. 收集采集频率
 
 18.
-vsm_data    vehinfo_data  adascan_data   hmi_data  ema_data  vsm_data   plan_dat  camera_eq4_data
+vsm_data   vehinfo_data   adascan_data   hmi_data   ema_data   vsm_data   plan_data   camera_eq4_data
     
 aeb_data    adascan_data   hmi_data  ema_data     plan_data  
+
+vsm_data vehinfo_data adascan_data hmi_data ema_data vsm_data plan_dat
 
 http://10.255.16.112/wui/main.jsp
 123.com

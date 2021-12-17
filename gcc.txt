@@ -78,3 +78,7 @@ gcc -Wall -Wextra -Werror
         : "=a" (lo), "=d" (hi)
         );
     return ((uint64_t)hi << 32) | lo;
+
+27. https://godbolt.org/       语言转汇编
+    https://quick-bench.com/   benchMark
+28. 
