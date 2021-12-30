@@ -1551,6 +1551,9 @@ tar -xzvf ./output.tar.gz
     route add default gw 172.16.13.97 eth0.13
     route add default gw 192.168.100.1 eth0
 
-199. 
+199. 串口 minicom    cutecom
 
-15:53       
+200. time    统计用户调用时间  系统调用时间  总调用时间
+
+201. cpptree.pl
+     calltree.pl

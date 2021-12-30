@@ -325,3 +325,12 @@ git log命令
 63.  git mergetool
 64.  git diff --cached 或者 git diff --staged    查看暂存的修改
 65.  git remote add 
+     git remote add target git://gitUrl
+     git fetch target
+
+66.  git rebase --continue
+
+67. git 添加另一个分支的文件
+    git checkout --patch master /app/view/activity.java
+
+68. 

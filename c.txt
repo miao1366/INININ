@@ -19,3 +19,27 @@ int main() {
     二进制：0Bxxxxx
 
 3. NDEBUG宏是Standard C中定义的宏，专门用来控制assert()的行为。如果定义了这个宏，则assert不会起作用
+
+4. strlen()优化
+int mystrlen(char *str)
+{
+                /* 为了不数据指针的自增致使频繁访问内存，全部的临时变量都声明为寄存器存储类型，以提升运行速度 */
+                register int *tail = (int *)str; 
+                register int value;
+                register int len = 0;
+                char *p;
+                while (1) {
+                        /* 用临时变量接受读取的内存值，目的是避免在接下来的判断表达式中使用*tail以提升运算速度（*tail会让编译器生成一条访存指令，拖慢速度）                         */
+                        value = *tail; 
+                        /* 用if运算来判断每个字节，以确保若是遇到空字节（‘\0’）则当即结束循环，不然认为没有遇到字符串结尾，则将长度计数器增长4 */
+                        if (!(value & 0xff000000) || !(value & 0xff0000)
+                        || !(value & 0xff00) || !(value & 0xff))
+                            break;
+                        len += 4; /* 长度计数器自增4字节 */
+                        tail++; /* 当前数据指针后移 */
+                }
+                p = (char *)tail;
+                while (*p++ != '\0')
+                len ++;
+                return len;
+}

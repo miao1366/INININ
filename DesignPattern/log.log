@@ -1,0 +1,282 @@
+root@buildroot:/opt/data/123/output# ./run.sh -m "common camera_side_upload"
+kernel.core_pattern = /opt/data/123/output/core/%h.core-%e.%p.%s.%t
+If coredump happens, core file will writing to /opt/data/123/output/core, file name start with '*.core-'
+ kill all start 
+kill  node 
+kill  ^hios 
+kill  recorder 
+kill  vsomeipd 1336
+/opt/data/123/output/stop.sh: line 75: kill: (1336) - No such process
+ kill all end 
+sync start
+sync end
+env ok
+common camera_side_upload
+carid 1
+vsomeipd run!
+node -n default -d /opt/data/123/output/../output/aarch64  -m common camera_side_upload
+node :default
+home_dir : /opt/data/123/output/../output/aarch64
+type : LEGACY
+log : 
+modules : common camera_side_upload 
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+I0912 20:47:01.946961  1435 class_loader.cpp:14] <INIT> ClassLoader: construct
+I0912 20:47:01.947307  1435 dag.cpp:160] <INIT> Dag construct begin
+I0912 20:47:01.948122  1435 centerbase.h:185] <INIT> center:DataCenter registor type: FakeInputData
+I0912 20:47:01.948216  1435 centerbase.h:185] <INIT> center:DataCenter registor type: FakeOutputData
+I0912 20:47:01.948276  1435 centerbase.h:185] <INIT> center:DataCenter registor type: DefaultData
+I0912 20:47:01.948336  1435 centerbase.h:185] <INIT> center:DataCenter registor type: TracingMsgGroup
+I0912 20:47:01.948408  1435 centerbase.h:185] <INIT> center:DataCenter registor type: ProtoFileDesData
+I0912 20:47:01.948467  1435 centerbase.h:185] <INIT> center:DataCenter registor type: VersionInfoData
+I0912 20:47:01.948549  1435 centerbase.h:185] <INIT> center:DataCenter registor type: BufferedBundleData
+I0912 20:47:01.948608  1435 centerbase.h:185] <INIT> center:DataCenter registor type: BufferedBundleDataSharp
+I0912 20:47:01.948678  1435 centerbase.h:185] <INIT> center:DataCenter registor type: BufferedBundleDataSync
+I0912 20:47:01.948760  1435 centerbase.h:185] <INIT> center:DataCenter registor type: FifoBufferedShadowData
+I0912 20:47:01.948813  1435 centerbase.h:185] <INIT> center:DataCenter registor type: ShadowData
+I0912 20:47:01.948932  1435 centerbase.h:125] <INIT> center:DataCenter add name: default_input type: FakeInputData
+I0912 20:47:01.949020  1435 centerbase.h:125] <INIT> center:DataCenter add name: default_output type: FakeOutputData
+I0912 20:47:01.950369  1435 centerbase.h:125] <INIT> center:DataCenter add name: tracing_msg type: TracingMsgGroup
+I0912 20:47:01.950649  1435 centerbase.h:125] <INIT> center:DataCenter add name: proto_file_des type: ProtoFileDesData
+I0912 20:47:01.950878  1435 centerbase.h:125] <INIT> center:DataCenter add name: version_info type: VersionInfoData
+I0912 20:47:01.950981  1435 centerbase.h:185] <INIT> center:ExecCenter registor type: norm
+I0912 20:47:01.951040  1435 centerbase.h:185] <INIT> center:ExecCenter registor type: normal
+I0912 20:47:01.951098  1435 centerbase.h:185] <INIT> center:ExecCenter registor type: fake_input
+I0912 20:47:01.951174  1435 centerbase.h:185] <INIT> center:ExecCenter registor type: period
+I0912 20:47:01.951246  1435 centerbase.h:185] <INIT> center:ExecCenter registor type: busy
+I0912 20:47:01.951306  1435 centerbase.h:185] <INIT> center:ExecCenter registor type: fake_input_no_drop
+I0912 20:47:01.951419  1435 centerbase.h:185] <INIT> center:ExecCenter registor type: thread_local
+I0912 20:47:01.951488  1435 centerbase.h:185] <INIT> center:ExecCenter registor type: FakeInputExecutor
+I0912 20:47:01.951565  1435 centerbase.h:185] <INIT> center:ExecCenter registor type: BusyExecutor
+I0912 20:47:01.951632  1435 centerbase.h:185] <INIT> center:ExecCenter registor type: ThreadLocalExecutor
+I0912 20:47:01.951697  1435 centerbase.h:185] <INIT> center:ExecCenter registor type: PeriodExecutor
+I0912 20:47:01.951753  1435 centerbase.h:185] <INIT> center:ExecCenter registor type: EvTimerExecutor
+I0912 20:47:01.951841  1435 dag.cpp:170] <INIT> Dag construct end
+I0912 20:47:01.966049  1435 centerbase.h:185] <INIT> center:PluginCenter registor type: CliPlugin
+I0912 20:47:01.966099  1435 centerbase.h:185] <INIT> center:PluginCenter registor type: VersionPlugin
+I0912 20:47:01.966282  1435 centerbase.h:185] <INIT> center:PluginCenter registor type: ProtoFilePlugin
+I0912 20:47:01.966405  1435 centerbase.h:185] <INIT> center:SchedulerCenter registor type: SchedulerFCFS
+I0912 20:47:01.966464  1435 centerbase.h:185] <INIT> center:SchedulerCenter registor type: FCFS
+I0912 20:47:01.966526  1435 centerbase.h:185] <INIT> center:SchedulerCenter registor type: SchedulerLegacy
+I0912 20:47:01.966585  1435 centerbase.h:185] <INIT> center:SchedulerCenter registor type: Legacy
+I0912 20:47:01.966683  1435 centerbase.h:185] <INIT> center:SchedulerCenter registor type: TaskGroup
+I0912 20:47:01.966867  1435 node.cpp:209] <INIT> _eda_config.home_dir() /opt/data/123/output/../output/aarch64
+W0912 20:47:01.966948  1435 node.cpp:217] <INIT> Node change config modules to : common camera_side_upload 
+I0912 20:47:01.967036  1435 centerbase.h:125] <INIT> center:PluginCenter add name: cli type: CliPlugin
+I0912 20:47:01.967124  1435 centerbase.h:125] <INIT> center:PluginCenter add name: version type: VersionPlugin
+I0912 20:47:01.967346  1435 node.cpp:438] <INIT> Log dir: ./log
+The same moduel has been registed!
+W0912 20:47:01.970592  1435 certainty_schedule.cpp:660] <FRAMEWORK> /opt/data/123/output/../output/aarch64/rt_sched.prototxt doesn't exist
+W0912 20:47:01.971014  1435 node.cpp:102] <INIT>  CertaintySystem init failed
+W0912 20:47:01.975697  1435 dag_analysis.cpp:296] <INIT> data camera_me_data already add
+W0912 20:47:02.250525  1435 node.cpp:253] <INIT>           common          f0c2faffcd308fad5336f11a59d9cde48a651e93                 app_base/common   1.0.0.0    [ HEAD ]
+W0912 20:47:02.250874  1435 node.cpp:253] <INIT> camera_side_upload          2f122907441525102f20f02bceb24095bb022ef9            app_base/data_source   1.2.1.0    [ HEAD ]
+The same moduel has been registed!
+W0912 20:47:02.251296  1435 scheduler_legacy.cpp:60] <FRAMEWORK> No executors configured for current node
+E0912 20:47:02.252061  1435 hardware_config_plugin.cpp:97] <INIT>  parse hardware config file /etc/config/hw.prototxt failed, and retry
+E0912 20:47:02.252321  1435 hardware_config_plugin.cpp:97] <INIT>  parse hardware config file /etc/config/1/hw.prototxt failed, and retry
+E0912 20:47:02.252377  1435 hardware_config_plugin.cpp:97] <INIT>  parse hardware config file /var/etc/config/hw.prototxt failed, and retry
+E0912 20:47:02.252432  1435 hardware_config_plugin.cpp:105] <INIT>  can't find hardware config file 
+W0912 20:47:02.252825  1435 version_plugin.cpp:30] <INIT>  read version info file /opt/data/123/output/../output/aarch64/..//info.json
+The same moduel has been registed!
+The same moduel has been registed!
+The same moduel has been registed!
+The same moduel has been registed!
+The same moduel has been registed!
+The same moduel has been registed!
+W0912 20:47:02.254160  1435 node.cpp:491] <INIT> Node default start run.
+W0912 20:47:02.254493  1458 camera_side_upload.cpp:715] <ALARM> init()
+W0912 20:47:02.254503  1435 scheduler_legacy.cpp:119] <INIT> SchedulerLegacy has started all threads
+APP: Init ... !!!
+MEM: Init ... !!!
+MEM: Initialized DMA HEAP (fd=22) !!!
+MEM: Init ... Done !!!
+IPC: Init ... !!!
+IPC: Init ... Done !!!
+REMOTE_SERVICE: Init ... !!!
+REMOTE_SERVICE: Init ... Done !!!
+APP: Init ... Done !!!
+  1831.827115 s:  VX_ZONE_INIT:Enabled
+  1831.827142 s:  VX_ZONE_ERROR:Enabled
+  1831.827149 s:  VX_ZONE_WARNING:Enabled
+  1831.827703 s:  VX_ZONE_INIT:[tivxInit:71] Initialization Done !!!
+  1831.827916 s:  VX_ZONE_INIT:[tivxHostInit:48] Initialization Done for HOST !!!
+open_device success
+BuildDate:Dec 17 2021 10:37:39
+BuildDate2:Dec 16 2021 10:46:54
+IttCtrl_registerHandler: command echo registered at location 0 
+IttCtrl_registerHandler: command iss_read_2a_params registered at location 1 
+IttCtrl_registerHandler: command iss_write_2a_params registered at location 2 
+IttCtrl_registerHandler: command iss_raw_save registered at location 3 
+IttCtrl_registerHandler: command iss_yuv_save registered at location 4 
+IttCtrl_registerHandler: command iss_read_sensor_reg registered at location 5 
+IttCtrl_registerHandler: command iss_write_sensor_reg registered at location 6 
+IttCtrl_registerHandler: command dev_ctrl registered at location 7 
+IttCtrl_registerHandler: command iss_send_dcc_file registered at location 8 
+ NETWORK: Opened at IP Addr = 192.168.100.247, socket port=5000!!!
+app_init done
+Creating graph 
+  1831.831726 s:  VX_ZONE_ERROR:[vxCopyUserDataObject:385] Invalid user data object reference
+  1831.831746 s:  VX_ZONE_ERROR:[ownReleaseReferenceInt:307] Invalid reference
+  1831.831852 s:  VX_ZONE_ERROR:[vxCopyUserDataObject:385] Invalid user data object reference
+  1831.831897 s:  VX_ZONE_ERROR:[ownReleaseReferenceInt:307] Invalid reference
+  1831.831957 s:  VX_ZONE_ERROR:[vxCopyUserDataObject:385] Invalid user data object reference
+  1831.831966 s:  VX_ZONE_ERROR:[ownReleaseReferenceInt:307] Invalid reference
+  1831.832047 s:  VX_ZONE_ERROR:[vxCopyUserDataObject:385] Invalid user data object reference
+  1831.832055 s:  VX_ZONE_ERROR:[ownReleaseReferenceInt:307] Invalid reference
+1111111111111111111111:dcc_buff_size == 16925
+2222222222222222222222222222:dcc_buff_size == 66652
+AEWB  S
+obj->node_aewb  0xffff768b5a70
+AEWB E
+LDC  S
+vxVerifyGraph done
+Querying MAXNONE-MAX96717 
+  1831.873299 s: ISS: Querying sensor [MAXNONE-MAX96717] ... !!!
+  1831.873626 s: ISS: ERROR: Querying sensor [MAXNONE-MAX96717] failed !!!
+appQueryImageSensor returned -1
+Error : app_create_graph returned 0xffffffff 
+  1831.873925 s:  VX_ZONE_WARNING:[vxReleaseContext:1026] A kernel with name com.ti.hwa.vpac_ldc has not been removed, possibly due to a kernel module not being unloaded.
+  1831.873937 s:  VX_ZONE_WARNING:[vxReleaseContext:1027] Removing as a part of garbage collection
+  1831.873946 s:  VX_ZONE_ERROR:[ownRemoveKernelFromContext:544] kernel not found
+  1831.873954 s:  VX_ZONE_WARNING:[ownDecrementReference:202] #### EXTERNAL REF COUNT IS ALREADY ZERO!!! 0xffff768d1fc0 type:00000804 #####
+  1831.873959 s:  VX_ZONE_WARNING:[vxReleaseContext:1026] A kernel with name com.ti.hwa.vpac_viss has not been removed, possibly due to a kernel module not being unloaded.
+  1831.873964 s:  VX_ZONE_WARNING:[vxReleaseContext:1027] Removing as a part of garbage collection
+  1831.873968 s:  VX_ZONE_ERROR:[ownRemoveKernelFromContext:544] kernel not found
+  1831.873973 s:  VX_ZONE_WARNING:[ownDecrementReference:202] #### EXTERNAL REF COUNT IS ALREADY ZERO!!! 0xffff768d3b18 type:00000804 #####
+  1831.873981 s:  VX_ZONE_WARNING:[vxReleaseContext:1026] A kernel with name com.ti.capture has not been removed, possibly due to a kernel module not being unloaded.
+  1831.873988 s:  VX_ZONE_WARNING:[vxReleaseContext:1027] Removing as a part of garbage collection
+  1831.873992 s:  VX_ZONE_ERROR:[ownRemoveKernelFromContext:544] kernel not found
+  1831.873997 s:  VX_ZONE_WARNING:[ownDecrementReference:202] #### EXTERNAL REF COUNT IS ALREADY ZERO!!! 0xffff768d4608 type:00000804 #####
+  1831.874002 s:  VX_ZONE_WARNING:[vxReleaseContext:1026] A kernel with name com.ti.imaging.aewb has not been removed, possibly due to a kernel module not being unloaded.
+  1831.874007 s:  VX_ZONE_WARNING:[vxReleaseContext:1027] Removing as a part of garbage collection
+  1831.874011 s:  VX_ZONE_ERROR:[ownRemoveKernelFromContext:544] kernel not found
+  1831.874016 s:  VX_ZONE_WARNING:[ownDecrementReference:202] #### EXTERNAL REF COUNT IS ALREADY ZERO!!! 0xffff768d5be8 type:00000804 #####
+  1831.874021 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff7669f6c0 of type 00000802 at external count 1, internal count 0, releasing it
+  1831.874028 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = graph_85
+  1831.874035 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879091 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff7697dc68 of type 00000813 at external count 1, internal count 0, releasing it
+  1831.879107 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = object_array_87
+  1831.879114 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879210 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff7697de08 of type 00000813 at external count 1, internal count 0, releasing it
+  1831.879221 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = object_array_92
+  1831.879228 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879308 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff7697dfa8 of type 00000813 at external count 1, internal count 0, releasing it
+  1831.879317 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = object_array_97
+  1831.879326 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879406 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff768fa6e0 of type 00000816 at external count 1, internal count 0, releasing it
+  1831.879415 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = user_data_object_103
+  1831.879419 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879443 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff768fa900 of type 00000816 at external count 1, internal count 0, releasing it
+  1831.879451 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = user_data_object_104
+  1831.879456 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879477 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff7697e148 of type 00000813 at external count 1, internal count 0, releasing it
+  1831.879485 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = object_array_105
+  1831.879489 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879499 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff7692c878 of type 0000080f at external count 1, internal count 0, releasing it
+  1831.879506 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = image_106
+  1831.879510 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879545 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff7692cb30 of type 0000080f at external count 1, internal count 0, releasing it
+  1831.879553 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = image_107
+  1831.879557 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879591 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff7692cde8 of type 0000080f at external count 1, internal count 0, releasing it
+  1831.879600 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = image_108
+  1831.879606 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879641 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff7692d0a0 of type 0000080f at external count 1, internal count 0, releasing it
+  1831.879646 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = image_109
+  1831.879650 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879683 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff7697e2e8 of type 00000813 at external count 1, internal count 0, releasing it
+  1831.879691 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = object_array_111
+  1831.879697 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879760 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff768fab20 of type 00000816 at external count 1, internal count 0, releasing it
+  1831.879769 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = user_data_object_116
+  1831.879778 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879802 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff7697e488 of type 00000813 at external count 1, internal count 0, releasing it
+  1831.879808 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = object_array_118
+  1831.879812 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879878 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff7697e628 of type 00000813 at external count 1, internal count 0, releasing it
+  1831.879887 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = object_array_123
+  1831.879891 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.879955 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff7697e7c8 of type 00000813 at external count 1, internal count 0, releasing it
+  1831.879964 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = object_array_128
+  1831.879968 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.880032 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff768fb5c0 of type 00000816 at external count 1, internal count 0, releasing it
+  1831.880041 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = user_data_object_133
+  1831.880048 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+  1831.880071 s:  VX_ZONE_WARNING:[vxReleaseContext:1011] Found a reference 0xffff7697e968 of type 00000813 at external count 1, internal count 0, releasing it
+  1831.880077 s:  VX_ZONE_WARNING:[vxReleaseContext:1015] Unreleased reference name = object_array_135
+  1831.880081 s:  VX_ZONE_WARNING:[vxReleaseContext:1017] Releasing reference now as a part of garbage collection
+vxReleaseContext done
+app_deinit done
+  1831.880233 s: ISS: De-initializing sensor [MAXNONE-MAX96717] ... !!!
+  1831.880555 s: ISS: De-initializing sensor [MAXNONE-MAX96717] failed !!!
+This is adas sdk test
+*******************************************
+ArcSoft_ADAS_SDK_1.1.30610.17
+12/02/2021
+Copyright 2021 ArcSoft Corporation Limited. All rights reserved.
+*******************************************
+vxCreateContext=0xffff76662570
+obj->context=0xffff76662570
+neat_version a72:1.2.1.343
+tivxRegisterModule == S
+tivxRegisterModule == E
+host tivxAddKernelArcNN
+Neat_TDA4xx_Init == 0
+Neat_TDA4xx_NodeRegister check 0xffff6b7e45d8 0xffff768b4dc0 0xffff768fa4c0 0xffff7669f6c0
+  1831.885060 s:  VX_ZONE_ERROR:[ownContextSendCmd:782] Command ack message returned failure cmd_status: -7
+  1831.885072 s:  VX_ZONE_ERROR:[ownContextSendCmd:818] tivxEventWait() failed.
+  1831.885090 s:  VX_ZONE_ERROR:[ownNodeKernelInit:526] Target kernel, TIVX_CMD_NODE_CREATE failed
+  1831.885106 s:  VX_ZONE_ERROR:[ownNodeKernelInit:527] Please be sure the target callbacks have been registered for this core
+  1831.885120 s:  VX_ZONE_ERROR:[ownNodeKernelInit:528] If the target callbacks have been registered, please ensure no errors are occurring within the create callback of this kernel
+  1831.885136 s:  VX_ZONE_ERROR:[ownGraphNodeKernelInit:583] kernel init for node 0, kernel com.arcsoft.arcnnkernel ... failed !!!
+  1831.885153 s:  VX_ZONE_ERROR:[vxVerifyGraph:2044] Node kernel init failed
+  1831.885168 s:  VX_ZONE_ERROR:[vxVerifyGraph:2098] Graph verify failed
+EEEEEEEEEEE arcNNSysInit EEEEEEEEEE
+pReserver u32Crc32=0x1a21739b
+pReserver head=arcsoft-calibration
+pReserver date=2021年12月13日 16:19:31
+arcCalibrationCalibFileCheck success 
+adas_input[i].size_w=1920 1280
+adas_input[i].size_w=1920 1280
+adas_input[i].size_w=1920 1280
+adas_input[i].size_w=1920 1280
+ADAS_LOG===>ARC_ADAS_Support_Four_Camera_Initial start
+ADAS_LOG===>ARC_ADAS_Initial Camera 0 Start 
+[ADAS_LOG] ARC_ADAS_Initial start
+[ADAS_LOG] check_params start
+[ADAS_LOG] check_params end
+[ADAS_LOG] LD_ThreadInit start
+[ADAS_LOG] LD_ThreadInit inner start
+[ADAS_LOG] ADASLANE_Init_Model_Params start
+into ADASLANE_Init_Model_Params func
+into tidl,model=50
+out tidl
+into 1-tidl,23-arm model init
+into 012_111 tidl init func
+obj,par,noload size=[2488,1611912,1781796]
+012_111 start memcpy obj par
+012_111 start Neat_Net_Create
+  1831.913473 s:  VX_ZONE_ERROR:[tivxNodeSendCommandTimed:277] vxVerifyGraph should be called before tivxNodeSendCommand can be called on a node in the same graph
+Error: Neat_TIDLNet_Create return: 100
+into nv12torgb preprocess
+obj_par_noloadSize=[1248,136,5118008]
+E0912 20:47:02.355856  1458 node.cpp:446] <FRAMEWORK> *** Aborted at 1599914822 (unix time) try "date -d @1599914822" if you are using GNU date ***
+E0912 20:47:02.360136  1458 node.cpp:446] <FRAMEWORK> PC: @                0x0 (unknown)
+E0912 20:47:02.362821  1458 node.cpp:446] <FRAMEWORK> *** SIGSEGV (@0xb0) received by PID 1435 (TID 0xffff6b7e7a70) from PID 176; stack trace: ***
+E0912 20:47:02.363520  1458 node.cpp:446] <FRAMEWORK>     @     0xffff8b1eb328 google::(anonymous namespace)::FailureSignalHandler()
+E0912 20:47:02.364342  1458 node.cpp:446] <FRAMEWORK>     @     0xffff8c8205b8 ([vdso]+0x5b7)
+E0912 20:47:02.364655  1458 node.cpp:446] <FRAMEWORK>     @     0xffff758fc430 ADASLANE_Process_Neat_nv12torgb_1080p256()
+E0912 20:47:02.364961  1458 node.cpp:446] <FRAMEWORK>     @     0xffff758fe510 ADASLANE_Init_Model_Params
+E0912 20:47:02.365224  1458 node.cpp:446] <FRAMEWORK>     @     0xffff75923eac LD_ThreadInit()
+E0912 20:47:02.365586  1458 node.cpp:446] <FRAMEWORK>     @     0xffff75926f00 ARC_ADAS_Initial
+E0912 20:47:02.365842  1458 node.cpp:446] <FRAMEWORK>     @     0xffff7592acf4 ARC_ADAS_Support_Four_Camera_Initial
+E0912 20:47:02.366050  1458 node.cpp:446] <FRAMEWORK>     @     0xffff758d04ec arcAdasEngineInit
+E0912 20:47:02.367575  1458 node.cpp:446] <FRAMEWORK>     @     0xffff8423b108 adasSdkInit()
+E0912 20:47:02.367959  1458 node.cpp:446] <FRAMEWORK>     @     0xffff84236b0c haomo::hipilot::CameraSideUpload::start()
+E0912 20:47:02.373071  1458 node.cpp:446] <FRAMEWORK>     @     0xffff8c66bb74 haomo::hios::DataSourceCenter::run()
+E0912 20:47:02.373816  1458 node.cpp:446] <FRAMEWORK>     @     0xffff8afca704 (unknown)
+E0912 20:47:02.374919  1458 node.cpp:446] <FRAMEWORK>     @     0xffff8b567810 start_thread
+E0912 20:47:02.375468  1458 node.cpp:446] <FRAMEWORK>     @     0xffff8ad3ab5c (unknown)
+./run.sh: line 161:  1435 Segmentation fault      (core dumped) ${NODE} -n ${node_name} -d ${home_dir} ${product} -m "${run_modules}"
+root@buildroot:/opt/data/123/output# 

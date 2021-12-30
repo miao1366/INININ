@@ -66,3 +66,91 @@
 
 
 1395.57
+oot@buildroot:~# ifconfig␍␊
+[17:16:03:953] eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500␍␊
+[17:16:03:970]         inet 192.168.100.247  netmask 255.255.255.0  broadcast 192.168.100.255␍␊
+[17:16:03:970]         ether 02:47:57:4d:00:84  txqueuelen 1000  (Ethernet)␍␊
+[17:16:03:985]         RX packets 16  bytes 960 (960.0 B)␍␊
+[17:16:03:985]         RX errors 0  dropped 0  overruns 0  frame 0␍␊
+[17:16:03:985]         TX packets 75  bytes 25438 (24.8 KiB)␍␊
+[17:16:03:985]         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0␍␊
+[17:16:04:001] ␍␊
+[17:16:04:001] eth0.2: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500␍␊
+[17:16:04:001]         inet 172.16.2.84  netmask 255.255.255.0  broadcast 172.16.2.255␍␊
+[17:16:04:001]         ether 02:47:57:4d:00:84  txqueuelen 1000  (Ethernet)␍␊
+[17:16:04:018]         RX packets 0  bytes 0 (0.0 B)␍␊
+[17:16:04:018]         RX errors 0  dropped 0  overruns 0  frame 0␍␊
+[17:16:04:018]         TX packets 9  bytes 5562 (5.4 KiB)␍␊
+[17:16:04:033]         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0␍␊
+[17:16:04:033] ␍␊
+[17:16:04:033] eth0.3: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500␍␊
+[17:16:04:033]         inet 172.16.3.84  netmask 255.255.255.0  broadcast 172.16.3.255␍␊
+[17:16:04:049]         ether 02:47:57:4d:00:84  txqueuelen 1000  (Ethernet)␍␊
+[17:16:04:049]         RX packets 0  bytes 0 (0.0 B)␍␊
+[17:16:04:049]         RX errors 0  dropped 0  overruns 0  frame 0␍␊
+[17:16:04:049]         TX packets 9  bytes 4866 (4.7 KiB)␍␊
+[17:16:04:065]         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0␍␊
+[17:16:04:065] ␍␊
+[17:16:04:065] eth0.5: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500␍␊
+[17:16:04:065]         inet 172.16.5.84  netmask 255.255.255.0  broadcast 172.16.5.255␍␊
+[17:16:04:081]         ether 02:47:57:4d:00:84  txqueuelen 1000  (Ethernet)␍␊
+[17:16:04:081]         RX packets 0  bytes 0 (0.0 B)␍␊
+[17:16:04:081]         RX errors 0  dropped 0  overruns 0  frame 0␍␊
+[17:16:04:097]         TX packets 40  bytes 5328 (5.2 KiB)␍␊
+[17:16:04:097]         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0␍␊
+[17:16:04:097] ␍␊
+[17:16:04:097] eth0.13: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500␍␊
+[17:16:04:113]         inet 172.16.13.85  netmask 255.255.255.0  broadcast 172.16.13.255␍␊
+[17:16:04:113]         ether 02:47:57:4d:00:84  txqueuelen 1000  (Ethernet)␍␊
+[17:16:04:113]         RX packets 0  bytes 0 (0.0 B)␍␊
+[17:16:04:129]         RX errors 0  dropped 0  overruns 0  frame 0␍␊
+[17:16:04:129]         TX packets 6  bytes 3048 (2.9 KiB)␍␊
+[17:16:04:129]         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0␍␊
+[17:16:04:129] ␍␊
+[17:16:04:129] lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536␍␊
+[17:16:04:150]         inet 127.0.0.1  netmask 255.0.0.0␍␊
+[17:16:04:150]         loop  txqueuelen 1000  (Local Loopback)␍␊
+[17:16:04:150]         RX packets 202  bytes 121096 (118.2 KiB)␍␊
+[17:16:04:150]         RX errors 0  dropped 0  overruns 0  frame 0␍␊
+[17:16:04:161]         TX packets 202  bytes 121096 (118.2 KiB)␍␊
+[17:16:04:161]         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0␍␊
+[17:16:04:161] ␍␊
+[17:16:04:177] root@buildroot:~# 
+
+
+1 在产出下， 将arcsoft文件夹放入
+2 在产出下，将calibration result.bin文件放入
+3 将en96722.sh文件放入
+3 设置环境变量。可以在scripts/env_sys.sh下修改export LD_LIBRARY_PATH=/opt/gaia/lib/:/opt/data/sidecamera/output/arcsoft/
+4 运行en96722.sh
+4 运行./run.sh -m "common camera_side_upload"
+  mount -o remount rw /
+
+  date -s "2007-08-03 14:15:00"
+
+环境准备
+1 可以安装百度最新产出
+2 将main_12.7.tar.gz中相关固件替换，运行指令cp vision_apps/firmware/* /lib/firmware/
+3 百度系统为只读系统，如果复制失败，先运行mount / -o rw,remount
+
+29. 上午没干什么
+    下午看brpc, 看知乎
+    晚上也看brpc
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
