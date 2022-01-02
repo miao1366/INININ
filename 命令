@@ -1554,6 +1554,12 @@ tar -xzvf ./output.tar.gz
 199. 串口 minicom    cutecom
 
 200. time    统计用户调用时间  系统调用时间  总调用时间
+    real   为实际时间
+    user   为用户CPU时间
+     sys   为系统CPU时间。
 
 201. cpptree.pl
      calltree.pl
+
+202. ag
+

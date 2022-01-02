@@ -810,3 +810,19 @@ c++ 17提供了一个新的性能工具std::string_view。它有着类似std::st
     }
 
 9. __attribute__ ((packed)); 的作用就是告诉编译器取消结构在编译过程中的优化对齐,按照实际占用字节数进行对齐，是GCC特有的语法
+
+10.  std::async
+     函数原型
+     template<class Fn, class... Args>
+     future<typename result_of<Fn(Args...)>::type> async(launch policy, Fn&& fn, Args&&...args);
+     
+     a. 对于是异步执行还是同步执行，由第一个参数的执行策略决定：
+        （1）、std::launch::async 传递的可调用对象异步执行；
+        （2）、std::launch::deferred 传递的可调用对象同步执行；
+        （3）、std::launch::async | std::launch::deferred 可以异步或是同步，取决于操作系统，我们无法控制；
+        （4）、如果我们不指定策略，则相当于（3）。
+     b、对于执行结果：
+        我们可以使用get、wait、wait_for、wait_until等待执行结束，区别是get可以获得执行的结果。如果选择异步执行策略，调用get时，如果异步执行没有结束，get会阻塞当前调用线程，
+        直到异步执行结束并获得结果，如果异步执行已经结束，不等待获取执行结果；如果选择同步执行策略，只有当调用get函数时，同步调用才真正执行，这也被称为函数调用被延迟。
+
+11. 

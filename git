@@ -333,4 +333,5 @@ git log命令
 67. git 添加另一个分支的文件
     git checkout --patch master /app/view/activity.java
 
-68. 
+68.   git log 支持过滤
+      git log --grep 'APPLE'
