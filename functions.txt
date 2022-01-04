@@ -3143,18 +3143,17 @@ flags |= FD_CLOEXEC;
 fcntl(fd, F_SETFD, flags);  
 这样，当fork子进程后，仍然可以使用fd。但执行exec后系统就会字段关闭子进程中的fd了。
 
-283. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+283. const char *gai_strerror(int error);
+     getaddrinfo出错时返回非零值，gai_strerror根据返回的非零值返回指向对应的出错信息字符串的指针，其原型如下
+     常量       描述
+    EAI_ADDRFAMILY      不支持hostname的地址族
+    EAI_AGAIN           名字解析中的暂时失败
+    EAI_BADFLAGS        ai_flags的值无效
+    EAI_FAIL            名字解析中不可恢复的失败
+    EAI_FAMILY          不支持ai_family
+    EAI_MEMORY          内存分配失败
+    EAI_NODATA          没有与hostname相关联的地址
+    EAI_NONAME          hostname或service未提供，或者不可知
+    EAI_SERVICE         不支持ai_socktype类型的service
+    EAI_SOCKTYPE        不支持ai_socktype
+    EAI_SYSTEM          errno中有系统错误返回
