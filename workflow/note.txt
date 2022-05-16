@@ -2,8 +2,8 @@ wget 启用了 28个线程
 create_http_task()创建了24个线程
 task->start()创建了4个个线程
 
-.poller_threads		=	4,
-.handler_threads	=	20,
+.poller_threads        =    4,
+.handler_threads    =    20,
 
 if (scheduler_.init(settings->poller_threads,
     settings->handler_threads)
@@ -101,11 +101,11 @@ struct __poller
 
 
 struct poller_params params = {
-    .max_open_files		=	65536,
-    .create_message		=	Communicator::create_message,
-    .partial_written	=	Communicator::partial_written,
-    .callback			=	Communicator::callback,
-    .context			=	this
+    .max_open_files        =    65536,
+    .create_message        =    Communicator::create_message,
+    .partial_written    =    Communicator::partial_written,
+    .callback            =    Communicator::callback,
+    .context            =    this
 };
 
 struct __poller_node
@@ -116,8 +116,8 @@ struct __poller_node
 #pragma pack(1)
     union
     {
-    	struct list_head list;
-    	struct rb_node rb;
+        struct list_head list;
+        struct rb_node rb;
     };
 #pragma pack()
     char in_rbtree;
@@ -194,3 +194,104 @@ new(&this->resp) RESP();
 #include <iostream>
 std::coutt<< __
 
+======2022--04--16========
+
+struct __mpoller
+{
+    void **nodes_buf;
+    unsigned int nthreads;
+    poller_t *poller[1];
+};
+
+struct __poller
+{
+    size_t max_open_files;
+    poller_message_t *(*create_message)(void *);
+    int (*partial_written)(size_t, void *);
+    void (*cb)(struct poller_result *, void *);
+    void *ctx;
+    pthread_t tid;
+    int pfd;
+    int timerfd;
+    int pipe_rd;
+    int pipe_wr;
+    int stopped;
+    struct rb_root timeo_tree;
+    struct rb_node *tree_first;
+    struct rb_node *tree_last;
+    struct list_head timeo_list;
+    struct list_head no_timeo_list;
+    struct __poller_node **nodes;
+    pthread_mutex_t mutex;
+    char buf[POLLER_BUFSIZE];
+};
+
+struct __poller_node
+{
+    int state;
+    int error;
+    struct poller_data data;
+#pragma pack(1)
+    union
+    {
+        struct list_head list;
+        struct rb_node rb;
+    };
+#pragma pack()
+    char in_rbtree;
+    char removed;
+    int event;
+    struct timespec timeout;
+    struct __poller_node *res;
+};
+
+struct poller_data
+{
+    short operation;
+    unsigned short iovcnt;
+    int fd;
+    union
+    {
+        SSL *ssl;
+        void *(*accept)(const struct sockaddr *, socklen_t, int, void *);
+        void *(*event)(void *);
+        void *(*notify)(void *, void *);
+    };
+    void *context;
+    union
+    {
+        poller_message_t *message;
+        struct iovec *write_iov;
+        void *result;
+    };
+};
+
+void **nodes_buf = (void **)calloc(params->max_open_files, sizeof (void *));
+
+
+static inline int __poller_add_fd(int fd, int event, void *data, poller_t *poller)
+{
+struct epoll_event ev = {
+        .events        =    event,
+        .data        =    {
+        .ptr    =    data
+        }
+    };
+    return epoll_ctl(poller->pfd, EPOLL_CTL_ADD, fd, &ev);
+}
+
+struct poller_result
+{
+#define PR_ST_SUCCESS        0
+#define PR_ST_FINISHED        1
+#define PR_ST_ERROR            2
+#define PR_ST_DELETED        3
+#define PR_ST_MODIFIED        4
+#define PR_ST_STOPPED        5
+    int state;
+    int error;
+    struct poller_data data;
+    /* In callback, spaces of six pointers are available from here. */
+};
+
+poller->nodes[node->data.fd] = NULL;

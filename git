@@ -335,3 +335,6 @@ git log命令
 
 68.   git log 支持过滤
       git log --grep 'APPLE'
+
+69. 生成密钥
+    ssh-keygen -t rsa -C "邮箱名称"
