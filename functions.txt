@@ -3157,3 +3157,37 @@ fcntl(fd, F_SETFD, flags);
     EAI_SERVICE         不支持ai_socktype类型的service
     EAI_SOCKTYPE        不支持ai_socktype
     EAI_SYSTEM          errno中有系统错误返回
+
+284. 
+主机16位无符号int 转网络（大端）
+uint16_t htobe16(uint16_t host_16bits);
+主机16位无符号int 转小端
+uint16_t htole16(uint16_t host_16bits);
+网络（大端）16位无符号int 转主机
+uint16_t be16toh(uint16_t big_endian_16bits);
+小端16位无符号int 转主机
+uint16_t le16toh(uint16_t little_endian_16bits);
+主机32位无符号int 转网络（大端）
+uint32_t htobe32(uint32_t host_32bits);
+主机32位无符号int 转小端
+uint32_t htole32(uint32_t host_32bits);
+网络（大端）32位无符号int 转主机
+uint32_t be32toh(uint32_t big_endian_32bits);
+小端32位无符号int 转主机
+uint32_t le32toh(uint32_t little_endian_32bits);
+主机64位无符号int 转网络（大端）
+uint64_t htobe64(uint64_t host_64bits);
+主机64位无符号int 转小端
+uint64_t htole64(uint64_t host_64bits);
+网络（大端）64位无符号int 转主机
+uint64_t be64toh(uint64_t big_endian_64bits);
+小端64位无符号int 转主机
+uint64_t le64toh(uint64_t little_endian_64bits);
+主机32位无符号int 转网络32位int类型
+uint32_t htonl(uint32_t hostlong);
+主机16位无符号int 转网络16位int类型
+uint16_t htons(uint16_t hostshort);
+网络32位int类型转主机32位无符号int
+uint32_t ntohl(uint32_t netlong);
+网络16位int类型转主机16位无符号int
+uint16_t ntohs(uint16_t netshort);

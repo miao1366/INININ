@@ -1,0 +1,20 @@
+01. C17中新增了filesystem功能，使得跨平台文件系统 操作使用便方便简易。
+  std::filesystem::path::path;
+  1、常用类：
+    path 类：说白了该类只是对字符串（路径）进行一些处理，这也是文件系统的基石。
+    directory_entry 类：功如其名，文件入口，这个类才真正接触文件。 
+    directory_iterator 类：获取文件系统目录中文件的迭代器容器，其元素为 directory_entry对象（可用于遍历目录）
+    file_status 类：用于获取和修改文件（或目录）的属性（需要了解C++11的强枚举类型（即枚举类）） 
+
+  2、常用方法：
+    std::filesystem::is_directory()检查是否为目录；
+    std::filesystem::current_path()返回当前路径；
+    std::filesystem::exists()文件目录是否存在；
+    std::filesystem::create_directories()创建目录，可以连续创建多级目录；
+    std::filesystem::u8path
+
+
+02. std::optional
+    std::variant
+
+03. std::greater

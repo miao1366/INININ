@@ -1,0 +1,2 @@
+01. 列表初始化—std::initializer_list
+    std::initializer_list 是非常高效的。它的内部并不负责保存初始化列表中元素的拷贝，仅仅存储了列表中元素的引用而已

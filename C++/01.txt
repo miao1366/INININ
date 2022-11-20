@@ -1,0 +1,12 @@
+01. locale-dependent
+    Locale是基于地理区域中的操作方式对事物进行编码的差异。通常这意味着一些区域如何将今天的日期显示为17 May, 
+    2018与May 17, 2018，或者一些区域如何将.用作千位分隔符，而,用作分数分隔符，如9.000,1
+
+    对于同样的代码，“title”.toUpperCase，在土耳其区域和英国区域，转换的字符是不同的，这样在后续诸如
+    if (“title”.toUpperCase().equals(“TITLE”))
+    等判断上会出现不同的结果。从而引发一定问题。
+    解决方法：
+    使用 Local类 （java.util包）的常量作为参数进行转换。
+    “aaa”.toLowerCase(Locale.ENGLISH)
+
+02.
