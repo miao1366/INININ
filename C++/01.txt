@@ -9,4 +9,10 @@
     使用 Local类 （java.util包）的常量作为参数进行转换。
     “aaa”.toLowerCase(Locale.ENGLISH)
 
-02.
+02. C++ STL的std::is_convertible模板用于检查是否可以将任何数据类型A隐式转换为任何数据类型B。它返回布尔值true或false
+
+03. std::enable_if 顾名思义，满足条件时类型有效
+
+04. std::remove_cv 模板用于获取类型T，而没有const和volatile限定。如果T不带const和volatile限定，则返回布尔值true，否则返回false。
+
+05. std::remove_cv 去掉变量的cv属性，获取其原始类型信息
