@@ -15,4 +15,4 @@
 
 04. std::remove_cv 模板用于获取类型T，而没有const和volatile限定。如果T不带const和volatile限定，则返回布尔值true，否则返回false。
 
-05. std::remove_cv 去掉变量的cv属性，获取其原始类型信息
+05. std::remove_cv 去掉变量的cv属性，获取其原始类型信息  
